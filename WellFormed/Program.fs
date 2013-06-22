@@ -15,17 +15,14 @@ let main argv =
     let formlet = Formlet.Do
                         {
                             let! first = Controls.Input ""
-                            if first <> "" then 
+                            let! second = Controls.Input ""
+                            if first = "" then 
                                 return! Controls.Input ""
                             else
                                 return first
                         }
 
-    let form = formlet.Build()
-
-    let body = form.Body()
-    
-    let body' = form.Body()
+    window.Content <- FormletControl.New (fun v -> ()) formlet :> obj
 
     let result = window.ShowDialog()
 

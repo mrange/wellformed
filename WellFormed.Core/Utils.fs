@@ -6,7 +6,6 @@ type Disposable =
     {
         Dispose : unit -> unit
     }
-
     interface IDisposable with
 
         member this.Dispose () =

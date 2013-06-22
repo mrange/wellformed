@@ -5,6 +5,11 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WellFormed", "WellFormed\We
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WellFormed.Core", "WellFormed.Core\WellFormed.Core.fsproj", "{AA464CF2-BBC0-4CB5-B07E-0CD330E675A4}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D3074B2F-E337-47C7-ABA7-92D716333C44}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

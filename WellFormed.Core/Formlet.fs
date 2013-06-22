@@ -13,28 +13,25 @@ type Result<'T> =
 type Body =
     |   Empty
     |   Element         of FrameworkElement
-    |   Label           of string*Body
     |   Join            of Body*Body
-    |   Collection      of Body list
 
 type IForm<'T> =
     abstract member Body    : unit -> Body
     abstract member Collect : unit -> Result<'T>
-        inherit IDisposable
+    inherit IDisposable
 
-type Form<'State, 'T> =
+type Form<'T> =
     {
-        State   : 'State 
         Body    : unit -> Body
         Collect : unit -> Result<'T>
         Dispose : unit -> unit
     }
-        interface IForm<'T> with
-            member this.Body() = this.Body()
-            member this.Collect() = this.Collect()
-        interface IDisposable with
-            member this.Dispose() = this.Dispose()
-    static member New state body collect dispose = {State = state; Body = body; Collect = collect; Dispose = dispose; }
+    interface IForm<'T> with
+        member this.Body() = this.Body()
+        member this.Collect() = this.Collect()
+    interface IDisposable with
+        member this.Dispose() = this.Dispose()
+    static member New body collect dispose = {Body = body; Collect = collect; Dispose = dispose; }
 
 type Formlet<'T> = 
     {
@@ -70,7 +67,6 @@ module Formlet =
 
                 (!state).Value
             {
-                State       = ()
                 Body        = form.Body
                 Dispose     = form.Dispose
                 Collect     = fun () -> 
@@ -114,7 +110,6 @@ module Formlet =
                 (!state).Value
 
             {
-                State       = ()
                 Body        = fun () -> 
                     let body = form.Body()
 
@@ -138,7 +133,6 @@ module Formlet =
     let Return (x : 'T) : Formlet<'T> = 
         let state =          
                         {
-                            State       = ()
                             Body        = fun () -> Empty
                             Dispose     = DoNothing
                             Collect     = fun () -> Success x
