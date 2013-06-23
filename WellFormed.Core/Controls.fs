@@ -9,11 +9,11 @@ module Controls =
         let build () =
             let control = CreateTextBox t
 
-            let body() = Element control     
+            let buildTree (t : ILogicalTreeBuilder) = t.Add (control)
             let collect() = Success control.Text
 
             {
-                Body        = body
+                BuildTree   = buildTree
                 Dispose     = DoNothing
                 Collect     = collect
             } :> IForm<string>

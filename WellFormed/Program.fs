@@ -12,13 +12,24 @@ let main argv =
     window.MinHeight <- 400.0
     window.Title <- "WellFormed App"
 
-    let formlet = Formlet.Do
+    let innerFormlet = Formlet.Do
                         {
                             let! first =    Controls.Input ""
                                                 |> Enchance.WithLabel "First"
                             let! second =   Controls.Input ""
                                                 |> Enchance.WithLabel "Second"
-                            if first = "" then 
+
+                            return first, second                                              
+                        } |> Enchance.WithGroup "Testing"
+
+    let formlet = Formlet.Do
+                        {
+                            let! first =    Controls.Input ""
+                                                |> Enchance.WithLabel "First"
+
+                            let! inner  =   innerFormlet
+                            
+                            if first <> "" then 
                                 return! Controls.Input ""
                             else
                                 return first

@@ -2,6 +2,8 @@
 
 open System
 
+open System.Collections.Generic
+
 open System.Windows
 open System.Windows.Controls
 
@@ -9,31 +11,64 @@ type Result<'T> =
     | Success of 'T
     | Failure of string list
 
+type ILogicalTreeBuilder =
+    abstract member Add                 : UIElement -> unit
+    abstract member Clear               : unit      -> unit
+    abstract member NewGroupFromPanel   : Panel     -> ILogicalTreeBuilder
+    abstract member NewGroup            : unit      -> ILogicalTreeBuilder
 
-type Body =
-    |   Empty
-    |   Element         of FrameworkElement
-    |   Label           of TextBlock*Body
-    |   Group           of FrameworkElement*Grid*Body
-    |   Join            of Body*Body
+type LogicalTreeBuilder (panel : Panel) =
+    let elements    = new List<UIElement>()
+    let groups      = new List<LogicalTreeBuilder>()
+    interface ILogicalTreeBuilder with
+        member this.Add ue = if ue <> null then elements.Add(ue)
+        member this.Clear () = elements.Clear()
+        member this.NewGroupFromPanel innerPanel =  let g = new LogicalTreeBuilder(innerPanel)
+                                                    groups.Add(g)
+                                                    g :> ILogicalTreeBuilder
+        member this.NewGroup () =   let g = new LogicalTreeBuilder(panel)
+                                    groups.Add(g)
+                                    g :> ILogicalTreeBuilder
+        
+
+    member this.UpdateImpl outerPanel start =  
+                
+        let start' = if Object.ReferenceEquals(panel, outerPanel) then start else 0
+
+        let min = min elements.Count (panel.Children.Count - start')
+
+        for i in 0..min - 1 do
+            panel.Children.[start' + i] <- elements.[i]
+
+        for i in min..elements.Count - 1 do
+            ignore <| panel.Children.Add(elements.[i])
+
+        let mutable i = start' + elements.Count
+
+        for group in groups do 
+            i <- group.UpdateImpl panel i
+
+        i
+
+    member this.Update() =  this.UpdateImpl panel 0
 
 type IForm<'T> =
-    abstract member Body    : unit -> Body
-    abstract member Collect : unit -> Result<'T>
+    abstract member BuildTree   : ILogicalTreeBuilder -> unit
+    abstract member Collect     : unit -> Result<'T>
     inherit IDisposable
 
 type Form<'T> =
     {
-        Body    : unit -> Body
-        Collect : unit -> Result<'T>
-        Dispose : unit -> unit
+        BuildTree   : ILogicalTreeBuilder -> unit
+        Collect     : unit -> Result<'T>
+        Dispose     : unit -> unit
     }
     interface IForm<'T> with
-        member this.Body() = this.Body()
+        member this.BuildTree t = this.BuildTree t
         member this.Collect() = this.Collect()
     interface IDisposable with
         member this.Dispose() = this.Dispose()
-    static member New body collect dispose = {Body = body; Collect = collect; Dispose = dispose; }
+    static member New buildTree collect dispose = {BuildTree = buildTree; Collect = collect; Dispose = dispose; }
 
 type Formlet<'T> = 
     {
@@ -46,26 +81,13 @@ module Formlet =
     let MapResult (m : Result<'T> -> Result<'U>) (f : Formlet<'T>) : Formlet<'U> = 
         let build () =
             let form = f.Build()
+            
+            let collect() = m (form.Collect())
 
-            let state : (Result<'T>*Result<'U>) option ref = ref None
-
-            let getState() =
-                state := 
-                    match !state with
-                        |   None            ->  let r = form.Collect()
-                                                Some (r, (m r))
-                        |   Some (r', mr')  ->  let r = form.Collect()
-                                                if IsEqual r r'
-                                                    then Some (r', mr')
-                                                    else Some (r, (m r))
-
-                (!state).Value
             {
-                Body        = form.Body
+                BuildTree   = form.BuildTree
                 Dispose     = form.Dispose
-                Collect     = fun () -> 
-                                    let (r, mr) = getState()
-                                    mr
+                Collect     = collect
             } :> IForm<'U>
         Formlet.New build
 
@@ -80,43 +102,30 @@ module Formlet =
         let build () =
             let form = formlet.Build()
 
-            let state : (Result<Formlet<'T>>*IForm<'T> option) option ref = ref None
+            let innerForm() = form.Collect()
 
-            let buildState collect =    match collect with
-                                            |   Success formLet -> collect, Some (formLet.Build())
-                                            |   f -> collect, None
+            let buildTree (t : ILogicalTreeBuilder) =   
+                                let g = t.NewGroup()
+                                form.BuildTree t
+                                let innerCollect = form.Collect()
+                                match innerCollect with 
+                                    |   Success innerFormlet -> let innerForm = innerFormlet.Build()
+                                                                ignore <| innerForm.BuildTree g
+                                    |   _ -> ()
 
-            let getState() = 
-                let innerCollect = form.Collect()
-                state :=
-                    match !state with
-                        |   None -> Some (buildState innerCollect)
-                        |   Some (innerCollect', None) -> 
-                                if IsEqual innerCollect' innerCollect
-                                    then Some (innerCollect', None)
-                                    else Some (buildState innerCollect)
-                        |   Some (innerCollect', Some innerForm') -> 
-                                if IsEqual innerCollect' innerCollect
-                                    then Some (innerCollect, Some innerForm')
-                                    else 
-                                            innerForm'.Dispose()
-                                            Some (buildState innerCollect')
-                (!state).Value
+            let dispose() =     form.Dispose()                                            
 
+            let collect() =     let innerCollect = form.Collect()
+                                match innerCollect with 
+                                    |   Success innerFormlet -> let innerForm = innerFormlet.Build()
+                                                                innerForm.Collect()
+                                    |   Failure f -> Failure f
+
+               
             {
-                Body        = fun () -> 
-                    let body = form.Body()
-
-                    let i = getState()
-                    match i with         
-                        |   (_, Some innerForm) -> Join (body, innerForm.Body())
-                        |   _                   -> Join (body, Empty)
-                Dispose     = DoNothing
-                Collect     = fun () -> 
-                    let i = getState()
-                    match i with         
-                        |   (_, Some innerForm) -> innerForm.Collect()
-                        |   (Failure f, _)      -> Failure f
+                BuildTree   = buildTree
+                Dispose     = dispose
+                Collect     = collect 
             } :> IForm<'T>
         Formlet.New build
 
@@ -125,25 +134,21 @@ module Formlet =
 
                     
     let Return (x : 'T) : Formlet<'T> = 
+        let buildTree t = ()
+        let collect() = Success x
         let state =          
-                        {
-                            Body        = fun () -> Empty
-                            Dispose     = DoNothing
-                            Collect     = fun () -> Success x
-                        } :> IForm<'T>
+            {
+                BuildTree   = buildTree
+                Dispose     = DoNothing
+                Collect     = collect
+            } :> IForm<'T>
         let build() = state
         Formlet.New build
 
     let Delay (f : unit -> Formlet<'T>) : Formlet<'T> = 
-        let state = ref None
         let build () = 
-
-            state := 
-                match !state with
-                    |   None -> Some (f().Build())
-                    |   v -> v
-
-            (!state).Value
+            let formlet = f ()
+            formlet.Build ()
         Formlet.New build
 
     let ReturnFrom (f : Formlet<'T>) = f

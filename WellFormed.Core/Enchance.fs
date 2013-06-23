@@ -13,12 +13,15 @@ module Enchance =
 
             let innerForm = f.Build()
 
-            let body() = Group (outer, inner, innerForm.Body())
+            let buildTree (t : ILogicalTreeBuilder) = 
+                            t.Add(outer)
+                            let g = t.NewGroupFromPanel inner
+                            innerForm.BuildTree g
             let dispose() = inner.Children.Clear()
                             innerForm.Dispose()
 
             {
-                Body        = body
+                BuildTree   = buildTree
                 Dispose     = dispose
                 Collect     = innerForm.Collect
             } :> IForm<'T>
@@ -26,15 +29,17 @@ module Enchance =
 
     let WithLabel (t : string) (f : Formlet<'T>) : Formlet<'T> = 
         let build() =
-            let label = CreateLabel t
+            let label = CreateTextBlock t
 
             let innerForm = f.Build()
 
-            let body() = Body.Label (label, innerForm.Body())
+            let buildTree (t : ILogicalTreeBuilder) = 
+                            t.Add(label)
+                            innerForm.BuildTree t                            
             let dispose() = innerForm.Dispose()
 
             {
-                Body        = body
+                BuildTree   = buildTree
                 Dispose     = dispose
                 Collect     = innerForm.Collect
             } :> IForm<'T>

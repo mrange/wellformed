@@ -54,6 +54,8 @@ module Utils =
         r.Height <- GridLength.Auto
         r                                    
 
+    let CreateEmpty () = null :> UIElement
+
     let CreateTextBlock t = 
         let textBlock = new TextBlock()
         textBlock.Text <- t
@@ -66,26 +68,21 @@ module Utils =
         textBox.Margin <- DefaultMargin
         textBox
 
-    let CreateLabel t = CreateTextBlock t
-
-    let CreateGroup t : FrameworkElement*Grid = 
-        let label = CreateLabel t
+    let CreateGroup t : FrameworkElement*Panel = 
+        let label = CreateTextBox t
+        label.IsReadOnly <- true
         label.VerticalAlignment <- VerticalAlignment.Top
         label.HorizontalAlignment <- HorizontalAlignment.Left
-        label.Background <- DefaultBackgroundBrush
         label.RenderTransform <- new TranslateTransform (8.0, 0.0)
         let border = new Border ()
-        let outerGrid = new Grid ()
-        let innerGrid = new Grid ()
-        innerGrid.ColumnDefinitions.Add(NewColumn 70.0)
-        innerGrid.ColumnDefinitions.Add(NewStarColumn ())
-        innerGrid.ColumnDefinitions.Add(NewColumn 32.0)
+        let outer = new Grid ()
+        let inner = new StackPanel ()
         border.Margin <- DefaultBorderMargin
         border.Padding <- DefaultBorderPadding
-        border.Child <- innerGrid
+        border.Child <- inner
         border.BorderThickness <- DefaultBorderThickness
         border.BorderBrush <- DefaultBorderBrush 
-        ignore <| outerGrid.Children.Add(border)
-        ignore <| outerGrid.Children.Add(label)
-        upcast outerGrid, innerGrid
+        ignore <| outer.Children.Add(border)
+        ignore <| outer.Children.Add(label)
+        upcast outer, upcast inner
 
