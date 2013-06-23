@@ -31,7 +31,7 @@ type LogicalTreeBuilder (panel : Panel) =
                 
         let start' = if Object.ReferenceEquals(panel, outerPanel) then start else 0
 
-        let min = min elements.Count (panel.Children.Count - start')
+        let min = max (min elements.Count (panel.Children.Count - start')) 0
 
         for i in 0..min - 1 do
             panel.Children.[start' + i] <- elements.[i]

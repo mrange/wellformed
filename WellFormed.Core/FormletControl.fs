@@ -32,13 +32,11 @@ type FormletControl<'T>(action : 'T -> unit, formlet : Formlet<'T>) as this=
 
         let (outer, inner) = CreateGroup "Form"
 
-        this.form <- formlet.Build()
+        let lt = new LogicalTreeBuilder(inner)
 
-        let t = new LogicalTreeBuilder(inner)
+        this.form <- formlet.Build(upcast lt)
 
-        this.form.BuildTree t
-
-        t.Update()
+        lt.Update()
 
         this.Content <- outer
 

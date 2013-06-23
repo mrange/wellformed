@@ -9,20 +9,19 @@ open System.Windows.Controls
 
 type Formlet<'T> = 
     {
-        Build : unit -> IForm<'T>
+        Build : ILogicalTreeBuilder -> IForm<'T>
     }
-    static member New (build : unit -> IForm<'T>) = { Build = build; }
+    static member New (build : ILogicalTreeBuilder -> IForm<'T>) = { Build = build; }
 
 module Formlet =
 
     let MapResult (m : Result<'T> -> Result<'U>) (f : Formlet<'T>) : Formlet<'U> = 
-        let build () =
-            let form = f.Build()
+        let build (lt : ILogicalTreeBuilder) = 
+            let form = f.Build(lt)
             
             let collect() = m (form.Collect())
 
             {
-                BuildTree   = form.BuildTree
                 Dispose     = form.Dispose
                 Collect     = collect
             } :> IForm<'U>
@@ -36,31 +35,27 @@ module Formlet =
         MapResult m' f
 
     let Join (formlet: Formlet<Formlet<'T>>) : Formlet<'T> = 
-        let build () =
-            let form = formlet.Build()
+        let build (lt : ILogicalTreeBuilder) = 
+            let form = formlet.Build(lt)
 
-            let innerForm() = form.Collect()
+            let ilt = lt.NewGroup()
+            let innerCollect = form.Collect()
 
-            let buildTree (t : ILogicalTreeBuilder) =   
-                                let g = t.NewGroup()
-                                form.BuildTree t
-                                let innerCollect = form.Collect()
-                                match innerCollect with 
-                                    |   Success innerFormlet -> let innerForm = innerFormlet.Build()
-                                                                ignore <| innerForm.BuildTree g
-                                    |   _ -> ()
+            match innerCollect with 
+                |   Success innerFormlet -> ignore <| innerFormlet.Build(ilt)
+                |   _ -> ()
+
 
             let dispose() =     form.Dispose()                                            
 
             let collect() =     let innerCollect = form.Collect()
                                 match innerCollect with 
-                                    |   Success innerFormlet -> let innerForm = innerFormlet.Build()
+                                    |   Success innerFormlet -> let innerForm = innerFormlet.Build(ilt)
                                                                 innerForm.Collect()
                                     |   Failure f -> Failure f
 
                
             {
-                BuildTree   = buildTree
                 Dispose     = dispose
                 Collect     = collect 
             } :> IForm<'T>
@@ -71,21 +66,19 @@ module Formlet =
 
                     
     let Return (x : 'T) : Formlet<'T> = 
-        let buildTree t = ()
         let collect() = Success x
-        let state =          
+        let form =          
             {
-                BuildTree   = buildTree
                 Dispose     = DoNothing
                 Collect     = collect
             } :> IForm<'T>
-        let build() = state
+        let build (lt : ILogicalTreeBuilder) = form
         Formlet.New build
 
     let Delay (f : unit -> Formlet<'T>) : Formlet<'T> = 
-        let build () = 
+        let build (lt : ILogicalTreeBuilder) = 
             let formlet = f ()
-            formlet.Build ()
+            formlet.Build (lt)
         Formlet.New build
 
     let ReturnFrom (f : Formlet<'T>) = f

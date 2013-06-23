@@ -6,14 +6,13 @@ module Controls =
 
     
     let Input t = 
-        let build () =
+        let build (lt : ILogicalTreeBuilder) =
             let control = CreateTextBox t
+            lt.Add (control)
 
-            let buildTree (t : ILogicalTreeBuilder) = t.Add (control)
             let collect() = Success control.Text
 
             {
-                BuildTree   = buildTree
                 Dispose     = DoNothing
                 Collect     = collect
             } :> IForm<string>
