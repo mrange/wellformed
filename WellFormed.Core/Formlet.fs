@@ -7,69 +7,6 @@ open System.Collections.Generic
 open System.Windows
 open System.Windows.Controls
 
-type Result<'T> =
-    | Success of 'T
-    | Failure of string list
-
-type ILogicalTreeBuilder =
-    abstract member Add                 : UIElement -> unit
-    abstract member Clear               : unit      -> unit
-    abstract member NewGroupFromPanel   : Panel     -> ILogicalTreeBuilder
-    abstract member NewGroup            : unit      -> ILogicalTreeBuilder
-
-type LogicalTreeBuilder (panel : Panel) =
-    let elements    = new List<UIElement>()
-    let groups      = new List<LogicalTreeBuilder>()
-    interface ILogicalTreeBuilder with
-        member this.Add ue = if ue <> null then elements.Add(ue)
-        member this.Clear () = elements.Clear()
-        member this.NewGroupFromPanel innerPanel =  let g = new LogicalTreeBuilder(innerPanel)
-                                                    groups.Add(g)
-                                                    g :> ILogicalTreeBuilder
-        member this.NewGroup () =   let g = new LogicalTreeBuilder(panel)
-                                    groups.Add(g)
-                                    g :> ILogicalTreeBuilder
-        
-
-    member this.UpdateImpl outerPanel start =  
-                
-        let start' = if Object.ReferenceEquals(panel, outerPanel) then start else 0
-
-        let min = min elements.Count (panel.Children.Count - start')
-
-        for i in 0..min - 1 do
-            panel.Children.[start' + i] <- elements.[i]
-
-        for i in min..elements.Count - 1 do
-            ignore <| panel.Children.Add(elements.[i])
-
-        let mutable i = start' + elements.Count
-
-        for group in groups do 
-            i <- group.UpdateImpl panel i
-
-        i
-
-    member this.Update() =  this.UpdateImpl panel 0
-
-type IForm<'T> =
-    abstract member BuildTree   : ILogicalTreeBuilder -> unit
-    abstract member Collect     : unit -> Result<'T>
-    inherit IDisposable
-
-type Form<'T> =
-    {
-        BuildTree   : ILogicalTreeBuilder -> unit
-        Collect     : unit -> Result<'T>
-        Dispose     : unit -> unit
-    }
-    interface IForm<'T> with
-        member this.BuildTree t = this.BuildTree t
-        member this.Collect() = this.Collect()
-    interface IDisposable with
-        member this.Dispose() = this.Dispose()
-    static member New buildTree collect dispose = {BuildTree = buildTree; Collect = collect; Dispose = dispose; }
-
 type Formlet<'T> = 
     {
         Build : unit -> IForm<'T>
