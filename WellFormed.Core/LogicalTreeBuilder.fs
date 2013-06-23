@@ -17,10 +17,14 @@ type ILogicalTreeBuilder =
 type LogicalTreeRoot (dispatcher : Dispatcher, action : unit -> unit) = 
     [<DefaultValue>] val mutable isDispatching  : bool
 
+    member this.Dispatch() = 
+        action()
+        this.isDispatching <- false
+
     member this.UpdateLogicalTree () =
         if not this.isDispatching then
             this.isDispatching <- true
-            Dispatch dispatcher action
+            Dispatch dispatcher this.Dispatch
 
 and LogicalTreeBuilder (root : LogicalTreeRoot, panel : Panel) =
     let elements    = new List<UIElement>()
@@ -42,7 +46,8 @@ and LogicalTreeBuilder (root : LogicalTreeRoot, panel : Panel) =
 
     member this.UpdateImpl outerPanel start =  
                 
-        let start' = if Object.ReferenceEquals(panel, outerPanel) then start else 0
+        let newPanel = not (Object.ReferenceEquals(panel, outerPanel))
+        let start' = if newPanel then 0 else start 
 
         let min = max (min elements.Count (panel.Children.Count - start')) 0
 
@@ -55,12 +60,15 @@ and LogicalTreeBuilder (root : LogicalTreeRoot, panel : Panel) =
         for i in min..elements.Count - 1 do
             ignore <| panel.Children.Add(elements.[i])
 
-        let mutable i = start' + elements.Count
+        let mutable ig = start' + elements.Count
 
         for group in groups do 
-            i <- group.UpdateImpl panel i
+            ig <- group.UpdateImpl panel ig
 
-        i
+        if newPanel && ig < panel.Children.Count then
+            panel.Children.RemoveRange(ig, panel.Children.Count - ig)
 
-    member this.Update() =  this.UpdateImpl panel 0
+        ig
+
+    member this.Update() =  this.UpdateImpl null 0
 

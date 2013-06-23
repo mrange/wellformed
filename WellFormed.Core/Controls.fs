@@ -10,7 +10,7 @@ module Controls =
             let control = CreateTextBox t
             lt.Add (control)
 
-            let state = ref ""
+            let state = ref t
 
             let observable, observer = Observable.Source (fun o -> o.OnNext (Success !state))
 
