@@ -32,8 +32,9 @@ module Utils =
 
     let NothingToDispose() = Disposable.New DoNothing
 
-    let Dispatch (dispatcher : Dispatcher) (action : Action) = 
-        let d : Delegate = upcast action
+    let Dispatch (dispatcher : Dispatcher) (action : unit -> unit) = 
+        let a = Action action 
+        let d : Delegate = upcast a
         ignore <| dispatcher.BeginInvoke (DispatcherPriority.ApplicationIdle, d)
 
 

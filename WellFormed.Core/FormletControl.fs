@@ -13,7 +13,8 @@ type FlatBody =
 type FormletControl<'T>(action : 'T -> unit, formlet : Formlet<'T>) as this=
     inherit ContentControl()
 
-    [<DefaultValue>] val mutable form : IForm<'T>
+    [<DefaultValue>] val mutable state      : IForm<'T>*LogicalTreeRoot*LogicalTreeBuilder
+    [<DefaultValue>] val mutable observer   : IDisposable
 
     let (outer, inner) = CreateGroup "Form"
 
@@ -22,19 +23,27 @@ type FormletControl<'T>(action : 'T -> unit, formlet : Formlet<'T>) as this=
 
     override this.OnApplyTemplate() =   Dispatch this.Dispatcher this.BuildForm
 
+    member this.UpdateVisualTree() = ()
+
+    member this.UpdateState (result : Result<'T>) = 
+        match result with
+            |   Success v   -> ()
+            |   Failure fs  -> ()
+
     member this.BuildForm() = 
 
         let (outer, inner) = CreateGroup "Form"
 
-        let lt = new LogicalTreeBuilder(inner)
+        let lr = new LogicalTreeRoot (this.Dispatcher, this.UpdateVisualTree)
+        let lt = new LogicalTreeBuilder(lr, inner)
 
-        this.form <- formlet.Build(upcast lt)
+        let form = formlet.Build(upcast lt)
 
-        lt.Update()
+        this.state <- form, lr, lt
+
+        this.observer <- form.State |> Observable.Sink this.UpdateState
 
         this.Content <- outer
-
-        inner.BeginInit()
 
         ()
 

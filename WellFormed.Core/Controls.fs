@@ -10,10 +10,14 @@ module Controls =
             let control = CreateTextBox t
             lt.Add (control)
 
-            let observable, observer = Observable.Source()
+            let state = ref ""
 
-            control.Loaded.Add (fun er -> observer.OnNext(Success t))
-            control.TextChanged.Add (fun er -> observer.OnNext(Success t))
+            let observable, observer = Observable.Source (fun o -> o.OnNext (Success !state))
+
+            control.LostFocus.Add (fun er -> 
+                if !state <> control.Text then
+                    state := control.Text
+                    observer.OnNext (Success !state))
 
             let dispose()   = observer.OnCompleted()
 

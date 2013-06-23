@@ -14,25 +14,28 @@ type ILogicalTreeBuilder =
     abstract member NewGroupFromPanel   : Panel     -> ILogicalTreeBuilder
     abstract member NewGroup            : unit      -> ILogicalTreeBuilder
 
-type LogicalTreeRoot (dispatcher : Dispatcher) = 
+type LogicalTreeRoot (dispatcher : Dispatcher, action : unit -> unit) = 
     [<DefaultValue>] val mutable isDispatching  : bool
 
     member this.UpdateLogicalTree () =
         if not this.isDispatching then
             this.isDispatching <- true
-            let action() = if this.tree <> null then ()
             Dispatch dispatcher action
 
-and LogicalTreeBuilder (panel : Panel) =
+and LogicalTreeBuilder (root : LogicalTreeRoot, panel : Panel) =
     let elements    = new List<UIElement>()
     let groups      = new List<LogicalTreeBuilder>()
     interface ILogicalTreeBuilder with
-        member this.Add ue = if ue <> null then elements.Add(ue)
-        member this.Clear () = elements.Clear()
-        member this.NewGroupFromPanel innerPanel =  let g = new LogicalTreeBuilder(innerPanel)
+        member this.Add ue =    if ue <> null then 
+                                    elements.Add(ue)
+                                    root.UpdateLogicalTree()
+        member this.Clear () =  elements.Clear()
+                                root.UpdateLogicalTree()
+        member this.NewGroupFromPanel innerPanel =  let g = new LogicalTreeBuilder(root, innerPanel)
                                                     groups.Add(g)
+                                                    root.UpdateLogicalTree()
                                                     g :> ILogicalTreeBuilder
-        member this.NewGroup () =   let g = new LogicalTreeBuilder(panel)
+        member this.NewGroup () =   let g = new LogicalTreeBuilder(root, panel)
                                     groups.Add(g)
                                     g :> ILogicalTreeBuilder
         

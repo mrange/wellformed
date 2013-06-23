@@ -77,12 +77,13 @@ module Observable =
 
     let Sink (f : 'T -> unit) (o : IObservable<'T>) = o.Subscribe f
 
-    let Source<'T> () : IObservable<'T>*IObserver<'T> = 
+    let Source (initial : IObserver<'T> -> unit)  : IObservable<'T>*IObserver<'T> = 
         let completed = ref false
         let observers = ref Map.empty
         let observable = Observable.New <| fun observer -> 
             let id = NewId()
             observers := Map.add id observer !observers
+            initial observer
             Disposable.New <| fun () -> 
                 observers := Map.remove id !observers
 
