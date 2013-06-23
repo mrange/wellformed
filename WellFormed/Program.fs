@@ -19,7 +19,12 @@ let main argv =
                             let! second =   Controls.Input ""
                                                 |> Enchance.WithLabel "Second"
 
-                            return first, second                                              
+                            if first = "" then 
+                                let! third = Controls.Input ""
+                                                |> Enchance.WithLabel "Third"
+                                return third, second
+                            else
+                                return first, second                                              
                         } |> Enchance.WithGroup "Testing"
 
     let formlet = Formlet.Do
@@ -27,12 +32,10 @@ let main argv =
                             let! first =    Controls.Input ""
                                                 |> Enchance.WithLabel "First"
 
-                            let! inner  =   innerFormlet
+                            let! (second, third)  =   innerFormlet
+
+                            return first,second, third
                             
-                            if first <> "" then 
-                                return! Controls.Input ""
-                            else
-                                return first
                         }
 
     window.Content <- FormletControl.New (fun v -> ()) formlet :> obj
