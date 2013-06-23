@@ -13,17 +13,17 @@ type Result<'T> =
     | Failure of string list
 
 type IForm<'T> =
-    abstract member Collect     : unit -> Result<'T>
+    abstract member State       : IObservable<Result<'T>>
     inherit IDisposable
 
 type Form<'T> =
     {
-        Collect     : unit -> Result<'T>
+        State       : IObservable<Result<'T>>
         Dispose     : unit -> unit
     }
     interface IForm<'T> with
-        member this.Collect() = this.Collect()
+        member this.State = this.State
     interface IDisposable with
         member this.Dispose() = this.Dispose()
-    static member New buildTree collect dispose = {Collect = collect; Dispose = dispose; }
+    static member New buildTree state dispose = {State = state; Dispose = dispose; }
 

@@ -6,6 +6,7 @@ open System.Collections.Generic
 
 open System.Windows
 open System.Windows.Controls
+open System.Windows.Threading
 
 type ILogicalTreeBuilder =
     abstract member Add                 : UIElement -> unit
@@ -13,7 +14,16 @@ type ILogicalTreeBuilder =
     abstract member NewGroupFromPanel   : Panel     -> ILogicalTreeBuilder
     abstract member NewGroup            : unit      -> ILogicalTreeBuilder
 
-type LogicalTreeBuilder (panel : Panel) =
+type LogicalTreeRoot (dispatcher : Dispatcher) = 
+    [<DefaultValue>] val mutable isDispatching  : bool
+
+    member this.UpdateLogicalTree () =
+        if not this.isDispatching then
+            this.isDispatching <- true
+            let action() = if this.tree <> null then ()
+            Dispatch dispatcher action
+
+and LogicalTreeBuilder (panel : Panel) =
     let elements    = new List<UIElement>()
     let groups      = new List<LogicalTreeBuilder>()
     interface ILogicalTreeBuilder with
@@ -34,7 +44,10 @@ type LogicalTreeBuilder (panel : Panel) =
         let min = max (min elements.Count (panel.Children.Count - start')) 0
 
         for i in 0..min - 1 do
-            panel.Children.[start' + i] <- elements.[i]
+            let currentElement = panel.Children.[start' + i]
+            let element = elements.[i]
+            if not (Object.ReferenceEquals(currentElement, element)) then
+                panel.Children.[start' + i] <- element
 
         for i in min..elements.Count - 1 do
             ignore <| panel.Children.Add(elements.[i])

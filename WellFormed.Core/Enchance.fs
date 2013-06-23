@@ -23,7 +23,7 @@ module Enchance =
 
             {
                 Dispose     = dispose
-                Collect     = innerForm.Collect
+                State       = innerForm.State
             } :> IForm<'T>
         Formlet.New build
 
@@ -38,6 +38,6 @@ module Enchance =
 
             {
                 Dispose     = dispose
-                Collect     = innerForm.Collect
+                State       = innerForm.State
             } :> IForm<'T>
         Formlet.New build

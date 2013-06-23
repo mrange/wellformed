@@ -10,10 +10,15 @@ module Controls =
             let control = CreateTextBox t
             lt.Add (control)
 
-            let collect() = Success control.Text
+            let observable, observer = Observable.Source()
+
+            control.Loaded.Add (fun er -> observer.OnNext(Success t))
+            control.TextChanged.Add (fun er -> observer.OnNext(Success t))
+
+            let dispose()   = observer.OnCompleted()
 
             {
-                Dispose     = DoNothing
-                Collect     = collect
+                Dispose     = dispose
+                State       = observable
             } :> IForm<string>
         Formlet.New build

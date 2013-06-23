@@ -19,11 +19,11 @@ module Formlet =
         let build (lt : ILogicalTreeBuilder) = 
             let form = f.Build(lt)
             
-            let collect() = m (form.Collect())
+            let state = Observable.Select m form.State
 
             {
                 Dispose     = form.Dispose
-                Collect     = collect
+                State       = state
             } :> IForm<'U>
         Formlet.New build
 
@@ -38,26 +38,38 @@ module Formlet =
         let build (lt : ILogicalTreeBuilder) = 
             let form = formlet.Build(lt)
 
+            let previousState : (Result<Formlet<'T>>*IForm<'T> option) option ref = ref None
+
             let ilt = lt.NewGroup()
-            let innerCollect = form.Collect()
+            let select (result : Result<Formlet<'T>>) : IObservable<Result<'T>> = 
+                match !previousState, result with 
+                    |   Some (Success innerFormlet', Some innerForm')   ,   Success innerFormlet    when Object.ReferenceEquals (innerFormlet', innerFormlet) -> innerForm'.State
+                    |   Some (Success innerFormlet', Some innerForm')   ,   Success innerFormlet    ->  innerForm'.Dispose()
+                                                                                                        ilt.Clear()
+                                                                                                        let innerForm = innerFormlet.Build(ilt)
+                                                                                                        previousState := Some (Success innerFormlet, Some innerForm)
+                                                                                                        innerForm.State
+                    |   _                                               ,   Success innerFormlet    ->  let innerForm = innerFormlet.Build(ilt)
+                                                                                                        previousState := Some (Success innerFormlet, Some innerForm)
+                                                                                                        innerForm.State
+                    |   Some (Success innerFormlet', Some innerForm')   ,   Failure f               ->  innerForm'.Dispose()
+                                                                                                        ilt.Clear()
+                                                                                                        Observable.Return (Failure f)
+                    |   _                                               ,   Failure f               ->  Observable.Return (Failure f)
 
-            match innerCollect with 
-                |   Success innerFormlet -> ignore <| innerFormlet.Build(ilt)
-                |   _ -> ()
+//            let select (result : Result<Formlet<'T>>) : IObservable<Result<'T>> = null
+
+            let state = form.State |> (Observable.Select select) |> Observable.Flatten
 
 
-            let dispose() =     form.Dispose()                                            
+            let dispose() =     match !previousState with
+                                    |   Some (_, Some innerForm')   -> innerForm'.Dispose()
+                                    |   _                           -> ()
+                                form.Dispose()                                            
 
-            let collect() =     let innerCollect = form.Collect()
-                                match innerCollect with 
-                                    |   Success innerFormlet -> let innerForm = innerFormlet.Build(ilt)
-                                                                innerForm.Collect()
-                                    |   Failure f -> Failure f
-
-               
             {
                 Dispose     = dispose
-                Collect     = collect 
+                State       = state
             } :> IForm<'T>
         Formlet.New build
 
@@ -66,11 +78,11 @@ module Formlet =
 
                     
     let Return (x : 'T) : Formlet<'T> = 
-        let collect() = Success x
+        let state = Observable.Return (Success x)
         let form =          
             {
                 Dispose     = DoNothing
-                Collect     = collect
+                State       = state
             } :> IForm<'T>
         let build (lt : ILogicalTreeBuilder) = form
         Formlet.New build

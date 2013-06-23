@@ -2,6 +2,8 @@
 
 open System
 
+open System.Threading
+
 type Observer<'T> =
     {
         OnNext      : 'T -> unit
@@ -38,6 +40,10 @@ type Observable<'T> =
 
 module Observable =
 
+    let id = ref 0L
+
+    let NewId () = Interlocked.Increment(id)
+
     let Return (x : 'T) = Observable<'T>.New <| fun observer ->
                             observer.OnNext(x)
                             observer.OnCompleted()
@@ -46,15 +52,47 @@ module Observable =
     let Never<'T>       = Observable<'T>.New <| fun observer ->
                             NothingToDispose()    
 
-    let Map (m : 'T -> 'U) (o : IObservable<'T>) : IObservable<'U> = 
+    let Select (m : 'T -> 'U) (o : IObservable<'T>) : IObservable<'U> = 
         Observable.New <| fun observer ->
             o.Subscribe(fun v -> observer.OnNext(m v))
+
+    let Flatten (io: IObservable<IObservable<'T>>) : IObservable<'T> =
+        Observable.New (fun o ->
+            let disp = ref ignore
+            let d =
+                io.Subscribe(fun (o1 : IObservable<'T>) ->
+                    let d = o1.Subscribe o.OnNext
+                    disp := fun () ->
+                        disp.Value ()
+                        d.Dispose ())
+            Disposable.New (fun () ->
+                disp.Value ()
+                d.Dispose ()))
 
                                 
     let Where (f : 'T -> bool) (o : IObservable<'T>) : IObservable<'T> = 
         Observable.New <| fun observer ->
             o.Subscribe(fun v -> 
                 if f v then observer.OnNext(v))
+
+    let Sink (f : 'T -> unit) (o : IObservable<'T>) = o.Subscribe f
+
+    let Source<'T> () : IObservable<'T>*IObserver<'T> = 
+        let completed = ref false
+        let observers = ref Map.empty
+        let observable = Observable.New <| fun observer -> 
+            let id = NewId()
+            observers := Map.add id observer !observers
+            Disposable.New <| fun () -> 
+                observers := Map.remove id !observers
+
+        let onNext v = if not !completed then Map.iter (fun _ (observer : IObserver<'T>) -> observer.OnNext v) !observers
+        let onCompleted() = if not !completed then 
+                                        completed := true
+                                        Map.iter (fun _ (observer : IObserver<'T>) -> observer.OnCompleted()) !observers
+        let onError e = if not !completed then Map.iter (fun _ (observer : IObserver<'T>) -> observer.OnError e) !observers
+        let observer = Observer.New onNext onCompleted onError
+        observable, observer
 
     let Merge (io1: IObservable<'T>) (io2: IObservable<'T>) : IObservable<'T> =
         Observable.New <| fun o ->

@@ -4,6 +4,7 @@ open System
 open System.Windows
 open System.Windows.Controls
 open System.Windows.Media
+open System.Windows.Threading
 
 type Disposable =
     {
@@ -30,6 +31,11 @@ module Utils =
     let DoNothing() = ()
 
     let NothingToDispose() = Disposable.New DoNothing
+
+    let Dispatch (dispatcher : Dispatcher) (action : Action) = 
+        let d : Delegate = upcast action
+        ignore <| dispatcher.BeginInvoke (DispatcherPriority.ApplicationIdle, d)
+
 
     let DefaultBackgroundBrush  = Brushes.White
 

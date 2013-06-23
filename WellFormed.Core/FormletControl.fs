@@ -20,13 +20,7 @@ type FormletControl<'T>(action : 'T -> unit, formlet : Formlet<'T>) as this=
     do
         this.LayoutTransform <- new ScaleTransform (1.5, 1.5)
 
-    member this.Dispatch (action : Action) = 
-        let d : Delegate = upcast action
-        this.Dispatcher.BeginInvoke (DispatcherPriority.ApplicationIdle, d)
-
-    override this.OnApplyTemplate() =   let x = this.Dispatch (fun () -> this.BuildForm())
-                                        ()
-
+    override this.OnApplyTemplate() =   Dispatch this.Dispatcher this.BuildForm
 
     member this.BuildForm() = 
 
