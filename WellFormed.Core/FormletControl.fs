@@ -6,10 +6,6 @@ open System.Windows.Controls
 open System.Windows.Threading
 open System.Windows.Media
 
-type FlatBody =
-    |   Visual          of FrameworkElement
-    |   LabeledVisual   of FrameworkElement*FrameworkElement
-
 type FormletControl<'T>(action : 'T -> unit, formlet : Formlet<'T>) as this=
     inherit ContentControl()
 
@@ -23,7 +19,10 @@ type FormletControl<'T>(action : 'T -> unit, formlet : Formlet<'T>) as this=
 
     override this.OnApplyTemplate() =   Dispatch this.Dispatcher this.BuildForm
 
-    member this.UpdateVisualTree() = ()
+    member this.UpdateVisualTree() = 
+        let (_,_,lt) = this.state
+        lt.Update()
+        ()
 
     member this.UpdateState (result : Result<'T>) = 
         match result with

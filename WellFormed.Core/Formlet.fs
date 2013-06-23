@@ -52,9 +52,6 @@ module Formlet =
                     |   _                                               ,   Success innerFormlet    ->  let innerForm = innerFormlet.Build(ilt)
                                                                                                         previousState := Some (Success innerFormlet, Some innerForm)
                                                                                                         innerForm.State
-                    |   Some (Success innerFormlet', Some innerForm')   ,   Failure f               ->  innerForm'.Dispose()
-                                                                                                        ilt.Clear()
-                                                                                                        Observable.Return (Failure f)
                     |   _                                               ,   Failure f               ->  Observable.Return (Failure f)
 
 //            let select (result : Result<Formlet<'T>>) : IObservable<Result<'T>> = null
