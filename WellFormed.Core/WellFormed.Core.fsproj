@@ -48,10 +48,12 @@
   <ItemGroup>
     <Compile Include="Utils.fs" />
     <Compile Include="Observable.fs" />
+    <Compile Include="LogicalTreeBuilder.fs" />
+    <Compile Include="Form.fs" />
     <Compile Include="Formlet.fs" />
-    <Compile Include="FormletControl.fs" />
     <Compile Include="Enchance.fs" />
     <Compile Include="Controls.fs" />
+    <Compile Include="FormletControl.fs" />
     <None Include="Script.fsx" />
   </ItemGroup>
   <PropertyGroup>
