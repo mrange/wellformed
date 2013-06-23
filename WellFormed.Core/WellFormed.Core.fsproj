@@ -50,6 +50,7 @@
     <Compile Include="Observable.fs" />
     <Compile Include="Formlet.fs" />
     <Compile Include="FormletControl.fs" />
+    <Compile Include="Enchance.fs" />
     <Compile Include="Controls.fs" />
     <None Include="Script.fsx" />
   </ItemGroup>

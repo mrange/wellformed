@@ -13,6 +13,8 @@ type Result<'T> =
 type Body =
     |   Empty
     |   Element         of FrameworkElement
+    |   Label           of TextBlock*Body
+    |   Group           of FrameworkElement*Grid*Body
     |   Join            of Body*Body
 
 type IForm<'T> =
@@ -40,14 +42,6 @@ type Formlet<'T> =
     static member New (build : unit -> IForm<'T>) = { Build = build; }
 
 module Formlet =
-
-    let DoNothing() = ()
-
-    let IsEqual (l : obj) (r : obj) =   match l <> null,r <> null with
-                                            |   true, true  ->  l.Equals(r)
-                                            |   true, false ->  false
-                                            |   false, true ->  false
-                                            |   false, false->  true
 
     let MapResult (m : Result<'T> -> Result<'U>) (f : Formlet<'T>) : Formlet<'U> = 
         let build () =

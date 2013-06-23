@@ -5,15 +5,16 @@ open System.Windows.Controls
 module Controls =
 
     
-    let Input x = 
+    let Input t = 
         let build () =
-            let control = new TextBox()
-            control.Height <- 24.0
-            control.Text <- x
-            DockPanel.SetDock(control, Dock.Top)
+            let control = CreateTextBox t
+
+            let body() = Element control     
+            let collect() = Success control.Text
+
             {
-                Body        = fun () -> Element control     
+                Body        = body
                 Dispose     = DoNothing
-                Collect     = fun () -> Success control.Text
+                Collect     = collect
             } :> IForm<string>
         Formlet.New build

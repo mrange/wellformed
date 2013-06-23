@@ -14,8 +14,10 @@ let main argv =
 
     let formlet = Formlet.Do
                         {
-                            let! first = Controls.Input ""
-                            let! second = Controls.Input ""
+                            let! first =    Controls.Input ""
+                                                |> Enchance.WithLabel "First"
+                            let! second =   Controls.Input ""
+                                                |> Enchance.WithLabel "Second"
                             if first = "" then 
                                 return! Controls.Input ""
                             else
