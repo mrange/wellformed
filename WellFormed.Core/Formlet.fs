@@ -36,9 +36,20 @@ module Formlet =
 
     let Join (f: Formlet<Formlet<'T>>) : Formlet<'T> = 
         let rebuild (ui :FrameworkElement) = 
-            let collect = ApplyToElement ui (Fail "") (fun ui' -> f.Value.Collect(ui'))
-            collect
-        let collect (ui :FrameworkElement) = m (f.Collect ui)
+            let result = CreateElement ui (fun () -> new JoinControl<Formlet<'T>> ())
+            result.Left <- f.Rebuild(result.Left)
+            let collect = ApplyToElement result.Left (Fail "") (fun ui' -> f.Collect(ui'))
+            match collect with 
+                |   Success f'  ->
+                    result.Formlet <- Some f'
+                    result.Right <- f.Rebuild(result.Right)
+                |   _           -> ()
+            result :> FrameworkElement
+        let collect (ui :FrameworkElement) = ApplyToElement ui (Fail "") (fun (ui' : JoinControl<Formlet<'T>>) -> 
+                match ui'.Formlet with
+                    |   Some f' ->  f'.Collect (ui'.Right)
+                    |   _       ->  Fail "Form not built previously"
+                    )
         Formlet.New rebuild collect
 
     let Bind<'T1, 'T2> (f : Formlet<'T1>) (b : 'T1 -> Formlet<'T2>) : Formlet<'T2> = 
@@ -46,7 +57,7 @@ module Formlet =
 
 
     let Return (x : 'T) : Formlet<'T> = 
-        let rebuild (ui :FrameworkElement) = CreateElement ui (fun () -> new ReturnControl()) :> FrameworkElement
+        let rebuild (ui :FrameworkElement) = null
         let collect (ui :FrameworkElement) = Success x
         Formlet.New rebuild collect
 
@@ -56,7 +67,7 @@ module Formlet =
             let result = CreateElement ui (fun () -> new DelayControl())
             result.Value <- f'.Value.Rebuild(result.Value)
             result :> FrameworkElement
-        let collect (ui :FrameworkElement) = ApplyToElement ui (Fail "") (fun ui' -> f'.Value.Collect(ui'))
+        let collect (ui :FrameworkElement) = ApplyToElement ui (Fail "") (fun (ui' : DelayControl) -> f'.Value.Collect(ui'.Value))
         Formlet.New rebuild collect
 
     let ReturnFrom (f : Formlet<'T>) = f
