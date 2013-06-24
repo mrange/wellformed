@@ -12,43 +12,43 @@ let main argv =
     window.MinHeight <- 400.0
     window.Title <- "WellFormed App"
 
-//    let innerFormlet = Formlet.Do
-//                        {
-//                            let! first =    Controls.Input ""
-//                                                |> Enchance.WithLabel "First"
-//                            let! second =   Controls.Input ""
-//                                                |> Enchance.WithLabel "Second"
-//
-//                            if first = "" then 
-//                                let! third = Controls.Input ""
-//                                                |> Enchance.WithLabel "Third"
-//                                return third, second
-//                            else
-//                                return first, second                                              
-//                        } |> Enchance.WithGroup "Testing"
-//
-//    let formlet = Formlet.Do
-//                        {
-//                            let! first =    Controls.Input ""
-//                                                |> Enchance.WithLabel "First"
-//
-//                            let! (second, third)  =   innerFormlet
-//
-//                            return first,second, third
-//                            
-//                        }
+    let innerFormlet = Formlet.Do
+                        {
+                            let! first =    Controls.Input ""
+                                                |> Enchance.WithLabel "First"
+                            let! second =   Controls.Input ""
+                                                |> Enchance.WithLabel "Second"
+
+                            if first = "" then 
+                                let! third = Controls.Input ""
+                                                |> Enchance.WithLabel "Third"
+                                return third, second
+                            else
+                                return first, second                                              
+                        } |> Enchance.WithGroup "Testing"
 
     let formlet = Formlet.Do
                         {
-                            let! first =    Controls.Input "Test"
+                            let! first =    Controls.Input ""
+                                                |> Enchance.WithLabel "First"
 
-                            if first <> "" then 
-                                return first
-                            else
-                                return! Controls.Input "Bogus"
-                                
+                            let! (second, third)  =   innerFormlet
+
+                            return first,second, third
                             
                         }
+
+//    let formlet = Formlet.Do
+//                        {
+//                            let! first =    Controls.Input "Test"
+//
+//                            if first <> "" then 
+//                                return first
+//                            else
+//                                return! Controls.Input "Bogus"
+//                                
+//                            
+//                        }
 
     window.Content <- FormletControl.New (fun v -> ()) formlet :> obj
 

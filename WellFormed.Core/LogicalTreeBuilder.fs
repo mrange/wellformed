@@ -54,8 +54,7 @@ and LogicalTreeBuilder (root : LogicalTreeRoot, panel : Panel) =
         for i in 0..min - 1 do
             let currentElement = panel.Children.[start' + i]
             let element = elements.[i]
-            if not (Object.ReferenceEquals(currentElement, element)) then
-                panel.Children.[start' + i] <- element
+            panel.Children.[start' + i] <- element
 
         for i in min..elements.Count - 1 do
             ignore <| panel.Children.Add(elements.[i])

@@ -28,6 +28,15 @@ module Utils =
                                             |   false   , true  ->  false
                                             |   false   , false ->  true
 
+    let CreateElement (ui : FrameworkElement) (creator : unit -> #FrameworkElement) : #FrameworkElement = 
+        match ui with
+            | :? #FrameworkElement as ui' -> ui'
+            | _                 -> creator()
+
+    let ApplyToElement (ui : FrameworkElement) fallback (apply : #FrameworkElement -> 'T) : 'T = 
+        match ui with
+            | :? #FrameworkElement as ui' -> apply ui'
+            | _                 -> fallback
     let DoNothing() = ()
 
     let NothingToDispose() = Disposable.New DoNothing

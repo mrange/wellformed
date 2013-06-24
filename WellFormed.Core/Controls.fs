@@ -6,7 +6,7 @@ module Controls =
 
     
     let Input t = 
-        let build (lt : ILogicalTreeBuilder) =
+        let build (lt : ILogicalTreeBuilder) (context : obj) =
             let control = CreateTextBox t
             lt.Add (control)
 
