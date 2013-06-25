@@ -15,7 +15,9 @@ type FormletControl<'T>(action : 'T -> unit, formlet : Formlet<'T>) as this=
     override this.OnApplyTemplate() =   Dispatch this.Dispatcher this.BuildForm
 
     member this.BuildForm() = 
-        this.Content <- ApplyToElement (this.Content :?> FrameworkElement) (null :> FrameworkElement) (fun ui' -> formlet.Rebuild (ui'))
+        match this.Content with 
+            | :? FrameworkElement as fe -> this.Content <- formlet.Rebuild (fe)
+            | _ -> this.Content <- formlet.Rebuild(null)
         ()
 
 

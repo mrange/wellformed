@@ -19,6 +19,10 @@ type Disposable =
         {Dispose = d} :> IDisposable
 
 
+type Result<'T> =
+    | Success of 'T
+    | Failure of string list
+
 [<AutoOpen>]
 module Utils =
 
@@ -28,15 +32,17 @@ module Utils =
                                             |   false   , true  ->  false
                                             |   false   , false ->  true
 
+    let Fail (f : string) = Failure [f] 
+                       
     let CreateElement (ui : FrameworkElement) (creator : unit -> #FrameworkElement) : #FrameworkElement = 
         match ui with
             | :? #FrameworkElement as ui' -> ui'
             | _                 -> creator()
 
-    let ApplyToElement (ui : FrameworkElement) fallback (apply : #FrameworkElement -> 'T) : 'T = 
+    let ApplyToElement (ui : FrameworkElement) (apply : #FrameworkElement -> Result<'T>) : Result<'T> = 
         match ui with
             | :? #FrameworkElement as ui' -> apply ui'
-            | _                 -> fallback
+            | _                 -> Fail "Couldn't apply to element as it wasn't of a compatible type"
     let DoNothing() = ()
 
     let NothingToDispose() = Disposable.New DoNothing

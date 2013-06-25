@@ -1,28 +1,13 @@
 ﻿namespace WellFormed.Core
 
+open System.Windows
 open System.Windows.Controls
 
+[<AutoOpen>]
 module Controls =
 
-    
     let Input t = 
-        let build (lt : ILogicalTreeBuilder) (context : obj) =
-            let control = CreateTextBox t
-            lt.Add (control)
+        let rebuild (ui :FrameworkElement) = CreateElement ui (fun () -> CreateTextBox t) :> FrameworkElement
+        let collect (ui :FrameworkElement) = ApplyToElement ui (fun (ui' : TextBox)-> Success ui'.Text)
 
-            let state = ref t
-
-            let observable, observer = Observable.Source (fun o -> o.OnNext (Success !state))
-
-            control.LostFocus.Add (fun er -> 
-                if !state <> control.Text then
-                    state := control.Text
-                    observer.OnNext (Success !state))
-
-            let dispose()   = observer.OnCompleted()
-
-            {
-                Dispose     = dispose
-                State       = observable
-            } :> IForm<string>
-        Formlet.New build
+        Formlet.New rebuild collect
