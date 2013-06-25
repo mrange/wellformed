@@ -33,6 +33,11 @@ module Utils =
                                             |   false   , false ->  true
 
     let Fail (f : string) = Failure [f] 
+             
+    let Enumerator (e : array<'T>) = e.GetEnumerator()
+
+    let CombineVertically (sz : Size) (l : Size) (r : Size) = 
+        Size (Math.Min(Math.Max(l.Width, r.Width), sz.Width), Math.Min(l.Height + r.Height, sz.Height))
                        
     let CreateElement (ui : FrameworkElement) (creator : unit -> #FrameworkElement) : #FrameworkElement = 
         match ui with
