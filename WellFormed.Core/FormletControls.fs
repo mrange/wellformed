@@ -8,38 +8,42 @@ open System.Windows
 open System.Windows.Controls
 open System.Windows.Media
 
-type DelayControl() =
+[<AbstractClass>]
+type FormletContainerControl() =
     inherit FrameworkElement()
+
+    abstract Children : array<FrameworkElement> with get
+
+    override this.LogicalChildren = this.Children |> Enumerator
+
+    override this.VisualChildrenCount = this.Children.Length
+
+    override this.GetVisualChild (i : int) = this.Children.[i] :> Visual
+
+    member this.RemoveChild (fe : FrameworkElement) =
+            this.RemoveVisualChild(fe)
+            this.RemoveLogicalChild(fe)
+
+    member this.AddChild (fe : FrameworkElement) =
+            this.AddLogicalChild(fe)
+            this.AddVisualChild(fe)
+
+type DelayControl() =
+    inherit FormletContainerControl()
 
     let mutable value : FrameworkElement = null
 
-    let mutable children = [||]
-
-    member this.UpdateChildren() = 
-        if value <> null 
-            then    children    <- [|value|]
-            else    children    <- [||]
+    override this.Children 
+        with    get ()   = if value <> null then [|value|] else [||]
 
     member this.Value 
         with    get ()                      = value
-        and     set (v : FrameworkElement)  = 
-            if not (Object.ReferenceEquals (value,v)) then    
-                this.RemoveVisualChild(value)
-                this.RemoveLogicalChild(value)
-                value <- v
-                this.AddLogicalChild(value)
-                this.AddVisualChild(value)
+        and     set (fe : FrameworkElement)  = 
+            if not (Object.ReferenceEquals (value,fe)) then    
+                this.RemoveChild(value)
+                value <- fe
+                this.AddChild(value)
                 this.InvalidateMeasure()
-
-                this.UpdateChildren()
-            
-
-
-    override this.LogicalChildren = children |> Enumerator
-
-    override this.VisualChildrenCount = children.Length
-
-    override this.GetVisualChild (i : int) = children.[i] :> Visual
 
     override this.MeasureOverride(sz : Size) =
         let v = value
@@ -55,55 +59,49 @@ type DelayControl() =
         sz
 
 type JoinControl<'T>() =
-    inherit FrameworkElement()
+    inherit FormletContainerControl()
 
     let mutable left    : FrameworkElement = null
     let mutable right   : FrameworkElement = null
 
-    let mutable children = [||]
+    override this.Children 
+        with    get ()   = 
+            match left, right with
+                |   null, null  -> [||]
+                |   l,null      -> [|l|]
+                |   null,r      -> [|r|]
+                |   l,r         -> [|l;r;|]
 
-    member this.UpdateChildren() = 
-        match left, right with
-            |   null,null   ->  children <- [||]
-            |   null,r      ->  children <- [|r|]     
-            |   l,null      ->  children <- [|l|]     
-            |   l,r         ->  children <- [|l;r;|]  
 
     member this.Left 
         with    get ()                      = left
-        and     set (v : FrameworkElement)  = 
-            if not (Object.ReferenceEquals (left,v)) then    
-                this.RemoveVisualChild(left)
-                this.RemoveLogicalChild(left)
-                left <- v
-                this.AddLogicalChild(left)
-                this.AddVisualChild(left)
+        and     set (fe : FrameworkElement)  = 
+            if not (Object.ReferenceEquals (left,fe)) then    
+                this.RemoveChild(left)
+                left <- fe
+                this.AddChild(left)
                 this.InvalidateMeasure()
-                this.UpdateChildren()
 
     member this.Right 
         with    get ()                      = right
-        and     set (v : FrameworkElement)  = 
-            if not (Object.ReferenceEquals (right,v)) then    
-                this.RemoveVisualChild(right)
-                this.RemoveLogicalChild(right)
-                right <- v
-                this.AddLogicalChild(right)
-                this.AddVisualChild(right)
+        and     set (fe : FrameworkElement)  = 
+            if not (Object.ReferenceEquals (right,fe)) then    
+                this.RemoveChild(right)
+                right <- right
+                this.AddChild(right)
                 this.InvalidateMeasure()
-                this.UpdateChildren()
 
     member val Formlet : 'T option = None with get, set
 
-    override this.LogicalChildren = children |> Enumerator
+    override this.LogicalChildren = this.Children |> Enumerator
 
-    override this.VisualChildrenCount = children.Length
+    override this.VisualChildrenCount = this.Children.Length
 
-    override this.GetVisualChild (i : int) = children.[i] :> Visual
+    override this.GetVisualChild (i : int) = this.Children.[i] :> Visual
 
     override this.MeasureOverride(sz : Size) =
         let adjustedSize = Size (sz.Width, Double.PositiveInfinity)
-        let c = children
+        let c = this.Children
         match c with 
             |   [||]    ->  Size()
             |   [|v|]   ->  v.Measure(adjustedSize)
@@ -113,7 +111,7 @@ type JoinControl<'T>() =
                             CombineVertically sz l.DesiredSize r.DesiredSize
 
     override this.ArrangeOverride(sz : Size) =
-        let c = children
+        let c = this.Children
         match c with 
             |   [||]    ->  ()
             |   [|v|]   ->  let r = Rect (0.0, 0.0, sz.Width, v.DesiredSize.Height)
@@ -123,6 +121,7 @@ type JoinControl<'T>() =
                             l.Arrange(lr)
                             r.Arrange(rr)
                             ignore <| r.Arrange(rr)
+            
         sz
 
 
