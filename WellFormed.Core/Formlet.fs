@@ -36,7 +36,7 @@ module Formlet =
             match collect with 
                 |   Success f'  ->
                     result.Formlet <- Some f'
-                    result.Right <- f.Rebuild(result.Right)
+                    result.Right <- f'.Rebuild(result.Right)
                 |   _           -> ()
             result :> FrameworkElement
         let collect (ui :FrameworkElement) = ApplyToElement ui (fun (ui' : JoinControl<Formlet<'T>>) -> 

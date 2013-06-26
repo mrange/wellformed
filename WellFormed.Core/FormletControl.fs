@@ -9,10 +9,25 @@ open System.Windows.Media
 type FormletControl<'T>(action : 'T -> unit, formlet : Formlet<'T>) as this=
     inherit ContentControl()
 
+    let mutable isDispatching = false
+
     do
         this.LayoutTransform <- new ScaleTransform (1.5, 1.5)
 
-    override this.OnApplyTemplate() =   Dispatch this.Dispatcher this.BuildForm
+    
+    let DispatchOnce (action : unit -> unit) =
+        if not isDispatching then
+            isDispatching <- true
+            Dispatch this.Dispatcher (fun () ->
+                try
+                    action()
+                finally
+                    isDispatching <- false
+                )
+
+    override this.OnApplyTemplate()         =   DispatchOnce this.BuildForm
+
+    override this.OnLostKeyboardFocus(e)    =   DispatchOnce this.BuildForm
 
     member this.BuildForm() = 
         match this.Content with 
@@ -20,6 +35,7 @@ type FormletControl<'T>(action : 'T -> unit, formlet : Formlet<'T>) as this=
             | _ -> this.Content <- formlet.Rebuild(null)
         ()
 
-
 module FormletControl =
     let New<'T> (action : 'T -> unit) (formlet : Formlet<'T>) = new FormletControl<'T>(action, formlet)
+
+

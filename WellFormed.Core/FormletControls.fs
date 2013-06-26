@@ -23,15 +23,15 @@ type DelayControl() =
     member this.Value 
         with    get ()                      = value
         and     set (v : FrameworkElement)  = 
-            if not (Object.ReferenceEquals (value,v)) 
-                then    this.RemoveVisualChild(value)
-                        this.RemoveLogicalChild(value)
-                        value <- v
-                        this.AddLogicalChild(value)
-                        this.AddVisualChild(value)
-                        this.InvalidateMeasure()
+            if not (Object.ReferenceEquals (value,v)) then    
+                this.RemoveVisualChild(value)
+                this.RemoveLogicalChild(value)
+                value <- v
+                this.AddLogicalChild(value)
+                this.AddVisualChild(value)
+                this.InvalidateMeasure()
 
-            this.UpdateChildren()
+                this.UpdateChildren()
             
 
 
@@ -72,26 +72,26 @@ type JoinControl<'T>() =
     member this.Left 
         with    get ()                      = left
         and     set (v : FrameworkElement)  = 
-            if not (Object.ReferenceEquals (left,v)) 
-                then    this.RemoveVisualChild(left)
-                        this.RemoveLogicalChild(left)
-                        left <- v
-                        this.AddLogicalChild(left)
-                        this.AddVisualChild(left)
-                        this.InvalidateMeasure()
-            this.UpdateChildren()
+            if not (Object.ReferenceEquals (left,v)) then    
+                this.RemoveVisualChild(left)
+                this.RemoveLogicalChild(left)
+                left <- v
+                this.AddLogicalChild(left)
+                this.AddVisualChild(left)
+                this.InvalidateMeasure()
+                this.UpdateChildren()
 
     member this.Right 
         with    get ()                      = right
         and     set (v : FrameworkElement)  = 
-            if not (Object.ReferenceEquals (right,v)) 
-                then    this.RemoveVisualChild(right)
-                        this.RemoveLogicalChild(right)
-                        right <- v
-                        this.AddLogicalChild(right)
-                        this.AddVisualChild(right)
-                        this.InvalidateMeasure()
-            this.UpdateChildren()
+            if not (Object.ReferenceEquals (right,v)) then    
+                this.RemoveVisualChild(right)
+                this.RemoveLogicalChild(right)
+                right <- v
+                this.AddLogicalChild(right)
+                this.AddVisualChild(right)
+                this.InvalidateMeasure()
+                this.UpdateChildren()
 
     member val Formlet : 'T option = None with get, set
 
@@ -102,13 +102,13 @@ type JoinControl<'T>() =
     override this.GetVisualChild (i : int) = children.[i] :> Visual
 
     override this.MeasureOverride(sz : Size) =
+        let adjustedSize = Size (sz.Width, Double.PositiveInfinity)
         let c = children
         match c with 
             |   [||]    ->  Size()
-            |   [|v|]   ->  v.Measure(sz)
+            |   [|v|]   ->  v.Measure(adjustedSize)
                             v.DesiredSize
-            |   [|l;r;|]->  let adjustedSize = Size (sz.Width, Double.PositiveInfinity)
-                            l.Measure(adjustedSize)
+            |   [|l;r;|]->  l.Measure(adjustedSize)
                             r.Measure(adjustedSize)
                             CombineVertically sz l.DesiredSize r.DesiredSize
 
@@ -116,10 +116,12 @@ type JoinControl<'T>() =
         let c = children
         match c with 
             |   [||]    ->  ()
-            |   [|v|]   ->  ignore <| v.Arrange(Rect(sz))
+            |   [|v|]   ->  let r = Rect (0.0, 0.0, sz.Width, v.DesiredSize.Height)
+                            ignore <| v.Arrange(r)
             |   [|l;r;|]->  let lr = Rect (0.0, 0.0, sz.Width, l.DesiredSize.Height)
                             let rr = Rect (0.0, l.DesiredSize.Height, sz.Width, r.DesiredSize.Height)
                             l.Arrange(lr)
+                            r.Arrange(rr)
                             ignore <| r.Arrange(rr)
         sz
 

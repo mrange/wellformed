@@ -39,7 +39,7 @@ let main argv =
 //                            
 //                        }
 
-    let formlet = Formlet.Do
+    let inner = Formlet.Do
                         {
                             let! first = Input "Test"
 
@@ -50,6 +50,24 @@ let main argv =
                                 
                             
                         }
+    let formlet = Formlet.Do
+                        {
+                            let! first = inner
+                            let! second = inner
+
+                            return first, second
+                        }
+//    let formlet = Formlet.Do
+//                        {
+//                            let! first = Input "Test"
+//
+//                            if first <> "" then 
+//                                return first
+//                            else
+//                                return! Input "Bogus"
+//                                
+//                            
+//                        }
 
     window.Content <- FormletControl.New (fun v -> ()) formlet :> obj
 
