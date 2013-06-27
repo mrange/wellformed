@@ -77,9 +77,18 @@ module Utils =
 
     let NothingToDispose() = Disposable.New DoNothing
 
-    let Dispatch (dispatcher : Dispatcher) (action : unit -> unit) = 
+    let RoutedEventAsDelegate (action : obj -> RoutedEventArgs -> unit) = 
+        let a = RoutedEventHandler action
+        let d : Delegate = upcast a
+        d
+
+    let ActionAsDelegate (action : unit -> unit) = 
         let a = Action action 
         let d : Delegate = upcast a
+        d
+
+    let Dispatch (dispatcher : Dispatcher) (action : unit -> unit) = 
+        let d = ActionAsDelegate action
         ignore <| dispatcher.BeginInvoke (DispatcherPriority.ApplicationIdle, d)
 
 

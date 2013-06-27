@@ -14,6 +14,9 @@ type FormletControl<'T>(action : 'T -> unit, formlet : Formlet<'T>) as this=
     do
         this.LayoutTransform <- new ScaleTransform (1.5, 1.5)
 
+        let d = RoutedEventAsDelegate <| this.OnRebuild
+
+        this.AddHandler (FormletContainerControl.RebuildEvent, d)
     
     let DispatchOnce (action : unit -> unit) =
         if not isDispatching then
@@ -25,9 +28,10 @@ type FormletControl<'T>(action : 'T -> unit, formlet : Formlet<'T>) as this=
                     isDispatching <- false
                 )
 
-    override this.OnApplyTemplate()         =   DispatchOnce this.BuildForm
+    member this.OnRebuild (sender : obj) (e : RoutedEventArgs)
+                                            =   DispatchOnce this.BuildForm
 
-    override this.OnLostKeyboardFocus(e)    =   DispatchOnce this.BuildForm
+    override this.OnApplyTemplate()         =   DispatchOnce this.BuildForm
 
     member this.BuildForm() = 
         match this.Content with 

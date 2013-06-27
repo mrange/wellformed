@@ -12,6 +12,10 @@ open System.Windows.Media
 type FormletContainerControl() =
     inherit FrameworkElement()
 
+    static let rebuildevent = EventManager.RegisterRoutedEvent ("RebuildEvent", RoutingStrategy.Bubble, typeof<RoutedEventHandler>, typeof<FormletContainerControl>)
+
+    static member RebuildEvent = rebuildevent
+
     abstract Children : array<FrameworkElement> with get
 
     override this.LogicalChildren = this.Children |> Enumerator
@@ -27,6 +31,10 @@ type FormletContainerControl() =
     member this.AddChild (fe : FrameworkElement) =
             this.AddLogicalChild(fe)
             this.AddVisualChild(fe)
+
+    static member RaiseRebuild (sender : FrameworkElement) =    let args = new RoutedEventArgs (rebuildevent, sender)
+                                                                sender.RaiseEvent args
+    member this.Rebuild () = FormletContainerControl.RaiseRebuild this
 
 [<AbstractClass>]
 type UnaryControl() =
@@ -154,8 +162,10 @@ type InputControl(text : string) as this =
     inherit TextBox()
 
     do
-        this.Text <- text
+        this.Text   <- text
         this.Margin <- DefaultMargin
+
+    override this.OnLostFocus(e) = FormletContainerControl.RaiseRebuild this
 
 type GroupControl(text : string) as this =
     inherit UnaryControl()
