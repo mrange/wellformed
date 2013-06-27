@@ -39,7 +39,7 @@ let main argv =
 //                            
 //                        }
 
-    let inner = Formlet.Do
+    let inner name = Formlet.Do
                         {
                             let! first = Input "Test"
                                             |> Enchance.WithLabel "This is the test"
@@ -52,10 +52,11 @@ let main argv =
                                 
                             
                         }
+                        |> Enchance.WithGroup name
     let formlet = Formlet.Do
                         {
-                            let! first = inner
-                            let! second = inner
+                            let! first = inner "First"
+                            let! second = inner "Second"
 
                             return first, second
                         }

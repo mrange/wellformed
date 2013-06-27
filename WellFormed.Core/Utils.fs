@@ -125,7 +125,7 @@ module Utils =
         textBlock.Width <- 100.0
         textBlock
 
-    let CreateGroup t : FrameworkElement*Panel = 
+    let CreateGroup t : FrameworkElement*Decorator = 
         let label = CreateTextBox t
         label.IsReadOnly <- true
         label.VerticalAlignment <- VerticalAlignment.Top
@@ -133,13 +133,11 @@ module Utils =
         label.RenderTransform <- new TranslateTransform (8.0, 0.0)
         let border = new Border ()
         let outer = new Grid ()
-        let inner = new StackPanel ()
         border.Margin <- DefaultBorderMargin
         border.Padding <- DefaultBorderPadding
-        border.Child <- inner
         border.BorderThickness <- DefaultBorderThickness
         border.BorderBrush <- DefaultBorderBrush 
         ignore <| outer.Children.Add(border)
         ignore <| outer.Children.Add(label)
-        upcast outer, upcast inner
+        upcast outer, upcast border
 

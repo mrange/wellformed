@@ -157,3 +157,15 @@ type InputControl(text : string) as this =
         this.Text <- text
         this.Margin <- DefaultMargin
 
+type GroupControl(text : string) as this =
+    inherit UnaryControl()
+
+    let outer, inner = CreateGroup text
+
+    do
+        this.Value <- outer
+
+    member this.Inner
+        with get ()                         = inner.Child :?> FrameworkElement
+        and  set (value : FrameworkElement) = inner.Child <- value
+
