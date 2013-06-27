@@ -41,17 +41,20 @@ module Utils =
              
     let Enumerator (e : array<'T>) = e.GetEnumerator()
 
-    let MakeFirstRectUsingOrientation orientation (sz : Size) (f : FrameworkElement) = match orientation with 
+    let MakeFirstRectUsingOrientation orientation (sz : Size) (f : FrameworkElement) = 
+        match orientation with 
         |   TopToBottom -> Rect (0.0, 0.0, sz.Width, f.DesiredSize.Height)
         |   LeftToRight -> Rect (0.0, 0.0, f.DesiredSize.Width, sz.Height)
 
-    let MakeSecondRectUsingOrientation orientation (sz : Size) (f : FrameworkElement) (s : FrameworkElement) = match orientation with 
+    let MakeSecondRectUsingOrientation orientation (sz : Size) (f : FrameworkElement) (s : FrameworkElement) = 
+        match orientation with 
         |   TopToBottom -> Rect (0.0, f.DesiredSize.Height, sz.Width, s.DesiredSize.Height)
         |   LeftToRight -> Rect (f.DesiredSize.Width, 0.0, s.DesiredSize.Width, sz.Height)
 
-    let AdjustUsingOrientation orientation (sz : Size) = match orientation with
-            |   TopToBottom -> Size (sz.Width, Double.PositiveInfinity)
-            |   LeftToRight -> Size (Double.PositiveInfinity, sz.Height)
+    let AdjustUsingOrientation orientation (sz : Size) = 
+        match orientation with
+        |   TopToBottom -> Size (sz.Width, Double.PositiveInfinity)
+        |   LeftToRight -> Size (Double.PositiveInfinity, sz.Height)
 
     let CombineVertically (sz : Size) (l : Size) (r : Size) = 
         Size (Math.Min(Math.Max(l.Width, r.Width), sz.Width), Math.Min(l.Height + r.Height, sz.Height))
@@ -61,18 +64,19 @@ module Utils =
 
     let CombineUsingOrientation (o : LayoutOrientation) (sz : Size) (l : Size) (r : Size) =
         match o with
-            |   TopToBottom -> CombineVertically    sz l r
-            |   LeftToRight -> CombineHorizontally  sz l r
+        |   TopToBottom -> CombineVertically    sz l r
+        |   LeftToRight -> CombineHorizontally  sz l r
                        
     let CreateElement (ui : FrameworkElement) (creator : unit -> #FrameworkElement) : #FrameworkElement = 
         match ui with
-            | :? #FrameworkElement as ui' -> ui'
-            | _                 -> creator()
+        | :? #FrameworkElement as ui' -> ui'
+        | _                 -> creator()
 
     let ApplyToElement (ui : FrameworkElement) (apply : #FrameworkElement -> Result<'T>) : Result<'T> = 
         match ui with
-            | :? #FrameworkElement as ui' -> apply ui'
-            | _                 -> Fail "Couldn't apply to element as it wasn't of a compatible type"
+        | :? #FrameworkElement as ui' -> apply ui'
+        | _                 -> Fail "Couldn't apply to element as it wasn't of a compatible type"
+
     let DoNothing() = ()
 
     let NothingToDispose() = Disposable.New DoNothing

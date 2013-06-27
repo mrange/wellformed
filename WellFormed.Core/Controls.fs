@@ -14,6 +14,16 @@ module Controls =
 
     let Input t = 
         let rebuild (ui :FrameworkElement) = CreateElement ui (fun () -> new InputControl(t)) :> FrameworkElement
-        let collect (ui :FrameworkElement) = ApplyToElement ui (fun (ui' : TextBox)-> Success ui'.Text)
+        let collect (ui :FrameworkElement) = ApplyToElement ui (fun (ui' : InputControl)-> Success ui'.Text)
+
+        Formlet.New rebuild collect
+
+    let Select<'T> (i : int) (options : (string * 'T)  list)  = 
+        let rebuild (ui :FrameworkElement) = CreateElement ui (fun () -> new SelectControl<'T>(i, options)) :> FrameworkElement
+        let collect (ui :FrameworkElement) = ApplyToElement ui (fun (ui' : SelectControl<'T>)-> let collect = ui'.Collect()
+                                                                                                match collect with
+                                                                                                    |   Some v  -> Success v
+                                                                                                    |   None    -> Fail "No value selected"
+                                                                                                    )
 
         Formlet.New rebuild collect

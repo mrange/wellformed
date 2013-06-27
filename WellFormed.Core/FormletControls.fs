@@ -167,6 +167,30 @@ type InputControl(text : string) as this =
 
     override this.OnLostFocus(e) = FormletContainerControl.RaiseRebuild this
 
+type SelectControl<'T>(initial : int, options : (string * 'T) list) as this =
+    inherit ComboBox()
+
+    do
+        let items = 
+            options 
+                |> List.map (fun (t, v) ->  let tb = CreateTextBlock t
+                                            let cbi = new ComboBoxItem ()
+                                            cbi.Content <- tb
+                                            cbi.Tag <- v
+                                            cbi
+                            ) 
+                |> List.toArray
+        this.ItemsSource <- items
+        if items.Length > 0 then
+            this.SelectedIndex <- Math.Max (initial, items.Length - 1)
+                          
+    member this.Collect () =    let item = this.SelectedItem :?> ComboBoxItem
+                                if item <> null then
+                                    Some (item.Tag :?> 'T)
+                                else
+                                    None
+
+
 type GroupControl(text : string) as this =
     inherit UnaryControl()
 
