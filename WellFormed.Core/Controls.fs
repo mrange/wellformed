@@ -7,7 +7,9 @@ open System.Windows.Controls
 module Controls =
 
     let Information t = 
-        let rebuild (ui :FrameworkElement) = CreateElement ui (fun () -> new InformationControl(t)) :> FrameworkElement
+        let rebuild (ui :FrameworkElement) = let info = CreateElement ui (fun () -> new InformationControl(t)) 
+                                             info.Text <- t
+                                             info :> FrameworkElement
         let collect (ui :FrameworkElement) = Success ()
 
         Formlet.New rebuild collect

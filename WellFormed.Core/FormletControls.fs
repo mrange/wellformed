@@ -165,7 +165,9 @@ type InputControl(text : string) as this =
         this.Text   <- text
         this.Margin <- DefaultMargin
 
-    override this.OnLostFocus(e) = FormletContainerControl.RaiseRebuild this
+    override this.OnLostFocus(e) = 
+        base.OnLostFocus(e)
+        FormletContainerControl.RaiseRebuild this
 
 type SelectControl<'T>(initial : int, options : (string * 'T) list) as this =
     inherit ComboBox()
@@ -173,7 +175,8 @@ type SelectControl<'T>(initial : int, options : (string * 'T) list) as this =
     do
         let items = 
             options 
-                |> List.map (fun (t, v) ->  let tb = CreateTextBlock t
+                |> List.map (fun (t, v) ->  let tb = new TextBlock ()
+                                            tb.Text <- t
                                             let cbi = new ComboBoxItem ()
                                             cbi.Content <- tb
                                             cbi.Tag <- v
@@ -182,19 +185,26 @@ type SelectControl<'T>(initial : int, options : (string * 'T) list) as this =
                 |> List.toArray
         this.ItemsSource <- items
         if items.Length > 0 then
-            this.SelectedIndex <- Math.Max (initial, items.Length - 1)
+            this.SelectedIndex <- Math.Min (initial, items.Length - 1)
+
+        this.Margin <- DefaultMargin
                           
-    member this.Collect () =    let item = this.SelectedItem :?> ComboBoxItem
+    member this.Collect () =    let item = this.SelectedValue :?> ComboBoxItem
                                 if item <> null then
                                     Some (item.Tag :?> 'T)
                                 else
                                     None
 
+    override this.OnSelectionChanged(e) = 
+        base.OnSelectionChanged(e)
+        FormletContainerControl.RaiseRebuild this
+
+
 
 type GroupControl(text : string) as this =
     inherit UnaryControl()
 
-    let outer, inner = CreateGroup text
+    let outer, label, inner = CreateGroup text
 
     do
         this.Value <- outer
@@ -202,4 +212,8 @@ type GroupControl(text : string) as this =
     member this.Inner
         with get ()                         = inner.Child :?> FrameworkElement
         and  set (value : FrameworkElement) = inner.Child <- value
+
+    member this.Text
+        with get ()                         = label.Text
+        and  set (value)                    = label.Text <- value
 

@@ -138,7 +138,7 @@ module Utils =
         textBlock.Width <- 100.0
         textBlock
 
-    let CreateGroup t : FrameworkElement*Decorator = 
+    let CreateGroup t : FrameworkElement*TextBox*Decorator = 
         let label = CreateTextBox t
         label.IsReadOnly <- true
         label.VerticalAlignment <- VerticalAlignment.Top
@@ -152,5 +152,5 @@ module Utils =
         border.BorderBrush <- DefaultBorderBrush 
         ignore <| outer.Children.Add(border)
         ignore <| outer.Children.Add(label)
-        upcast outer, upcast border
+        upcast outer, label, upcast border
 

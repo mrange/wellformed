@@ -9,6 +9,7 @@ module Enchance =
     
     let WithGroup (t : string) (f : Formlet<'T>) : Formlet<'T> = 
         let rebuild (ui : FrameworkElement) =   let group = CreateElement ui (fun () -> new GroupControl(t))
+                                                group.Text <- t
                                                 group.Inner <- f.Rebuild(group.Inner)
                                                 group :> FrameworkElement
         let collect (ui : FrameworkElement) =   ApplyToElement ui (fun (ui' : GroupControl) -> f.Collect(ui'.Inner))

@@ -31,7 +31,9 @@ type FormletControl<'T>(action : 'T -> unit, formlet : Formlet<'T>) as this=
     member this.OnRebuild (sender : obj) (e : RoutedEventArgs)
                                             =   DispatchOnce this.BuildForm
 
-    override this.OnApplyTemplate()         =   DispatchOnce this.BuildForm
+    override this.OnApplyTemplate()         =   
+        base.OnApplyTemplate()
+        DispatchOnce this.BuildForm
 
     member this.BuildForm() = 
         match this.Content with 
