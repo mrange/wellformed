@@ -19,6 +19,11 @@ type Disposable =
         {Dispose = d} :> IDisposable
 
 
+type LayoutOrientation = 
+    |   TopToBottom
+    |   LeftToRight
+
+
 type Result<'T> =
     | Success of 'T
     | Failure of string list
@@ -36,8 +41,28 @@ module Utils =
              
     let Enumerator (e : array<'T>) = e.GetEnumerator()
 
+    let MakeFirstRectUsingOrientation orientation (sz : Size) (f : FrameworkElement) = match orientation with 
+        |   TopToBottom -> Rect (0.0, 0.0, sz.Width, f.DesiredSize.Height)
+        |   LeftToRight -> Rect (0.0, 0.0, f.DesiredSize.Width, sz.Height)
+
+    let MakeSecondRectUsingOrientation orientation (sz : Size) (f : FrameworkElement) (s : FrameworkElement) = match orientation with 
+        |   TopToBottom -> Rect (0.0, f.DesiredSize.Height, sz.Width, s.DesiredSize.Height)
+        |   LeftToRight -> Rect (f.DesiredSize.Width, 0.0, s.DesiredSize.Width, sz.Height)
+
+    let AdjustUsingOrientation orientation (sz : Size) = match orientation with
+            |   TopToBottom -> Size (sz.Width, Double.PositiveInfinity)
+            |   LeftToRight -> Size (Double.PositiveInfinity, sz.Height)
+
     let CombineVertically (sz : Size) (l : Size) (r : Size) = 
         Size (Math.Min(Math.Max(l.Width, r.Width), sz.Width), Math.Min(l.Height + r.Height, sz.Height))
+
+    let CombineHorizontally (sz : Size) (l : Size) (r : Size) = 
+        Size (Math.Min(l.Width + r.Width, sz.Width), Math.Min(Math.Max (l.Height, r.Height), sz.Height))
+
+    let CombineUsingOrientation (o : LayoutOrientation) (sz : Size) (l : Size) (r : Size) =
+        match o with
+            |   TopToBottom -> CombineVertically    sz l r
+            |   LeftToRight -> CombineHorizontally  sz l r
                        
     let CreateElement (ui : FrameworkElement) (creator : unit -> #FrameworkElement) : #FrameworkElement = 
         match ui with
@@ -94,6 +119,11 @@ module Utils =
         textBox.Text <- t
         textBox.Margin <- DefaultMargin
         textBox
+
+    let CreateLabel t = 
+        let textBlock = CreateTextBlock t
+        textBlock.Width <- 100.0
+        textBlock
 
     let CreateGroup t : FrameworkElement*Panel = 
         let label = CreateTextBox t

@@ -42,11 +42,13 @@ let main argv =
     let inner = Formlet.Do
                         {
                             let! first = Input "Test"
+                                            |> Enchance.WithLabel "This is the test"
 
                             if first <> "" then 
                                 return first
                             else
                                 return! Input "Bogus"
+                                            |> Enchance.WithLabel "This is some bogus"
                                 
                             
                         }
@@ -59,7 +61,7 @@ let main argv =
                         }
 //    let formlet = Formlet.Do
 //                        {
-//                            let! first = Input "Test"
+//                            let! first = Input ""
 //
 //                            if first <> "" then 
 //                                return first

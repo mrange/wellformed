@@ -28,7 +28,8 @@ type FormletContainerControl() =
             this.AddLogicalChild(fe)
             this.AddVisualChild(fe)
 
-type DelayControl() =
+[<AbstractClass>]
+type UnaryControl() =
     inherit FormletContainerControl()
 
     let mutable value : FrameworkElement = null
@@ -58,11 +59,13 @@ type DelayControl() =
             then    v.Arrange(Rect(sz))
         sz
 
-type JoinControl<'T>() =
+[<AbstractClass>]
+type BinaryControl() =
     inherit FormletContainerControl()
 
-    let mutable left    : FrameworkElement = null
-    let mutable right   : FrameworkElement = null
+    let mutable left        : FrameworkElement  = null
+    let mutable right       : FrameworkElement  = null
+    let mutable orientation : LayoutOrientation = LayoutOrientation.TopToBottom
 
     override this.Children 
         with    get ()   = 
@@ -73,9 +76,16 @@ type JoinControl<'T>() =
                 |   l,r         -> [|l;r;|]
 
 
+    member this.Orientation
+        with get ()                         = orientation
+        and  set (value)                    = orientation <- value
+                                              this.InvalidateMeasure ()
+
+
+
     member this.Left 
         with    get ()                      = left
-        and     set (fe : FrameworkElement)  = 
+        and     set (fe : FrameworkElement) = 
             if not (Object.ReferenceEquals (left,fe)) then    
                 this.RemoveChild(left)
                 left <- fe
@@ -87,11 +97,9 @@ type JoinControl<'T>() =
         and     set (fe : FrameworkElement)  = 
             if not (Object.ReferenceEquals (right,fe)) then    
                 this.RemoveChild(right)
-                right <- right
+                right <- fe
                 this.AddChild(right)
                 this.InvalidateMeasure()
-
-    member val Formlet : 'T option = None with get, set
 
     override this.LogicalChildren = this.Children |> Enumerator
 
@@ -100,7 +108,8 @@ type JoinControl<'T>() =
     override this.GetVisualChild (i : int) = this.Children.[i] :> Visual
 
     override this.MeasureOverride(sz : Size) =
-        let adjustedSize = Size (sz.Width, Double.PositiveInfinity)
+        let adjustedSize = AdjustUsingOrientation orientation sz
+        
         let c = this.Children
         match c with 
             |   [||]    ->  Size()
@@ -108,22 +117,37 @@ type JoinControl<'T>() =
                             v.DesiredSize
             |   [|l;r;|]->  l.Measure(adjustedSize)
                             r.Measure(adjustedSize)
-                            CombineVertically sz l.DesiredSize r.DesiredSize
+                            CombineUsingOrientation orientation sz l.DesiredSize r.DesiredSize
 
     override this.ArrangeOverride(sz : Size) =
         let c = this.Children
         match c with 
             |   [||]    ->  ()
-            |   [|v|]   ->  let r = Rect (0.0, 0.0, sz.Width, v.DesiredSize.Height)
+            |   [|v|]   ->  let r = MakeFirstRectUsingOrientation orientation sz v
                             ignore <| v.Arrange(r)
-            |   [|l;r;|]->  let lr = Rect (0.0, 0.0, sz.Width, l.DesiredSize.Height)
-                            let rr = Rect (0.0, l.DesiredSize.Height, sz.Width, r.DesiredSize.Height)
+            |   [|l;r;|]->  let lr = MakeFirstRectUsingOrientation orientation sz l
+                            let rr = MakeSecondRectUsingOrientation orientation sz l r
                             l.Arrange(lr)
                             r.Arrange(rr)
                             ignore <| r.Arrange(rr)
             
         sz
 
+type DelayControl() =
+    inherit UnaryControl()
+
+type JoinControl<'T>() =
+    inherit BinaryControl()
+
+    member val Formlet : 'T option = None with get, set
+
+
+type InformationControl(text : string) as this =
+    inherit TextBlock()
+
+    do
+        this.Text <- text
+        this.Margin <- DefaultMargin
 
 
 type InputControl(text : string) as this =
