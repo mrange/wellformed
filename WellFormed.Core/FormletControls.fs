@@ -141,9 +141,6 @@ type BinaryControl() =
             
         sz
 
-type DelayControl() =
-    inherit UnaryControl()
-
 type JoinControl<'T>() =
     inherit BinaryControl()
 

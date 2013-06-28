@@ -57,11 +57,8 @@ module Formlet =
 
     let Delay (f : unit -> Formlet<'T>) : Formlet<'T> = 
         let f' = lazy (f())
-        let rebuild (ui :FrameworkElement) = 
-            let result = CreateElement ui (fun () -> new DelayControl())
-            result.Value <- f'.Value.Rebuild(result.Value)
-            result :> FrameworkElement
-        let collect (ui :FrameworkElement) = ApplyToElement ui (fun (ui' : DelayControl) -> f'.Value.Collect(ui'.Value))
+        let rebuild (ui :FrameworkElement) = f'.Value.Rebuild(ui)
+        let collect (ui :FrameworkElement) = f'.Value.Collect(ui)
         Formlet.New rebuild collect
 
     let ReturnFrom (f : Formlet<'T>) = f
