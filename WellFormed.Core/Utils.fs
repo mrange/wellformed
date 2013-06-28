@@ -42,6 +42,11 @@ type Collect<'T> =
 [<AutoOpen>]
 module Utils =
 
+    let rec LastOrDefault defaultTo ls = 
+        match ls with
+        |   []          -> defaultTo
+        |   [v]         -> v
+        |   v::vs       -> LastOrDefault defaultTo vs
     let JoinFailures (l : Collect<'U>) (r : Collect<'T>) = 
         {
             Value       = r.Value

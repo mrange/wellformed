@@ -62,6 +62,13 @@ type FormletControl<'T>(action : 'T -> unit, formlet : Formlet<'T>) as this=
         match scrollViewer.Content with 
             | :? FrameworkElement as fe -> scrollViewer.Content <- formlet.Rebuild(fe)
             | _                         -> scrollViewer.Content <- formlet.Rebuild(null)
+
+        let collect = 
+            match scrollViewer.Content with 
+            | :? FrameworkElement as fe -> formlet.Collect (fe)
+            | _                         -> Fail_NeverBuiltUp()
+
+
         ()
 
 module FormletControl =

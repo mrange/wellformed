@@ -49,6 +49,11 @@ type AddressInfo =
 
 let NonEmpty t = 
     Input "" 
+    |> Enhance.WithValidation_NonEmpty
+    |> Enhance.WithLabel t
+
+let AllowEmpty t = 
+    Input "" 
     |> Enhance.WithLabel t
 
 let IndividualFormlet = 
@@ -79,13 +84,13 @@ let CountryFormlet = Select 0 ["Sweden", "SE"; "Norway", "NO"; "Denmark", "DK"]
 let AddressFormlet = 
     Formlet.Do
         {
-            let!    carryOver       = NonEmpty "C/O"
-            let!    addressLine1    = NonEmpty "Address"
-            let!    addressLine2    = NonEmpty "Address"
-            let!    addressLine3    = NonEmpty "Address"
-            let!    zip             = NonEmpty "Zip"
-            let!    city            = NonEmpty "City"
-            let!    county          = NonEmpty "County"
+            let!    carryOver       = AllowEmpty    "C/O"
+            let!    addressLine1    = NonEmpty      "Address"
+            let!    addressLine2    = AllowEmpty    "Address"
+            let!    addressLine3    = AllowEmpty    "Address"
+            let!    zip             = AllowEmpty    "Zip"
+            let!    city            = NonEmpty      "City"
+            let!    county          = AllowEmpty    "County"
             let!    country         = CountryFormlet
 
             return 
@@ -153,6 +158,7 @@ let main argv =
 
                             return entity, address
                         }
+                        |> Enhance.WithErrorLog
                         |> Enhance.WithGroup "Partner registration"
 
 

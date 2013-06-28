@@ -18,6 +18,7 @@ open System.Collections.Generic
 
 open System.Windows
 open System.Windows.Controls
+open System.Windows.Documents
 open System.Windows.Media
 
 [<AbstractClass>]
@@ -239,4 +240,34 @@ type LabelControl(text : string, labelWidth : double) as this =
     member this.Text
         with get ()                         = label.Text
         and  set (value)                    = label.Text <- value
+
+type ValidationErrorPresenterControl() as this =
+    inherit BinaryControl()
+
+    let label = CreateTextBlock ""
+
+    do
+        label.Foreground    <- Brushes.Red
+        label.FontWeight    <- FontWeights.Bold
+        this.Left           <- label
+
+    member this.Failures
+        with set (value : Failure list) =   
+            label.Inlines.Clear ()
+            let inlines = 
+                value
+                |>  List.collect (fun f -> 
+                    [
+                        new Run (f.Context |> LastOrDefault "No context")   :> Inline
+                        new Run (" - ")         :> Inline
+                        new Run (f.Message)     :> Inline
+                        new LineBreak()         :> Inline
+                    ])
+                |>  List.toArray
+            label.Inlines.AddRange (inlines)
+            if label.Inlines.Count = 0 then
+                label.Visibility <- Visibility.Collapsed
+            else
+                label.Visibility <- Visibility.Visible
+
 

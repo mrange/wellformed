@@ -26,7 +26,7 @@ module Enhance =
                                                 group.Text <- t
                                                 group.Inner <- f.Rebuild(group.Inner)
                                                 group :> FrameworkElement
-        let collect (ui : FrameworkElement) =   CollectFromElement ui (fun (ui' : GroupControl) -> f.Collect(ui'.Inner))
+        let collect (ui : FrameworkElement) =   AppendFailureContext t <| CollectFromElement ui (fun (ui' : GroupControl) -> f.Collect(ui'.Inner))
 
         Formlet.New rebuild collect
 
@@ -51,14 +51,25 @@ module Enhance =
                                                 label.Text <- t
                                                 label.Right <- f.Rebuild(label.Right)
                                                 label :> FrameworkElement
-        let collect (ui :FrameworkElement) =    CollectFromElement ui (fun (ui' : LabelControl) -> f.Collect(ui'.Right))
+        let collect (ui :FrameworkElement) =    AppendFailureContext t <| CollectFromElement ui (fun (ui' : LabelControl) -> f.Collect(ui'.Right))
+
+        Formlet.New rebuild collect
+
+    let WithErrorLog (f : Formlet<'T>) : Formlet<'T> = 
+        let rebuild (ui :FrameworkElement) =    let control = CreateElement ui (fun () -> new ValidationErrorPresenterControl()) 
+                                                control.Right <- f.Rebuild(control.Right)
+                                                control :> FrameworkElement
+        let collect (ui :FrameworkElement) =    CollectFromElement ui (fun (ui' : ValidationErrorPresenterControl) ->   let collect = f.Collect(ui'.Right)
+                                                                                                                        ui'.Failures <- collect.Failures
+                                                                                                                        collect
+                                                                                                                        )
 
         Formlet.New rebuild collect
 
  
     let WithValidation (validator : 'T -> string option) (f : Formlet<'T>) : Formlet<'T> = 
         let rebuild (ui :FrameworkElement) =    f.Rebuild(ui)
-        let collect (ui :FrameworkElement) =    let result = CollectFromElement ui (fun (ui' : LabelControl) -> f.Collect(ui'.Right))
+        let collect (ui :FrameworkElement) =    let result = f.Collect(ui)
                                                 match result.Value with
                                                 |   Some v      ->  let fs = validator v
                                                                     match fs with
