@@ -124,32 +124,6 @@ let main argv =
     window.MinHeight <- 400.0
     window.Title <- "WellFormed App"
 
-//    let innerFormlet = Formlet.Do
-//                        {
-//                            let! first =    Controls.Input ""
-//                                                |> Enhance.WithLabel "First"
-//                            let! second =   Controls.Input ""
-//                                                |> Enhance.WithLabel "Second"
-//
-//                            if first = "" then 
-//                                let! third = Controls.Input ""
-//                                                |> Enhance.WithLabel "Third"
-//                                return third, second
-//                            else
-//                                return first, second                                              
-//                        } |> Enhance.WithGroup "Testing"
-//
-//    let formlet = Formlet.Do
-//                        {
-//                            let! first =    Controls.Input ""
-//                                                |> Enhance.WithLabel "First"
-//
-//                            let! (second, third)  =   innerFormlet
-//
-//                            return first,second, third
-//                            
-//                        }
-
     let formlet = Formlet.Do
                         {
                             let! entity = EntityFormlet
@@ -162,27 +136,6 @@ let main argv =
                         |> Enhance.WithGroup "Partner registration"
 
 
-//    let inner name = Formlet.Do
-//                        {
-//                            let! first = Input "Test"
-//                                            |> Enhance.WithLabel "This is the test"
-//
-//                            if first <> "" then 
-//                                return first
-//                            else
-//                                return! Input "Bogus"
-//                                            |> Enhance.WithLabel "This is some bogus"
-//                                
-//                            
-//                        }
-//                        |> Enhance.WithGroup name
-//    let formlet = Formlet.Do
-//                        {
-//                            let! first = inner "First"
-//                            let! second = inner "Second"
-//
-//                            return first, second
-//                        }
 //    let formlet = Formlet.Do
 //                        {
 //                            let! first = Input ""
@@ -194,6 +147,8 @@ let main argv =
 //                                
 //                            
 //                        }
+
+//    let formlet = Input ""
 
     window.Content <- FormletControl.New (fun v -> ()) formlet :> obj
 
