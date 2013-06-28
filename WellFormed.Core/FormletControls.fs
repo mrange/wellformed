@@ -95,7 +95,7 @@ type BinaryControl() =
     member this.StretchBehavior
         with get ()                         = stretchBehavior
         and  set (value)                    = stretchBehavior <- value
-                                              this.InvalidateMeasure ()
+                                              this.InvalidateArrange ()
 
     member this.Left 
         with    get ()                      = left
@@ -152,14 +152,6 @@ type JoinControl<'T>() =
     inherit BinaryControl()
 
     member val Formlet : 'T option = None with get, set
-
-
-type InformationControl(text : string) as this =
-    inherit TextBlock()
-
-    do
-        this.Text <- text
-        this.Margin <- DefaultMargin
 
 
 type InputControl(text : string) as this =
@@ -224,11 +216,11 @@ type GroupControl(text : string) as this =
 type LabelControl(text : string, labelWidth : double) as this =
     inherit BinaryControl()
 
-    let label = CreateLabel text
+    let label = CreateLabel text labelWidth
 
     do
-        label.Width         <- labelWidth
         this.Orientation    <- LayoutOrientation.LeftToRight
+        this.StretchBehavior<- StretchBehavior.RightStretches
         this.Left           <- label
 
     member this.Text

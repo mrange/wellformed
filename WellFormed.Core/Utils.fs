@@ -146,9 +146,9 @@ module Utils =
         textBox.Margin <- DefaultMargin
         textBox
 
-    let CreateLabel t = 
+    let CreateLabel t w = 
         let textBlock = CreateTextBlock t
-        textBlock.Width <- 100.0
+        textBlock.Width <- w
         textBlock
 
     let CreateGroup t : FrameworkElement*TextBox*Decorator = 

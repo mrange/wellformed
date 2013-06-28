@@ -30,9 +30,12 @@ module Enchance =
         Formlet.New rebuild collect
 
     let WithLabel (t : string) (f : Formlet<'T>) : Formlet<'T> = 
-        Formlet.Do
-            {
-                do! Information t
+        let rebuild (ui :FrameworkElement) =    let label = CreateElement ui (fun () -> new LabelControl(t, 100.0)) 
+                                                label.Text <- t
+                                                label.Right <- f.Rebuild(label.Right)
+                                                label :> FrameworkElement
+        let collect (ui :FrameworkElement) =    ApplyToElement ui (fun (ui' : LabelControl) -> f.Collect(ui'.Right))
 
-                return! f
-            }
+        Formlet.New rebuild collect
+
+ 
