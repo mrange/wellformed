@@ -31,6 +31,13 @@ type StretchBehavior =
 type Collect<'T> =
     | Success of 'T
     | Nothing
+
+type Failure =
+    {
+        Context : string list
+        Message : string
+    }
+
 //    | Failure of (string list*string) list
 
 [<AutoOpen>]
@@ -49,7 +56,7 @@ module Utils =
 //        |   _           , Failure f     ->  Failure f
 //        |   Failure f   , _             ->  Failure f
 //
-//    let Fail (f : string) = Failure [[],f]
+    let Fail (f : string) = [{Context = []; Message = f}]
 
              
     let Enumerator (e : array<'T>) = e.GetEnumerator()
@@ -94,10 +101,16 @@ module Utils =
         | :? #FrameworkElement as ui' -> ui'
         | _                 -> creator()
 
-    let ApplyToElement (ui : FrameworkElement) (apply : #FrameworkElement -> Collect<'T>) : Collect<'T> = 
+    let ApplyToElement defaultTo (ui : FrameworkElement) (apply : #FrameworkElement -> 'T) : 'T = 
         match ui with
-        | :? #FrameworkElement as ui' -> apply ui'
-        | _                 -> Nothing
+        | :? #FrameworkElement as ui'   -> apply ui'
+        | _                             -> defaultTo
+
+    let CollectFromElement (ui : FrameworkElement) (apply : #FrameworkElement -> Collect<'T>) : Collect<'T> = 
+        ApplyToElement Nothing ui apply 
+
+    let FailuresFromElement (ui : FrameworkElement) (apply : #FrameworkElement -> Failure list) : Failure list =
+        ApplyToElement [] ui apply 
 
     let DoNothing() = ()
 

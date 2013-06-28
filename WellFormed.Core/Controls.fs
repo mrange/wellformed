@@ -8,16 +8,23 @@ module Controls =
 
     let Input t = 
         let rebuild (ui :FrameworkElement) = CreateElement ui (fun () -> new InputControl(t)) :> FrameworkElement
-        let collect (ui :FrameworkElement) = ApplyToElement ui (fun (ui' : InputControl)-> Success ui'.Text)
+        let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : InputControl)-> Success ui'.Text)
+        let failures(ui :FrameworkElement) = []
 
-        Formlet.New rebuild collect
+        Formlet.New rebuild collect failures 
 
     let Select<'T> (i : int) (options : (string * 'T)  list)  = 
         let rebuild (ui :FrameworkElement) = CreateElement ui (fun () -> new SelectControl<'T>(i, options)) :> FrameworkElement
-        let collect (ui :FrameworkElement) = ApplyToElement ui (fun (ui' : SelectControl<'T>)-> let collect = ui'.Collect()
-                                                                                                match collect with
-                                                                                                    |   Some v  -> Success v
-                                                                                                    |   None    -> Nothing
-                                                                                                    )
-
-        Formlet.New rebuild collect
+        let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : SelectControl<'T>) ->    
+            let c = ui'.Collect()
+            match c with
+            |   Some v  -> Success v
+            |   None    -> Nothing
+            )
+        let failures(ui :FrameworkElement) = FailuresFromElement ui (fun (ui' : SelectControl<'T>) ->    
+            let c = ui'.Collect()
+            match c with
+            |   Some v  -> []
+            |   None    -> Fail "Select a value"
+            )
+        Formlet.New rebuild collect failures

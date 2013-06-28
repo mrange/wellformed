@@ -11,41 +11,52 @@ type Formlet<'T> =
     {
         Rebuild : FrameworkElement -> FrameworkElement
         Collect : FrameworkElement -> Collect<'T>
+        Failures: FrameworkElement -> Failure list
     }
-    static member New rebuild (collect : FrameworkElement -> Collect<'T>) = { Rebuild = rebuild; Collect = collect; }
+    static member New rebuild (collect : FrameworkElement -> Collect<'T>) failures = { Rebuild = rebuild; Collect = collect; Failures = failures}
 
 module Formlet =
     
     let MapResult (m : Collect<'T> -> Collect<'U>) (f : Formlet<'T>) : Formlet<'U> = 
         let rebuild (ui :FrameworkElement) = f.Rebuild ui
         let collect (ui :FrameworkElement) = m (f.Collect ui)
-        Formlet.New rebuild collect
+        let failures(ui :FrameworkElement) = f.Failures ui
+        Formlet.New rebuild collect failures
 
     let Map (m : 'T -> 'U) (f : Formlet<'T>) : Formlet<'U> = 
         let m' r =
             match r with 
-                |   Success v   -> Success (m v)
-                |   Nothing     -> Nothing
+            |   Success v   -> Success (m v)
+            |   Nothing     -> Nothing
         MapResult m' f
 
     let Join (f: Formlet<Formlet<'T>>) : Formlet<'T> = 
         let rebuild (ui :FrameworkElement) = 
             let result = CreateElement ui (fun () -> new JoinControl<Formlet<'T>> ())
             result.Left <- f.Rebuild(result.Left)
-            let collect = ApplyToElement result.Left (fun ui' -> f.Collect(ui'))
+            let collect = f.Collect(result.Left)
             result.Collet <- collect
             match collect with 
-                |   Success f'  ->
-                    result.Formlet  <- Some f'
-                    result.Right    <- f'.Rebuild(result.Right)
-                |   _           -> ()
+            |   Success f'  ->
+                result.Formlet  <- Some f'
+                result.Right    <- f'.Rebuild(result.Right)
+            |   _           -> ()
             result :> FrameworkElement
-        let collect (ui :FrameworkElement) = ApplyToElement ui (fun (ui' : JoinControl<Formlet<'T>>) -> 
+        let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : JoinControl<Formlet<'T>>) -> 
                 match ui'.Formlet with
-                    |   Some f' ->  f'.Collect (ui'.Right)
-                    |   None    -> Nothing
-                    )
-        Formlet.New rebuild collect
+                |   Some f' ->  f'.Collect (ui'.Right)
+                |   None    -> Nothing
+                )
+        let failures(ui :FrameworkElement) = 
+            FailuresFromElement ui (fun (ui' : JoinControl<Formlet<'T>>) -> 
+                let l = f.Failures(ui'.Left)
+                let r = 
+                    match ui'.Formlet with
+                    |   Some f' ->  f'.Failures (ui'.Right)
+                    |   None    -> []
+                l @ r
+                )
+        Formlet.New rebuild collect failures
 
     let Bind<'T1, 'T2> (f : Formlet<'T1>) (b : 'T1 -> Formlet<'T2>) : Formlet<'T2> = 
         f |> Map b |> Join
@@ -54,13 +65,15 @@ module Formlet =
     let Return (x : 'T) : Formlet<'T> = 
         let rebuild (ui :FrameworkElement) = null
         let collect (ui :FrameworkElement) = Success x
-        Formlet.New rebuild collect
+        let failures(ui :FrameworkElement) = []
+        Formlet.New rebuild collect failures
 
     let Delay (f : unit -> Formlet<'T>) : Formlet<'T> = 
         let f' = lazy (f())
         let rebuild (ui :FrameworkElement) = f'.Value.Rebuild(ui)
         let collect (ui :FrameworkElement) = f'.Value.Collect(ui)
-        Formlet.New rebuild collect
+        let failures(ui :FrameworkElement) = f'.Value.Failures(ui)
+        Formlet.New rebuild collect failures
 
     let ReturnFrom (f : Formlet<'T>) = f
 
