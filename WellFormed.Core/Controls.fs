@@ -17,7 +17,7 @@ module Controls =
         let collect (ui :FrameworkElement) = ApplyToElement ui (fun (ui' : SelectControl<'T>)-> let collect = ui'.Collect()
                                                                                                 match collect with
                                                                                                     |   Some v  -> Success v
-                                                                                                    |   None    -> Fail "No value selected"
+                                                                                                    |   None    -> Nothing
                                                                                                     )
 
         Formlet.New rebuild collect

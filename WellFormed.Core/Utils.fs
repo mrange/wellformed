@@ -30,25 +30,26 @@ type StretchBehavior =
 
 type Collect<'T> =
     | Success of 'T
-    | Failure of (string list*string) list
+    | Nothing
+//    | Failure of (string list*string) list
 
 [<AutoOpen>]
 module Utils =
 
-    let AppendFailureContext<'T> (ctx : string) (r : Collect<'T>) = 
-        match r with
-        |   Failure fs  ->  let fs' = fs |> List.map (fun (ctxs, f) -> (ctx::ctxs, f))
-                            Failure fs'
-        |   _           -> r
-
-    let JoinResult<'U, 'T> (l : Collect<'U>) (r : Collect<'T>) = 
-        match l, r with 
-        |   Success _   , Success s     ->  Success s
-        |   Failure lf  , Failure rf    ->  Failure (lf @ rf)
-        |   _           , Failure f     ->  Failure f
-        |   Failure f   , _             ->  Failure f
-
-    let Fail (f : string) = Failure [[],f]
+//    let AppendFailureContext<'T> (ctx : string) (r : Collect<'T>) = 
+//        match r with
+//        |   Failure fs  ->  let fs' = fs |> List.map (fun (ctxs, f) -> (ctx::ctxs, f))
+//                            Failure fs'
+//        |   _           -> r
+//
+//    let JoinResult<'U, 'T> (l : Collect<'U>) (r : Collect<'T>) = 
+//        match l, r with 
+//        |   Success _   , Success s     ->  Success s
+//        |   Failure lf  , Failure rf    ->  Failure (lf @ rf)
+//        |   _           , Failure f     ->  Failure f
+//        |   Failure f   , _             ->  Failure f
+//
+//    let Fail (f : string) = Failure [[],f]
 
              
     let Enumerator (e : array<'T>) = e.GetEnumerator()
@@ -96,7 +97,7 @@ module Utils =
     let ApplyToElement (ui : FrameworkElement) (apply : #FrameworkElement -> Collect<'T>) : Collect<'T> = 
         match ui with
         | :? #FrameworkElement as ui' -> apply ui'
-        | _                 -> Fail "Couldn't apply to element as it wasn't of a compatible type"
+        | _                 -> Nothing
 
     let DoNothing() = ()
 

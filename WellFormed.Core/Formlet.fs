@@ -25,7 +25,7 @@ module Formlet =
         let m' r =
             match r with 
                 |   Success v   -> Success (m v)
-                |   Failure s   -> Failure s
+                |   Nothing     -> Nothing
         MapResult m' f
 
     let Join (f: Formlet<Formlet<'T>>) : Formlet<'T> = 
@@ -33,7 +33,7 @@ module Formlet =
             let result = CreateElement ui (fun () -> new JoinControl<Formlet<'T>> ())
             result.Left <- f.Rebuild(result.Left)
             let collect = ApplyToElement result.Left (fun ui' -> f.Collect(ui'))
-            result.Result <- collect
+            result.Collet <- collect
             match collect with 
                 |   Success f'  ->
                     result.Formlet  <- Some f'
@@ -41,9 +41,9 @@ module Formlet =
                 |   _           -> ()
             result :> FrameworkElement
         let collect (ui :FrameworkElement) = ApplyToElement ui (fun (ui' : JoinControl<Formlet<'T>>) -> 
-                match ui'.Result with
-                    |   Success f'  ->  f'.Collect (ui'.Right)
-                    |   Failure fs  ->  Failure fs
+                match ui'.Formlet with
+                    |   Some f' ->  f'.Collect (ui'.Right)
+                    |   None    -> Nothing
                     )
         Formlet.New rebuild collect
 
