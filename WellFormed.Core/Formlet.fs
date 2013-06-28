@@ -10,13 +10,13 @@ open System.Windows.Controls
 type Formlet<'T> = 
     {
         Rebuild : FrameworkElement -> FrameworkElement
-        Collect : FrameworkElement -> Result<'T>
+        Collect : FrameworkElement -> Collect<'T>
     }
-    static member New rebuild (collect : FrameworkElement -> Result<'T>) = { Rebuild = rebuild; Collect = collect; }
+    static member New rebuild (collect : FrameworkElement -> Collect<'T>) = { Rebuild = rebuild; Collect = collect; }
 
 module Formlet =
     
-    let MapResult (m : Result<'T> -> Result<'U>) (f : Formlet<'T>) : Formlet<'U> = 
+    let MapResult (m : Collect<'T> -> Collect<'U>) (f : Formlet<'T>) : Formlet<'U> = 
         let rebuild (ui :FrameworkElement) = f.Rebuild ui
         let collect (ui :FrameworkElement) = m (f.Collect ui)
         Formlet.New rebuild collect

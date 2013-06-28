@@ -28,20 +28,20 @@ type StretchBehavior =
     |   RightStretches
 
 
-type Result<'T> =
+type Collect<'T> =
     | Success of 'T
     | Failure of (string list*string) list
 
 [<AutoOpen>]
 module Utils =
 
-    let AppendFailureContext<'T> (ctx : string) (r : Result<'T>) = 
+    let AppendFailureContext<'T> (ctx : string) (r : Collect<'T>) = 
         match r with
         |   Failure fs  ->  let fs' = fs |> List.map (fun (ctxs, f) -> (ctx::ctxs, f))
                             Failure fs'
         |   _           -> r
 
-    let JoinResult<'U, 'T> (l : Result<'U>) (r : Result<'T>) = 
+    let JoinResult<'U, 'T> (l : Collect<'U>) (r : Collect<'T>) = 
         match l, r with 
         |   Success _   , Success s     ->  Success s
         |   Failure lf  , Failure rf    ->  Failure (lf @ rf)
@@ -93,7 +93,7 @@ module Utils =
         | :? #FrameworkElement as ui' -> ui'
         | _                 -> creator()
 
-    let ApplyToElement (ui : FrameworkElement) (apply : #FrameworkElement -> Result<'T>) : Result<'T> = 
+    let ApplyToElement (ui : FrameworkElement) (apply : #FrameworkElement -> Collect<'T>) : Collect<'T> = 
         match ui with
         | :? #FrameworkElement as ui' -> apply ui'
         | _                 -> Fail "Couldn't apply to element as it wasn't of a compatible type"
