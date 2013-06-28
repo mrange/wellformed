@@ -27,34 +27,45 @@ type StretchBehavior =
     |   RightStretches
 
 
-type Collect<'T> =
-    | Success of 'T
-    | Nothing
-
 type Failure =
     {
         Context : string list
         Message : string
     }
 
+type Collect<'T> =
+    | Success of 'T
+    | Failures of Failure list
+
 //    | Failure of (string list*string) list
 
 [<AutoOpen>]
 module Utils =
 
-    let AppendFailureContext<'T> (ctx : string) (fs : Failure list) = 
-        fs 
-        |> List.map (fun f -> {Context = ctx::f.Context; Message = f.Message})
+    let JoinFailures (l : Collect<'U>) (r : Collect<'T>) = 
+        match l,r with
+        |   Success _       , Success v     -> Success v
+        |   Failures lfs    , Failures rfs  -> Failures (lfs @ rfs)
+        |   Success _       , Failures fs   -> Failures fs
+        |   Failures fs     , Success _     -> Failures fs
 
-    let Fail (f : string) = [{Context = []; Message = f}]
+    let AppendFailureContext (ctx : string) (collect : Collect<'T>) = 
+        match collect with
+        |   Success v       -> Success v
+        |   Failures fs     ->
+            fs 
+            |> List.map (fun f -> {Context = ctx::f.Context; Message = f.Message})
+            |> Failures
 
+    let Fail (f : string)   = Failures [{Context = []; Message = f}]
+    let Fail_NeverBuiltUp ()= Fail "WellFormed.ProgrammmingError: Never built up"
              
     let Enumerator (e : array<'T>) = e.GetEnumerator()
 
     let EmptySize = new Size()
     let EmptyRect = new Rect()
 
-    let TranslateUsingOrientation orientation (fill : Boolean) (sz : Size) (l : Rect) (r : Size) = 
+    let TranslateUsingOrientation orientation (fill : bool) (sz : Size) (l : Rect) (r : Size) = 
         match fill,orientation with 
         |   false, TopToBottom  -> Rect (0.0        , l.Bottom  , sz.Width                      , r.Height                      )
         |   false, LeftToRight  -> Rect (l.Right    , 0.0       , r.Width                       , sz.Height                     )
@@ -97,10 +108,7 @@ module Utils =
         | _                             -> defaultTo
 
     let CollectFromElement (ui : FrameworkElement) (apply : #FrameworkElement -> Collect<'T>) : Collect<'T> = 
-        ApplyToElement Nothing ui apply 
-
-    let FailuresFromElement (ui : FrameworkElement) (apply : #FrameworkElement -> Failure list) : Failure list =
-        ApplyToElement [] ui apply 
+        ApplyToElement (Fail_NeverBuiltUp ()) ui apply 
 
     let DoNothing() = ()
 
