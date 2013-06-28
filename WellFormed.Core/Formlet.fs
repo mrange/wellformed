@@ -34,10 +34,10 @@ module Formlet =
         Formlet.New rebuild collect
 
     let Map (m : 'T -> 'U) (f : Formlet<'T>) : Formlet<'U> = 
-        let m' r =
-            match r with 
-            |   Success v   -> Success (m v)
-            |   Failures fs -> Failures fs
+        let m' collect =
+            match collect.Value with 
+            |   Some v  -> { Value = Some (m v) ; Failures = collect.Failures; }
+            |   None    -> { Value = None       ; Failures = collect.Failures; }
         MapResult m' f
 
     let Join (f: Formlet<Formlet<'T>>) : Formlet<'T> = 
@@ -46,8 +46,8 @@ module Formlet =
             result.Left <- f.Rebuild(result.Left)
             let collect = f.Collect(result.Left)
             result.Collect <- collect
-            match collect with 
-            |   Success f'  ->
+            match collect.Value with 
+            |   Some f'  ->
                 result.Formlet  <- Some f'
                 result.Right    <- f'.Rebuild(result.Right)
             |   _           -> ()

@@ -34,30 +34,39 @@ type Failure =
     }
 
 type Collect<'T> =
-    | Success of 'T
-    | Failures of Failure list
-
-//    | Failure of (string list*string) list
+    {
+        Value       : 'T option
+        Failures    : Failure list
+    }
 
 [<AutoOpen>]
 module Utils =
 
     let JoinFailures (l : Collect<'U>) (r : Collect<'T>) = 
-        match l,r with
-        |   Success _       , Success v     -> Success v
-        |   Failures lfs    , Failures rfs  -> Failures (lfs @ rfs)
-        |   Success _       , Failures fs   -> Failures fs
-        |   Failures fs     , Success _     -> Failures fs
+        {
+            Value       = r.Value
+            Failures    = l.Failures @ r.Failures
+        }
 
     let AppendFailureContext (ctx : string) (collect : Collect<'T>) = 
-        match collect with
-        |   Success v       -> Success v
-        |   Failures fs     ->
-            fs 
-            |> List.map (fun f -> {Context = ctx::f.Context; Message = f.Message})
-            |> Failures
+        {
+            Value       = collect.Value
+            Failures    = collect.Failures 
+                            |> List.map (fun f -> {Context = ctx::f.Context; Message = f.Message})
+        }
 
-    let Fail (f : string)   = Failures [{Context = []; Message = f}]
+    let Success v   = 
+        {
+            Value       = Some v
+            Failures    = []
+        }
+
+    let Fail (msg : string)   = 
+        {
+            Value       = None
+            Failures    = [{Context = []; Message = msg;}]
+        }
+
     let Fail_NeverBuiltUp ()= Fail "WellFormed.ProgrammmingError: Never built up"
              
     let Enumerator (e : array<'T>) = e.GetEnumerator()

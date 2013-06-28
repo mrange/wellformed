@@ -59,12 +59,15 @@ module Enhance =
     let WithValidation (validator : 'T -> string option) (f : Formlet<'T>) : Formlet<'T> = 
         let rebuild (ui :FrameworkElement) =    f.Rebuild(ui)
         let collect (ui :FrameworkElement) =    let result = CollectFromElement ui (fun (ui' : LabelControl) -> f.Collect(ui'.Right))
-                                                match result with
-                                                |   Success v   ->  let fs = validator v
+                                                match result.Value with
+                                                |   Some v      ->  let fs = validator v
                                                                     match fs with
-                                                                    |   Some fs'    -> Fail fs'
-                                                                    |   _           -> Success v
-                                                |   Failures fs ->  Failures fs                                                                       
+                                                                    |   Some fs'    ->  { 
+                                                                                            Value = Some v  
+                                                                                            Failures = {Context = []; Message = fs';}::result.Failures
+                                                                                        }
+                                                                    |   _           -> result
+                                                |   _           ->  result
                                                 
 
         Formlet.New rebuild collect
