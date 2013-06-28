@@ -23,6 +23,19 @@ type EntityInfo =
     |   Individual      of  IndividualInfo
     |   Company         of  CompanyInfo 
 
+
+type AddressInfo =
+    {
+        CarryOver           :   string
+        AddressLine1        :   string
+        AddressLine2        :   string
+        AddressLine3        :   string
+        Zip                 :   string
+        City                :   string
+        County              :   string
+        Country             :   string
+    }
+
 let LabelInput t = Input "" |> Enchance.WithLabel t
 
 let IndividualFormlet = 
@@ -48,6 +61,42 @@ let CompanyFormlet =
         |> Enchance.WithGroup "Company Information"
 
 
+let CountryFormlet = Select 0 ["Sweden", "SE"; "Norway", "NO"; "Denmark", "DK"]
+                        |> Enchance.WithLabel "Country"
+let AddressFormlet = 
+    Formlet.Do
+        {
+            let!    carryOver       = LabelInput "C/O"
+            let!    addressLine1    = LabelInput "Address"
+            let!    addressLine2    = LabelInput "Address"
+            let!    addressLine3    = LabelInput "Address"
+            let!    zip             = LabelInput "Zip"
+            let!    city            = LabelInput "City"
+            let!    county          = LabelInput "County"
+            let!    country         = CountryFormlet
+
+            return 
+                {
+                    CarryOver       = carryOver      
+                    AddressLine1    = addressLine1  
+                    AddressLine2    = addressLine2  
+                    AddressLine3    = addressLine3  
+                    Zip             = zip           
+                    City            = city          
+                    County          = county        
+                    Country         = country       
+                }
+        }
+        |> Enchance.WithGroup "Address Information"
+
+
+let EntityFormlet = Formlet.Do
+                        {
+                            let! select = Select 0 ["Individual", IndividualFormlet; "Company",  CompanyFormlet]
+
+                            return! select
+                        }
+                        |> Enchance.WithGroup "My test"
 [<EntryPoint>]
 [<STAThread>]
 let main argv = 
@@ -84,11 +133,13 @@ let main argv =
 
     let formlet = Formlet.Do
                         {
-                            let! select = Select 0 ["Individual", IndividualFormlet; "Company",  CompanyFormlet]
+                            let! entity = EntityFormlet
 
-                            return! select
+                            let! address = AddressFormlet
+
+                            return entity, address
                         }
-                        |> Enchance.WithGroup "My test"
+                        |> Enchance.WithGroup "Partner registration"
 
 
 //    let inner name = Formlet.Do
