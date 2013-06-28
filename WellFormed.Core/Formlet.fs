@@ -42,7 +42,7 @@ module Formlet =
         let collect (ui :FrameworkElement) = ApplyToElement ui (fun (ui' : JoinControl<Formlet<'T>>) -> 
                 match ui'.Formlet with
                     |   Some f' ->  f'.Collect (ui'.Right)
-                    |   _       ->  Fail "Form not built previously"
+                    |   _       ->  Fail "WellFormed.Error: Form not built up"
                     )
         Formlet.New rebuild collect
 

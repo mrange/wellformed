@@ -67,13 +67,16 @@ type UnaryControl() =
             then    v.Arrange(Rect(sz))
         sz
 
+
+
 [<AbstractClass>]
 type BinaryControl() =
     inherit FormletContainerControl()
 
-    let mutable left        : FrameworkElement  = null
-    let mutable right       : FrameworkElement  = null
-    let mutable orientation : LayoutOrientation = LayoutOrientation.TopToBottom
+    let mutable left                : FrameworkElement  = null
+    let mutable right               : FrameworkElement  = null
+    let mutable orientation         : LayoutOrientation = LayoutOrientation.TopToBottom
+    let mutable stretchBehavior     : StretchBehavior   = StretchBehavior.NoStretch
 
     override this.Children 
         with    get ()   = 
@@ -89,7 +92,10 @@ type BinaryControl() =
         and  set (value)                    = orientation <- value
                                               this.InvalidateMeasure ()
 
-
+    member this.StretchBehavior
+        with get ()                         = stretchBehavior
+        and  set (value)                    = stretchBehavior <- value
+                                              this.InvalidateMeasure ()
 
     member this.Left 
         with    get ()                      = left
@@ -116,25 +122,25 @@ type BinaryControl() =
     override this.GetVisualChild (i : int) = this.Children.[i] :> Visual
 
     override this.MeasureOverride(sz : Size) =
-        let adjustedSize = AdjustUsingOrientation orientation sz
-        
         let c = this.Children
         match c with 
             |   [||]    ->  Size()
-            |   [|v|]   ->  v.Measure(adjustedSize)
+            |   [|v|]   ->  v.Measure(sz)
                             v.DesiredSize
-            |   [|l;r;|]->  l.Measure(adjustedSize)
-                            r.Measure(adjustedSize)
-                            CombineUsingOrientation orientation sz l.DesiredSize r.DesiredSize
+            |   [|l;r;|]->  l.Measure(sz)
+                            let sz' = ExceptUsingOrientation orientation sz l.DesiredSize
+                            r.Measure(sz')
+                            let result = Intersect sz (UnionUsingOrientation orientation l.DesiredSize r.DesiredSize)
+                            result
 
     override this.ArrangeOverride(sz : Size) =
         let c = this.Children
         match c with 
             |   [||]    ->  ()
-            |   [|v|]   ->  let r = MakeFirstRectUsingOrientation orientation sz v
+            |   [|v|]   ->  let r = TranslateUsingOrientation orientation sz Empty v.DesiredSize
                             ignore <| v.Arrange(r)
-            |   [|l;r;|]->  let lr = MakeFirstRectUsingOrientation orientation sz l
-                            let rr = MakeSecondRectUsingOrientation orientation sz l r
+            |   [|l;r;|]->  let lr = TranslateUsingOrientation orientation sz Empty l.DesiredSize
+                            let rr = TranslateUsingOrientation orientation sz l.DesiredSize r.DesiredSize
                             l.Arrange(lr)
                             r.Arrange(rr)
                             ignore <| r.Arrange(rr)
@@ -196,8 +202,6 @@ type SelectControl<'T>(initial : int, options : (string * 'T) list) as this =
         base.OnSelectionChanged(e)
         FormletContainerControl.RaiseRebuild this
 
-
-
 type GroupControl(text : string) as this =
     inherit UnaryControl()
 
@@ -209,6 +213,22 @@ type GroupControl(text : string) as this =
     member this.Inner
         with get ()                         = inner.Child :?> FrameworkElement
         and  set (value : FrameworkElement) = inner.Child <- value
+
+    member this.Text
+        with get ()                         = label.Text
+        and  set (value)                    = label.Text <- value
+
+
+
+type LabelControl(text : string, labelWidth : double) as this =
+    inherit BinaryControl()
+
+    let label = CreateLabel text
+
+    do
+        label.Width         <- labelWidth
+        this.Orientation    <- LayoutOrientation.LeftToRight
+        this.Left           <- label
 
     member this.Text
         with get ()                         = label.Text

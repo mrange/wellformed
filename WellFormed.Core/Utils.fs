@@ -23,6 +23,10 @@ type LayoutOrientation =
     |   TopToBottom
     |   LeftToRight
 
+type StretchBehavior = 
+    |   NoStretch
+    |   RightStretches
+
 
 type Result<'T> =
     | Success of 'T
@@ -41,31 +45,37 @@ module Utils =
              
     let Enumerator (e : array<'T>) = e.GetEnumerator()
 
-    let MakeFirstRectUsingOrientation orientation (sz : Size) (f : FrameworkElement) = 
+    let Empty = new Size()
+
+    let TranslateUsingOrientation orientation (sz : Size) (l : Size) (r : Size) = 
         match orientation with 
-        |   TopToBottom -> Rect (0.0, 0.0, sz.Width, f.DesiredSize.Height)
-        |   LeftToRight -> Rect (0.0, 0.0, f.DesiredSize.Width, sz.Height)
+        |   TopToBottom -> Rect (0.0, l.Height, sz.Width, r.Height)
+        |   LeftToRight -> Rect (l.Width, 0.0, r.Width, sz.Height)
 
-    let MakeSecondRectUsingOrientation orientation (sz : Size) (f : FrameworkElement) (s : FrameworkElement) = 
-        match orientation with 
-        |   TopToBottom -> Rect (0.0, f.DesiredSize.Height, sz.Width, s.DesiredSize.Height)
-        |   LeftToRight -> Rect (f.DesiredSize.Width, 0.0, s.DesiredSize.Width, sz.Height)
+    let ExceptVertically (l : Size) (r : Size) = 
+        Size (max l.Width r.Width, max (l.Height - r.Height) 0.0)
 
-    let AdjustUsingOrientation orientation (sz : Size) = 
-        match orientation with
-        |   TopToBottom -> Size (sz.Width, Double.PositiveInfinity)
-        |   LeftToRight -> Size (Double.PositiveInfinity, sz.Height)
+    let ExceptHorizontally (l : Size) (r : Size) = 
+        Size (max (l.Width - r.Width) 0.0, max l.Height r.Height)
 
-    let CombineVertically (sz : Size) (l : Size) (r : Size) = 
-        Size (Math.Min(Math.Max(l.Width, r.Width), sz.Width), Math.Min(l.Height + r.Height, sz.Height))
-
-    let CombineHorizontally (sz : Size) (l : Size) (r : Size) = 
-        Size (Math.Min(l.Width + r.Width, sz.Width), Math.Min(Math.Max (l.Height, r.Height), sz.Height))
-
-    let CombineUsingOrientation (o : LayoutOrientation) (sz : Size) (l : Size) (r : Size) =
+    let ExceptUsingOrientation (o : LayoutOrientation) (l : Size) (r : Size) =
         match o with
-        |   TopToBottom -> CombineVertically    sz l r
-        |   LeftToRight -> CombineHorizontally  sz l r
+        |   TopToBottom -> ExceptVertically    l r
+        |   LeftToRight -> ExceptHorizontally  l r
+
+    let Intersect (l : Size) (r : Size) = 
+        Size (min l.Width r.Width, min l.Height r.Height)
+
+    let UnionVertically (l : Size) (r : Size) = 
+        Size (max l.Width r.Width, l.Height + r.Height)
+
+    let UnionHorizontally (l : Size) (r : Size) = 
+        Size (l.Width + r.Width, max l.Height r.Height)
+
+    let UnionUsingOrientation (o : LayoutOrientation) (l : Size) (r : Size) =
+        match o with
+        |   TopToBottom -> UnionVertically    l r
+        |   LeftToRight -> UnionHorizontally  l r
                        
     let CreateElement (ui : FrameworkElement) (creator : unit -> #FrameworkElement) : #FrameworkElement = 
         match ui with
@@ -98,10 +108,10 @@ module Utils =
 
     let DefaultBackgroundBrush  = Brushes.White
 
-    let DefaultMargin           = new Thickness(4.0)
-    let DefaultBorderMargin     = new Thickness(4.0,12.0,4.0,4.0)
-    let DefaultBorderPadding    = new Thickness(0.0,24.0,0.0,0.0)
-    let DefaultBorderThickness  = new Thickness(2.0)
+    let DefaultMargin           = Thickness(4.0)
+    let DefaultBorderMargin     = Thickness(4.0,12.0,4.0,4.0)
+    let DefaultBorderPadding    = Thickness(0.0,24.0,0.0,0.0)
+    let DefaultBorderThickness  = Thickness(2.0)
     let DefaultBorderBrush      = Brushes.LightBlue
 
 
