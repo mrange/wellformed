@@ -35,13 +35,13 @@ This how to use a combobox to show either the formlet to collect information abo
 
 ```
 
-let EntityFormlet = Formlet.Do
-                        {
-                            let! select = Select 0 ["Individual", IndividualFormlet; "Company",  CompanyFormlet]
+let EntityFormlet = 
+    Formlet.Do
+        {
+            let! select = Select 0 ["Individual", IndividualFormlet; "Company",  CompanyFormlet]
 
-                            return! select
-                        }
-                        |> Enchance.WithGroup "My test"
+            return! select
+        }
 
 ```
 
