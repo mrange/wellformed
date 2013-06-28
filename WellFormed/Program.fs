@@ -47,43 +47,45 @@ type AddressInfo =
         Country             :   string
     }
 
-let LabelInput t = Input "" |> Enchance.WithLabel t
+let NonEmpty t = 
+    Input "" 
+    |> Enhance.WithLabel t
 
 let IndividualFormlet = 
     Formlet.Do
         {
-            let!    firstName   = LabelInput "First name"
-            let!    lastName    = LabelInput "Last name"
-            let!    regno       = LabelInput "Registration no"
+            let!    firstName   = NonEmpty "First name"
+            let!    lastName    = NonEmpty "Last name"
+            let!    regno       = NonEmpty "Registration no"
 
             return Individual {FirstName = firstName; LastName = lastName; RegNo = regno;}
         }
-        |> Enchance.WithGroup "Individual Information"
+        |> Enhance.WithGroup "Individual Information"
 
 let CompanyFormlet = 
     Formlet.Do
         {
-            let!    name        = LabelInput "Company name"
-            let!    regno       = LabelInput "Registration no"
-            let!    contact     = LabelInput "Contact"
+            let!    name        = NonEmpty "Company name"
+            let!    regno       = NonEmpty "Registration no"
+            let!    contact     = NonEmpty "Contact"
 
             return Company {Name = name; RegNo = regno; Contact = contact;}
         }
-        |> Enchance.WithGroup "Company Information"
+        |> Enhance.WithGroup "Company Information"
 
 
 let CountryFormlet = Select 0 ["Sweden", "SE"; "Norway", "NO"; "Denmark", "DK"]
-                        |> Enchance.WithLabel "Country"
+                        |> Enhance.WithLabel "Country"
 let AddressFormlet = 
     Formlet.Do
         {
-            let!    carryOver       = LabelInput "C/O"
-            let!    addressLine1    = LabelInput "Address"
-            let!    addressLine2    = LabelInput "Address"
-            let!    addressLine3    = LabelInput "Address"
-            let!    zip             = LabelInput "Zip"
-            let!    city            = LabelInput "City"
-            let!    county          = LabelInput "County"
+            let!    carryOver       = NonEmpty "C/O"
+            let!    addressLine1    = NonEmpty "Address"
+            let!    addressLine2    = NonEmpty "Address"
+            let!    addressLine3    = NonEmpty "Address"
+            let!    zip             = NonEmpty "Zip"
+            let!    city            = NonEmpty "City"
+            let!    county          = NonEmpty "County"
             let!    country         = CountryFormlet
 
             return 
@@ -98,7 +100,7 @@ let AddressFormlet =
                     Country         = country       
                 }
         }
-        |> Enchance.WithGroup "Address Information"
+        |> Enhance.WithGroup "Address Information"
 
 
 let EntityFormlet = 
@@ -120,22 +122,22 @@ let main argv =
 //    let innerFormlet = Formlet.Do
 //                        {
 //                            let! first =    Controls.Input ""
-//                                                |> Enchance.WithLabel "First"
+//                                                |> Enhance.WithLabel "First"
 //                            let! second =   Controls.Input ""
-//                                                |> Enchance.WithLabel "Second"
+//                                                |> Enhance.WithLabel "Second"
 //
 //                            if first = "" then 
 //                                let! third = Controls.Input ""
-//                                                |> Enchance.WithLabel "Third"
+//                                                |> Enhance.WithLabel "Third"
 //                                return third, second
 //                            else
 //                                return first, second                                              
-//                        } |> Enchance.WithGroup "Testing"
+//                        } |> Enhance.WithGroup "Testing"
 //
 //    let formlet = Formlet.Do
 //                        {
 //                            let! first =    Controls.Input ""
-//                                                |> Enchance.WithLabel "First"
+//                                                |> Enhance.WithLabel "First"
 //
 //                            let! (second, third)  =   innerFormlet
 //
@@ -151,23 +153,23 @@ let main argv =
 
                             return entity, address
                         }
-                        |> Enchance.WithGroup "Partner registration"
+                        |> Enhance.WithGroup "Partner registration"
 
 
 //    let inner name = Formlet.Do
 //                        {
 //                            let! first = Input "Test"
-//                                            |> Enchance.WithLabel "This is the test"
+//                                            |> Enhance.WithLabel "This is the test"
 //
 //                            if first <> "" then 
 //                                return first
 //                            else
 //                                return! Input "Bogus"
-//                                            |> Enchance.WithLabel "This is some bogus"
+//                                            |> Enhance.WithLabel "This is some bogus"
 //                                
 //                            
 //                        }
-//                        |> Enchance.WithGroup name
+//                        |> Enhance.WithGroup name
 //    let formlet = Formlet.Do
 //                        {
 //                            let! first = inner "First"

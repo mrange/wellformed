@@ -14,10 +14,12 @@ namespace WellFormed.Core
 
 open System
 
+open System.Text.RegularExpressions
+
 open System.Windows
 open System.Windows.Controls
 
-module Enchance = 
+module Enhance = 
     
     let WithGroup (t : string) (f : Formlet<'T>) : Formlet<'T> = 
         let rebuild (ui : FrameworkElement) =   let group = CreateElement ui (fun () -> new GroupControl(t))
@@ -54,13 +56,24 @@ module Enchance =
         Formlet.New rebuild collect
 
  
-(*
-        let WithValidation (v : 'T -> Failure list) (f : Formlet<'T>) : Formlet<'T> = 
+    let WithValidation (validator : 'T -> string option) (f : Formlet<'T>) : Formlet<'T> = 
         let rebuild (ui :FrameworkElement) =    f.Rebuild(ui)
-        let collect (ui :FrameworkElement) =    CollectFromElement ui (fun (ui' : LabelControl) -> f.Collect(ui'.Right))
-        let failures(ui :FrameworkElement) =    v <| CollectFromElement ui (fun (ui' : LabelControl) -> f.Collect(ui'.Right))
+        let collect (ui :FrameworkElement) =    let result = CollectFromElement ui (fun (ui' : LabelControl) -> f.Collect(ui'.Right))
+                                                match result with
+                                                |   Success v   ->  let fs = validator v
+                                                                    match fs with
+                                                                    |   Some fs'    -> Fail fs'
+                                                                    |   _           -> Success v
+                                                |   Failures fs ->  Failures fs                                                                       
+                                                
 
-        Formlet.New rebuild collect failures
-*)
+        Formlet.New rebuild collect
+
+ 
+    let WithValidation_NonEmpty (f : Formlet<string>) : Formlet<string> = 
+        WithValidation (fun s -> if String.IsNullOrWhiteSpace s then Some "Value must not be empty" else None) f
+
+    let WithValidation_Regex (r : Regex) (msg : string) (f : Formlet<string>) : Formlet<string> = 
+        WithValidation (fun s -> if r.IsMatch s then None else Some msg) f
 
  
