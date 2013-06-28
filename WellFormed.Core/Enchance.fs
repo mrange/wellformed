@@ -25,7 +25,7 @@ module Enchance =
                                                 group.Inner <- f.Rebuild(group.Inner)
                                                 group :> FrameworkElement
         let collect (ui : FrameworkElement) =   CollectFromElement ui (fun (ui' : GroupControl) -> f.Collect(ui'.Inner))
-        let failures(ui :FrameworkElement)  =   FailuresFromElement ui (fun (ui' : GroupControl) -> f.Failures(ui'.Inner))
+        let failures(ui :FrameworkElement)  =   AppendFailureContext t <| FailuresFromElement ui (fun (ui' : GroupControl) -> f.Failures(ui'.Inner))
 
         Formlet.New rebuild collect failures
 
@@ -53,7 +53,7 @@ module Enchance =
                                                 label.Right <- f.Rebuild(label.Right)
                                                 label :> FrameworkElement
         let collect (ui :FrameworkElement) =    CollectFromElement ui (fun (ui' : LabelControl) -> f.Collect(ui'.Right))
-        let failures(ui :FrameworkElement) =    FailuresFromElement ui (fun (ui' : LabelControl) -> f.Failures(ui'.Right))
+        let failures(ui :FrameworkElement) =    AppendFailureContext t <| FailuresFromElement ui (fun (ui' : LabelControl) -> f.Failures(ui'.Right))
 
         Formlet.New rebuild collect failures
 

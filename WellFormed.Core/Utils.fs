@@ -18,19 +18,6 @@ open System.Windows.Controls
 open System.Windows.Media
 open System.Windows.Threading
 
-type Disposable =
-    {
-        Dispose : unit -> unit
-    }
-    interface IDisposable with
-
-        member this.Dispose () =
-            this.Dispose ()
-
-    static member New d =
-        {Dispose = d} :> IDisposable
-
-
 type LayoutOrientation = 
     |   TopToBottom
     |   LeftToRight
@@ -55,19 +42,10 @@ type Failure =
 [<AutoOpen>]
 module Utils =
 
-//    let AppendFailureContext<'T> (ctx : string) (r : Collect<'T>) = 
-//        match r with
-//        |   Failure fs  ->  let fs' = fs |> List.map (fun (ctxs, f) -> (ctx::ctxs, f))
-//                            Failure fs'
-//        |   _           -> r
-//
-//    let JoinResult<'U, 'T> (l : Collect<'U>) (r : Collect<'T>) = 
-//        match l, r with 
-//        |   Success _   , Success s     ->  Success s
-//        |   Failure lf  , Failure rf    ->  Failure (lf @ rf)
-//        |   _           , Failure f     ->  Failure f
-//        |   Failure f   , _             ->  Failure f
-//
+    let AppendFailureContext<'T> (ctx : string) (fs : Failure list) = 
+        fs 
+        |> List.map (fun f -> {Context = ctx::f.Context; Message = f.Message})
+
     let Fail (f : string) = [{Context = []; Message = f}]
 
              
@@ -126,8 +104,6 @@ module Utils =
 
     let DoNothing() = ()
 
-    let NothingToDispose() = Disposable.New DoNothing
-
     let RoutedEventAsDelegate (action : obj -> RoutedEventArgs -> unit) = 
         let a = RoutedEventHandler action
         let d : Delegate = upcast a
@@ -150,23 +126,6 @@ module Utils =
     let DefaultBorderPadding    = Thickness(0.0,24.0,0.0,0.0)
     let DefaultBorderThickness  = Thickness(2.0)
     let DefaultBorderBrush      = Brushes.LightBlue
-
-
-    let NewColumn w = 
-        let c = new ColumnDefinition()
-        c.Width <- new GridLength(w)
-        c                                    
-    let NewStarColumn () = 
-        let c = new ColumnDefinition()
-        c.Width <- new GridLength(1.0, GridUnitType.Star)
-        c                                    
-
-    let NewAutoRow () = 
-        let r = new RowDefinition()
-        r.Height <- GridLength.Auto
-        r                                    
-
-    let CreateEmpty () = null :> UIElement
 
     let CreateTextBlock t = 
         let textBlock = new TextBlock()
