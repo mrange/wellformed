@@ -151,7 +151,8 @@ type BinaryControl() =
 type JoinControl<'T>() =
     inherit BinaryControl()
 
-    member val Formlet : 'T option = None with get, set
+    member val Formlet  : 'T option     = None                  with get, set
+    member val Result   : Result<'T>    = Fail "Never built up" with get, set
 
 
 type InputControl(text : string) as this =

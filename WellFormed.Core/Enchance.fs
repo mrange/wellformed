@@ -12,7 +12,7 @@ module Enchance =
                                                 group.Text <- t
                                                 group.Inner <- f.Rebuild(group.Inner)
                                                 group :> FrameworkElement
-        let collect (ui : FrameworkElement) =   ApplyToElement ui (fun (ui' : GroupControl) -> f.Collect(ui'.Inner))
+        let collect (ui : FrameworkElement) =   AppendFailureContext t (ApplyToElement ui (fun (ui' : GroupControl) -> f.Collect(ui'.Inner)))
         Formlet.New rebuild collect
 
     let WithWidth (width : double) (f : Formlet<'T>) : Formlet<'T> = 
@@ -34,7 +34,7 @@ module Enchance =
                                                 label.Text <- t
                                                 label.Right <- f.Rebuild(label.Right)
                                                 label :> FrameworkElement
-        let collect (ui :FrameworkElement) =    ApplyToElement ui (fun (ui' : LabelControl) -> f.Collect(ui'.Right))
+        let collect (ui :FrameworkElement) =    AppendFailureContext t (ApplyToElement ui (fun (ui' : LabelControl) -> f.Collect(ui'.Right)))
 
         Formlet.New rebuild collect
 

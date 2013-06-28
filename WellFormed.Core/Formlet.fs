@@ -33,16 +33,17 @@ module Formlet =
             let result = CreateElement ui (fun () -> new JoinControl<Formlet<'T>> ())
             result.Left <- f.Rebuild(result.Left)
             let collect = ApplyToElement result.Left (fun ui' -> f.Collect(ui'))
+            result.Result <- collect
             match collect with 
                 |   Success f'  ->
-                    result.Formlet <- Some f'
-                    result.Right <- f'.Rebuild(result.Right)
+                    result.Formlet  <- Some f'
+                    result.Right    <- f'.Rebuild(result.Right)
                 |   _           -> ()
             result :> FrameworkElement
         let collect (ui :FrameworkElement) = ApplyToElement ui (fun (ui' : JoinControl<Formlet<'T>>) -> 
-                match ui'.Formlet with
-                    |   Some f' ->  f'.Collect (ui'.Right)
-                    |   _       ->  Fail "WellFormed.Error: Form not built up"
+                match ui'.Result with
+                    |   Success f'  ->  f'.Collect (ui'.Right)
+                    |   Failure fs  ->  Failure fs
                     )
         Formlet.New rebuild collect
 

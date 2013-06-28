@@ -30,18 +30,26 @@ type StretchBehavior =
 
 type Result<'T> =
     | Success of 'T
-    | Failure of string list
+    | Failure of (string list*string) list
 
 [<AutoOpen>]
 module Utils =
 
-    let IsEqual (l : obj) (r : obj) =   match l <> null,r <> null with
-                                            |   true    , true  ->  l.Equals(r)
-                                            |   true    , false ->  false
-                                            |   false   , true  ->  false
-                                            |   false   , false ->  true
+    let AppendFailureContext<'T> (ctx : string) (r : Result<'T>) = 
+        match r with
+        |   Failure fs  ->  let fs' = fs |> List.map (fun (ctxs, f) -> (ctx::ctxs, f))
+                            Failure fs'
+        |   _           -> r
 
-    let Fail (f : string) = Failure [f] 
+    let JoinResult<'U, 'T> (l : Result<'U>) (r : Result<'T>) = 
+        match l, r with 
+        |   Success _   , Success s     ->  Success s
+        |   Failure lf  , Failure rf    ->  Failure (lf @ rf)
+        |   _           , Failure f     ->  Failure f
+        |   Failure f   , _             ->  Failure f
+
+    let Fail (f : string) = Failure [[],f]
+
              
     let Enumerator (e : array<'T>) = e.GetEnumerator()
 
