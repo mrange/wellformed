@@ -137,10 +137,11 @@ type BinaryControl() =
         let c = this.Children
         match c with 
             |   [||]    ->  ()
-            |   [|v|]   ->  let r = TranslateUsingOrientation orientation sz Empty v.DesiredSize
+            |   [|v|]   ->  let r = TranslateUsingOrientation orientation false sz EmptyRect v.DesiredSize
                             ignore <| v.Arrange(r)
-            |   [|l;r;|]->  let lr = TranslateUsingOrientation orientation sz Empty l.DesiredSize
-                            let rr = TranslateUsingOrientation orientation sz l.DesiredSize r.DesiredSize
+            |   [|l;r;|]->  let fillRight = stretchBehavior = StretchBehavior.RightStretches
+                            let lr = TranslateUsingOrientation orientation false sz EmptyRect l.DesiredSize
+                            let rr = TranslateUsingOrientation orientation fillRight sz lr r.DesiredSize
                             l.Arrange(lr)
                             r.Arrange(rr)
                             ignore <| r.Arrange(rr)

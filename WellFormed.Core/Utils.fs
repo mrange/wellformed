@@ -45,12 +45,15 @@ module Utils =
              
     let Enumerator (e : array<'T>) = e.GetEnumerator()
 
-    let Empty = new Size()
+    let EmptySize = new Size()
+    let EmptyRect = new Rect()
 
-    let TranslateUsingOrientation orientation (sz : Size) (l : Size) (r : Size) = 
-        match orientation with 
-        |   TopToBottom -> Rect (0.0, l.Height, sz.Width, r.Height)
-        |   LeftToRight -> Rect (l.Width, 0.0, r.Width, sz.Height)
+    let TranslateUsingOrientation orientation (fill : Boolean) (sz : Size) (l : Rect) (r : Size) = 
+        match fill,orientation with 
+        |   false, TopToBottom  -> Rect (0.0        , l.Bottom  , sz.Width                      , r.Height                      )
+        |   false, LeftToRight  -> Rect (l.Right    , 0.0       , r.Width                       , sz.Height                     )
+        |   true , TopToBottom  -> Rect (0.0        , l.Bottom  , sz.Width                      , max (sz.Height - l.Bottom) 0.0)
+        |   true , LeftToRight  -> Rect (l.Right    , 0.0       , max (sz.Width - l.Right) 0.0  , sz.Height                     )
 
     let ExceptVertically (l : Size) (r : Size) = 
         Size (max l.Width r.Width, max (l.Height - r.Height) 0.0)
