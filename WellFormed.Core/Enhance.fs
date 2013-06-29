@@ -90,4 +90,20 @@ module Enhance =
     let WithValidation_Regex (r : Regex) (msg : string) (f : Formlet<string>) : Formlet<string> = 
         WithValidation (fun s -> if r.IsMatch s then None else Some msg) f
 
+    let WithSubmitAndReset (f : Formlet<'T>) : Formlet<'T> = 
+        let rebuild (ui :FrameworkElement) =    let submitReset = CreateElement ui (fun () -> new SubmitResetControl()) 
+                                                submitReset.Right <- f.Rebuild(submitReset.Right)
+                                                submitReset :> FrameworkElement
+        let collect (ui :FrameworkElement) =    CollectFromElement ui (fun (ui' : SubmitResetControl) -> 
+                                                    let collect = f.Collect(ui'.Right)
+                                                    ui'.SubmitAllowed <-
+                                                        match collect.Value, collect.Failures.Length with   
+                                                        |   Some _, 0   -> true
+                                                        |   _           -> false
+                                                    collect
+                                                    )
+                                                
+                                                
+
+        Formlet.New rebuild collect
  

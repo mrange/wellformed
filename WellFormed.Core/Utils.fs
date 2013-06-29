@@ -15,6 +15,7 @@ namespace WellFormed.Core
 open System
 open System.Windows
 open System.Windows.Controls
+open System.Windows.Input
 open System.Windows.Media
 open System.Windows.Threading
 
@@ -38,6 +39,18 @@ type Collect<'T> =
         Value       : 'T option
         Failures    : Failure list
     }
+
+type Command(canExecute : unit -> bool, execute : unit -> unit) = 
+    let canExecuteChanged           = new Event<EventHandler, EventArgs> ()
+
+    interface ICommand with
+
+        member this.CanExecute          (ctx : obj)     = canExecute ()
+        member this.Execute             (ctx : obj)     = execute ()
+
+        member this.add_CanExecuteChanged(handler)      = CommandManager.RequerySuggested.AddHandler(handler)
+        member this.remove_CanExecuteChanged(handler)   = CommandManager.RequerySuggested.RemoveHandler(handler)
+
 
 [<AutoOpen>]
 module Utils =
@@ -144,10 +157,32 @@ module Utils =
     let DefaultBackgroundBrush  = Brushes.White
 
     let DefaultMargin           = Thickness(4.0)
+
+    let DefaultButtonPadding    = Thickness(8.0,2.0,8.0,2.0)
+
     let DefaultBorderMargin     = Thickness(4.0,12.0,4.0,4.0)
     let DefaultBorderPadding    = Thickness(0.0,24.0,0.0,0.0)
     let DefaultBorderThickness  = Thickness(2.0)
     let DefaultBorderBrush      = Brushes.LightBlue
+
+    let CreateRoutedEvent<'TOwner> name = EventManager.RegisterRoutedEvent (name + "Event", RoutingStrategy.Bubble, typeof<RoutedEventHandler>, typeof<'TOwner>)
+    let RaiseRoutedEvent routedEvent (sender : UIElement) = let args = new RoutedEventArgs (routedEvent, sender)
+                                                            sender.RaiseEvent args
+    let AddRoutedEventHandler routedEvent (receiver : UIElement) (h : obj -> RoutedEventArgs -> unit) = receiver.AddHandler (routedEvent, RoutedEventHandler h)
+
+
+    let CreateStackPanel orientation =
+        let stackPanel = new StackPanel()
+        stackPanel.Orientation <- orientation
+        stackPanel
+
+    let CreateButton t canExecute execute = 
+        let button      = new Button()
+        button.Content  <- t
+        button.Margin   <- DefaultMargin
+        button.Padding  <- DefaultButtonPadding
+        button.Command  <- Command (canExecute, execute)
+        button
 
     let CreateTextBlock t = 
         let textBlock = new TextBlock()

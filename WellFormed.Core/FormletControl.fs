@@ -21,16 +21,15 @@ open System.Windows.Media
 type FormletControl<'T>(action : 'T -> unit, formlet : Formlet<'T>) as this=
     inherit UnaryControl()
 
-    let mutable initialized                         = false
     let mutable isDispatching                       = false
     let         scrollViewer                        = new ScrollViewer()
 
     do
         this.LayoutTransform <- new ScaleTransform (1.5, 1.5)
 
-        let d = RoutedEventAsDelegate <| this.OnRebuild
-
-        this.AddHandler (FormletContainerControl.RebuildEvent, d)
+        AddRoutedEventHandler FormletContainerControl.RebuildEvent  this this.OnRebuild
+        AddRoutedEventHandler FormletContainerControl.SubmitEvent   this this.OnSubmit
+        AddRoutedEventHandler FormletContainerControl.ResetEvent    this this.OnReset
 
         scrollViewer.HorizontalScrollBarVisibility  <- ScrollBarVisibility.Disabled
         scrollViewer.VerticalScrollBarVisibility    <- ScrollBarVisibility.Visible
@@ -46,17 +45,26 @@ type FormletControl<'T>(action : 'T -> unit, formlet : Formlet<'T>) as this=
                     isDispatching <- false
                 )
 
-    member this.OnRebuild (sender : obj) (e : RoutedEventArgs)
-                                            =   DispatchOnce this.BuildForm
+    member this.OnRebuild   (sender : obj) (e : RoutedEventArgs) = DispatchOnce this.BuildForm
+    member this.OnSubmit    (sender : obj) (e : RoutedEventArgs) = DispatchOnce this.SubmitForm
+    member this.OnReset     (sender : obj) (e : RoutedEventArgs) = DispatchOnce this.ResetForm
 
-    override this.MeasureOverride(sz : Size) =
-        if not initialized then
-            this.BuildForm()
+    override this.OnStartUp () =
+        this.BuildForm()
 
-        initialized <- true
+    member this.ResetForm() = 
+        scrollViewer.Content <- null
+        this.BuildForm()
 
-        base.MeasureOverride(sz)
-    
+    member this.SubmitForm() = 
+        let collect = 
+            match scrollViewer.Content with 
+            | :? FrameworkElement as fe -> formlet.Collect (fe)
+            | _                         -> Fail_NeverBuiltUp()
+
+        match collect.Value, collect.Failures.Length with   
+        |   Some v, 0   -> action v
+
 
     member this.BuildForm() = 
         match scrollViewer.Content with 

@@ -19,15 +19,37 @@ open System.Collections.Generic
 open System.Windows
 open System.Windows.Controls
 open System.Windows.Documents
+open System.Windows.Input
 open System.Windows.Media
 
 [<AbstractClass>]
 type FormletContainerControl() =
     inherit FrameworkElement()
 
-    static let rebuildevent = EventManager.RegisterRoutedEvent ("RebuildEvent", RoutingStrategy.Bubble, typeof<RoutedEventHandler>, typeof<FormletContainerControl>)
+    let mutable isInitialized = false
 
-    static member RebuildEvent = rebuildevent
+    static let rebuildEvent     = CreateRoutedEvent<FormletContainerControl> "Rebuild"
+    static let submitEvent      = CreateRoutedEvent<FormletContainerControl> "Submit"
+    static let resetEvent       = CreateRoutedEvent<FormletContainerControl> "Reset"
+
+    static member RebuildEvent  = rebuildEvent
+    static member SubmitEvent   = submitEvent 
+    static member ResetEvent    = resetEvent  
+
+    static member RaiseRebuild (sender : FrameworkElement) = RaiseRoutedEvent FormletContainerControl.RebuildEvent  sender
+    static member RaiseSubmit  (sender : FrameworkElement) = RaiseRoutedEvent FormletContainerControl.SubmitEvent   sender
+    static member RaiseReset   (sender : FrameworkElement) = RaiseRoutedEvent FormletContainerControl.ResetEvent    sender
+
+    override this.MeasureOverride(sz : Size) =
+        if not isInitialized then
+            isInitialized <- true
+            this.OnStartUp ()
+
+        base.MeasureOverride sz
+
+    abstract member OnStartUp : unit -> unit
+
+    default this.OnStartUp () = ()
 
     abstract Children : array<FrameworkElement> with get
 
@@ -45,8 +67,6 @@ type FormletContainerControl() =
             this.AddLogicalChild(fe)
             this.AddVisualChild(fe)
 
-    static member RaiseRebuild (sender : FrameworkElement) =    let args = new RoutedEventArgs (rebuildevent, sender)
-                                                                sender.RaiseEvent args
     member this.Rebuild () = FormletContainerControl.RaiseRebuild this
 
 [<AbstractClass>]
@@ -68,6 +88,7 @@ type UnaryControl() =
                 this.InvalidateMeasure()
 
     override this.MeasureOverride(sz : Size) =
+        ignore <| base.MeasureOverride sz        
         let v = value
         if v <> null 
             then    v.Measure(sz)
@@ -75,6 +96,7 @@ type UnaryControl() =
             else    Size()
 
     override this.ArrangeOverride(sz : Size) =
+        ignore <| base.ArrangeOverride sz        
         let v = value
         if v <> null 
             then    v.Arrange(Rect(sz))
@@ -135,6 +157,7 @@ type BinaryControl() =
     override this.GetVisualChild (i : int) = this.Children.[i] :> Visual
 
     override this.MeasureOverride(sz : Size) =
+        ignore <| base.MeasureOverride sz        
         let c = this.Children
         match c with 
             |   [||]    ->  Size()
@@ -147,6 +170,7 @@ type BinaryControl() =
                             result
 
     override this.ArrangeOverride(sz : Size) =
+        ignore <| base.ArrangeOverride sz        
         let c = this.Children
         match c with 
             |   [||]    ->  ()
@@ -270,4 +294,29 @@ type ValidationErrorPresenterControl() as this =
             else
                 label.Visibility <- Visibility.Visible
 
+
+type SubmitResetControl() as this =
+    inherit BinaryControl()
+
+    let submit      = lazy CreateButton "_Submit" this.CanSubmit this.Submit
+    let reset       = lazy CreateButton "_Reset" this.CanReset this.Reset
+    let stackPanel  = lazy CreateStackPanel Orientation.Horizontal
+
+    let mutable submitAllowed = false
+
+    override this.OnStartUp () =
+        ignore <| stackPanel.Value.Children.Add(submit.Value)
+        ignore <| stackPanel.Value.Children.Add(reset.Value)
+        this.Left <- stackPanel.Value
+
+    member this.SubmitAllowed   
+        with get()          =   submitAllowed
+        and  set(value)     =   submitAllowed <- value
+                                CommandManager.InvalidateRequerySuggested()
+
+    member this.Submit ()   = FormletContainerControl.RaiseSubmit this
+    member this.CanSubmit ()= this.SubmitAllowed
+
+    member this.Reset ()    = FormletContainerControl.RaiseReset this
+    member this.CanReset () = true
 

@@ -133,6 +133,7 @@ let main argv =
                             return entity, address
                         }
                         |> Enhance.WithErrorLog
+                        |> Enhance.WithSubmitAndReset
                         |> Enhance.WithGroup "Partner registration"
 
 
@@ -150,7 +151,9 @@ let main argv =
 
 //    let formlet = Input ""
 
-    window.Content <- FormletControl.New (fun v -> ()) formlet :> obj
+    window.Content <- FormletControl.New (fun v -> 
+            ignore <| MessageBox.Show ("Form submitted")
+        ) formlet :> obj
 
     let result = window.ShowDialog()
 
