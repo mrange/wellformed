@@ -130,7 +130,7 @@ let CompanyFormlet regNoValidator =
         |> Enhance.WithGroup "Company Information"
 
 
-let CountryFormlet =    Select 0 ["Sweden", ("SE", SwedenRegNo); "Norway", ("NO", NorwayRegNo)]
+let CountryFormlet =    Select [|"Sweden", ("SE", SwedenRegNo); "Norway", ("NO", NorwayRegNo)|]
                         |> Enhance.WithLabel "Country"
 let AddressFormlet = 
     Formlet.Do
@@ -160,7 +160,7 @@ let AddressFormlet =
 
 
 let EntityFormlet individualRegNoValidator companyRegNoValidator =  
-        let select   =  Select 0 ["Individual", IndividualFormlet individualRegNoValidator;  "Company",  CompanyFormlet companyRegNoValidator]
+        let select   =  Select [|"Individual", IndividualFormlet individualRegNoValidator; "Company",  CompanyFormlet companyRegNoValidator|]
                         |> Enhance.WithLabel "Type"
         Formlet.Do
             {

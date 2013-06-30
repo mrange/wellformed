@@ -22,7 +22,7 @@ open System.Windows.Controls
 module Enhance = 
     
     let WithGroup (t : string) (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (ui : FrameworkElement) =   let group = CreateElement ui (fun () -> new GroupControl(t))
+        let rebuild (ui : FrameworkElement) =   let group = CreateElement ui (fun () -> new GroupControl())
                                                 group.Text <- t
                                                 group.Inner <- f.Rebuild(group.Inner)
                                                 group :> FrameworkElement
@@ -47,7 +47,7 @@ module Enhance =
         Formlet.New rebuild collect
 
     let WithLabel (t : string) (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (ui :FrameworkElement) =    let label = CreateElement ui (fun () -> new LabelControl(t, 100.0)) 
+        let rebuild (ui :FrameworkElement) =    let label = CreateElement ui (fun () -> new LabelControl(100.0)) 
                                                 label.Text <- t
                                                 label.Right <- f.Rebuild(label.Right)
                                                 label :> FrameworkElement

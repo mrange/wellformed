@@ -15,6 +15,7 @@ namespace WellFormed.Core
 open System
 
 open System.Collections.Generic
+open System.Collections.ObjectModel
 
 open System.Windows
 open System.Windows.Controls
@@ -168,6 +169,7 @@ type BinaryControl() =
                             r.Measure(sz')
                             let result = Intersect sz (UnionUsingOrientation orientation l.DesiredSize r.DesiredSize)
                             result
+            |   _       ->  HardFail_InvalidCase ()
 
     override this.ArrangeOverride(sz : Size) =
         ignore <| base.ArrangeOverride sz        
@@ -182,6 +184,7 @@ type BinaryControl() =
                             l.Arrange(lr)
                             r.Arrange(rr)
                             ignore <| r.Arrange(rr)
+            |   _       ->  HardFail_InvalidCase ()
             
         sz
 
@@ -192,51 +195,62 @@ type JoinControl<'T>() =
     member val Collect  : Collect<'T>   = Fail_NeverBuiltUp ()  with get, set
 
 
-type InputControl(text : string) as this =
+type InputControl(initialText : string) as this =
     inherit TextBox()
 
     do
-        this.Text   <- text
+        this.Text   <- initialText
         this.Margin <- DefaultMargin
 
     override this.OnLostFocus(e) = 
         base.OnLostFocus(e)
         FormletContainerControl.RaiseRebuild this
 
-type SelectControl<'T>(initial : int, options : (string * 'T) list) as this =
+type SelectControl<'T>() as this =
     inherit ComboBox()
 
-    do
-        let items = 
-            options 
-                |> List.map (fun (t, v) ->  let tb = new TextBlock ()
-                                            tb.Text <- t
-                                            let cbi = new ComboBoxItem ()
-                                            cbi.Content <- tb
-                                            cbi.Tag <- v
-                                            cbi
-                            ) 
-                |> List.toArray
-        this.ItemsSource <- items
-        if items.Length > 0 then
-            this.SelectedIndex <- Math.Min (initial, items.Length - 1)
+    let itemSource = new ObservableCollection<ComboBoxItem> ()
 
-        this.Margin <- DefaultMargin
+    let mutable options : (string * 'T) array = [||]
+
+    do
+        this.Margin         <- DefaultMargin
+        this.ItemsSource    <- itemSource
                           
-    member this.Collect () =    let item = this.SelectedValue :?> ComboBoxItem
-                                if item <> null then
-                                    Some (item.Tag :?> 'T)
-                                else
-                                    None
+    member this.Options 
+        with get ()         =   options
+        and  set (value)    =   options <- value
+                                for i in itemSource.Count..options.Length - 1 do
+                                    let t,_ = options.[i]
+                                    let tb = new TextBlock ()
+                                    tb.Text <- t
+                                    let cbi = new ComboBoxItem ()
+                                    cbi.Content <- tb
+                                    itemSource.Add (cbi)
+
+                                for i in 0..options.Length - 1 do
+                                    let t,_ = options.[i]
+                                    let cbi = itemSource.[i]
+                                    let tb = cbi.Content :?> TextBlock
+                                    tb.Text <- t
+                                
+                                if this.SelectedIndex < 0 && itemSource.Count > 0 then
+                                    this.SelectedIndex <- 0 
+
+    member this.Collect ()  =   let i = this.SelectedIndex
+                                if i < 0 || i >= options.Length then None
+                                else 
+                                    let _,v = options.[i]
+                                    Some v
 
     override this.OnSelectionChanged(e) = 
         base.OnSelectionChanged(e)
         FormletContainerControl.RaiseRebuild this
 
-type GroupControl(text : string) as this =
+type GroupControl() as this =
     inherit UnaryControl()
 
-    let outer, label, inner = CreateGroup text
+    let outer, label, inner = CreateGroup "Group"
 
     do
         this.Value <- outer
@@ -251,10 +265,10 @@ type GroupControl(text : string) as this =
 
 
 
-type LabelControl(text : string, labelWidth : double) as this =
+type LabelControl(labelWidth : double) as this =
     inherit BinaryControl()
 
-    let label = CreateLabel text labelWidth
+    let label = CreateLabel "Label" labelWidth
 
     do
         this.Orientation    <- LayoutOrientation.LeftToRight

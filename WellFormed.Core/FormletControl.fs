@@ -64,6 +64,7 @@ type FormletControl<'T>(action : 'T -> unit, formlet : Formlet<'T>) as this=
 
         match collect.Value, collect.Failures.Length with   
         |   Some v, 0   -> action v
+        |   _           -> ()
 
 
     member this.BuildForm() = 

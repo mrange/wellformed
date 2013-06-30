@@ -24,8 +24,10 @@ module Controls =
 
         Formlet.New rebuild collect
 
-    let Select<'T> (i : int) (options : (string * 'T)  list)  = 
-        let rebuild (ui :FrameworkElement) = CreateElement ui (fun () -> new SelectControl<'T>(i, options)) :> FrameworkElement
+    let Select<'T> (options : (string * 'T) array)  = 
+        let rebuild (ui :FrameworkElement) =    let select = CreateElement ui (fun () -> new SelectControl<'T>())
+                                                select.Options <- options
+                                                select :> FrameworkElement
         let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : SelectControl<'T>) ->    
             let c = ui'.Collect()
             match c with
