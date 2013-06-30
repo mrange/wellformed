@@ -24,9 +24,9 @@ module Input =
         Formlet.New rebuild collect
 
     let Option (options : (string * 'T) array)  = 
-        let rebuild (ui :FrameworkElement) =    let select = CreateElement ui (fun () -> new InputOptionControl<'T>())
-                                                select.Options <- options
-                                                select :> FrameworkElement
+        let rebuild (ui :FrameworkElement) =    let option = CreateElement ui (fun () -> new InputOptionControl<'T>())
+                                                option.Options <- options
+                                                option :> FrameworkElement
         let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : InputOptionControl<'T>) ->    
             let c = ui'.Collect()
             match c with

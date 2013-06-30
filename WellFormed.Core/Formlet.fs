@@ -19,6 +19,86 @@ open System.Collections.Generic
 open System.Windows
 open System.Windows.Controls
 
+(*  The semantics of a formlet
+    --------------------------
+
+    A formlet has two tasks:
+        1. Rebuilding the UI
+        2. Collecting data from the UI
+
+    It has to methods for that purpose
+
+    1. Rebuild
+        A formlet is supposed to rebuild a UI from an existing UI state
+        The reason is that during input the UI might need to be changed dramatically
+        but we like to preserve the user input as far as possible
+
+        As input the formlet gets the FrameworkElement that occupy the same position in the 
+        visual tree that UI of the current formlet will be placed
+
+        The formlet is supposed to return a FrameworkElement, preferably the input is preserved
+        but updated otherwise return a new instance (loses user input)
+
+        There are basically tree cases that needs to be handled
+        a.  Input is null
+            No UI has been created in this position and needs creating from scratch
+        b.  Input is not null but non-matching type
+            UI has been created in the current position but are being replaced and needs creating from scratch 
+        c.  Input is not null and the type matches
+            UI of the same type has been created in the current position. It's strongly recommend to preserve
+            the user input but other mutable state should be updated accordingly
+
+        Typically a rebuild action could look like this:
+        let rebuild (ui :FrameworkElement) =    let option = CreateElement ui (fun () -> new InputOptionControl<'T>())
+                                                option.Options <- options
+                                                option :> FrameworkElement
+
+        The method CreateElement creates a new InputOptionControl if the input UI doesn't match, 
+        otherwise returns existing instance.
+
+        The mutable state of the InputOptionControl control is updated, 
+        if the state is identical it shouldn't update the control
+
+        Finally the control is returned
+
+    2. Collect
+        A formlet is supposed to collect the user input from the UI on demand.
+
+        As input the formlet gets the FrameworkElement that corresponds the Formlet.
+
+        The formlet is supposed to return a Collect<'T>. Collet<'T> consists of two-parts
+            1.  Value - The input generated from the formlet. 
+                The formlet should strive to produce a value even though the input doesn't
+                fully validate.
+            2.  Failures - Zero or more failures that happened during the collection 
+                of input. This is the way formlets signals to the container whether state
+                is invalid or not. 
+
+        There are basically tree cases that needs to be handled
+        a.  Input is null
+            This is in an error case and the Formlet should return a failure (don't throw)
+        b.  Input is not null but non-matching type
+            This is in an error case and the Formlet should return a failure (don't throw)
+        c.  Input is not null and the type matches
+            The formlet should collect the user input and return it
+
+        Typically a collect action could look like this:
+
+        let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : InputOptionControl<'T>) ->    
+            let c = ui'.Collect()
+            match c with
+            |   Some v  -> Success v
+            |   None    -> Fail "Select a value"
+            )
+
+        The method CollectFromElement applies the action if the UI element is the expected,
+        otherwise it returns a failure.
+
+        The result is tested to see if it has a value and returns that, otherwise a failure is returned
+
+
+        These are the semantics of Formlet<'T>
+*)
 type Formlet<'T> = 
     {
         Rebuild : FrameworkElement -> FrameworkElement

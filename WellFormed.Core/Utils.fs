@@ -107,19 +107,6 @@ module internal Utils =
         |   TopToBottom -> UnionVertically    l r
         |   LeftToRight -> UnionHorizontally  l r
                        
-    let CreateElement (ui : FrameworkElement) (creator : unit -> #FrameworkElement) : #FrameworkElement = 
-        match ui with
-        | :? #FrameworkElement as ui' -> ui'
-        | _                 -> creator()
-
-    let ApplyToElement defaultTo (ui : FrameworkElement) (apply : #FrameworkElement -> 'T) : 'T = 
-        match ui with
-        | :? #FrameworkElement as ui'   -> apply ui'
-        | _                             -> defaultTo
-
-    let CollectFromElement (ui : FrameworkElement) (apply : #FrameworkElement -> Collect<'T>) : Collect<'T> = 
-        ApplyToElement (Fail_NeverBuiltUp ()) ui apply 
-
     let DoNothing() = ()
 
     let RoutedEventAsDelegate (action : obj -> RoutedEventArgs -> unit) = 
@@ -199,4 +186,19 @@ module internal Utils =
         ignore <| outer.Children.Add(border)
         ignore <| outer.Children.Add(label)
         upcast outer, label, upcast border
+
+[<AutoOpen>]
+module PublicUtils =
+    let CreateElement (ui : FrameworkElement) (creator : unit -> #FrameworkElement) : #FrameworkElement = 
+        match ui with
+        | :? #FrameworkElement as ui' -> ui'
+        | _                 -> creator()
+
+    let ApplyToElement defaultTo (ui : FrameworkElement) (apply : #FrameworkElement -> 'T) : 'T = 
+        match ui with
+        | :? #FrameworkElement as ui'   -> apply ui'
+        | _                             -> defaultTo
+
+    let CollectFromElement (ui : FrameworkElement) (apply : #FrameworkElement -> Collect<'T>) : Collect<'T> = 
+        ApplyToElement (Fail_NeverBuiltUp ()) ui apply 
 
