@@ -16,51 +16,11 @@ open System.Windows
 open System.Text.RegularExpressions
 
 open WellFormed.Core
+open WellFormed
 
-let Multiply (mp : int array) (s : string) = 
-    s.ToCharArray()
-    |> Array.zip mp
-    |> Array.map (fun (l,r) -> l*(int r - int '0'))
-
-let MultiplyAndAccumulateWithFlatten (mp : int array) (s : string) = 
-    Multiply mp s
-    |> Array.map (fun v -> v / 10 + v % 10)
-    |> Array.sum
-
-let MultiplyAndAccumulate (mp : int array) (s : string) = 
-    Multiply mp s
-    |> Array.sum
-
-let SwedenRegexRegNoPattern = Regex (@"^\d{6}-\d{4}$", RegexOptions.Compiled)
-let SwedenRegNoMultiplyPattern = [|2;1;2;1;2;1;0;2;1;2;1;|]
-
-let SwedenRegNo regNo = 
-    if not  <| SwedenRegexRegNoPattern.IsMatch (regNo) then
-        Some "Registration number needs the form: YYMMDD-CCCC"
-    else
-        let maa = (MultiplyAndAccumulateWithFlatten SwedenRegNoMultiplyPattern regNo) % 10
-
-        if maa <> 0 then
-            Some "Registration number checksum not correct"
-        else 
-            None
-
-let NorwayRegexRegNoPattern = Regex (@"^\d{6}-\d{5}$", RegexOptions.Compiled)
-let NorwayRegNoMultiplyPattern1 = [|3;7;6;1;8;9;0;4;5;2;1;0;|]
-let NorwayRegNoMultiplyPattern2 = [|5;4;3;2;7;6;0;5;4;3;2;1;|]
-
-
-let NorwayRegNo regNo = 
-    if not <| NorwayRegexRegNoPattern.IsMatch (regNo) then
-        Some "Registration number needs the form: DDMMYY-CCCCC"
-    else
-        let first   = (MultiplyAndAccumulate NorwayRegNoMultiplyPattern1 regNo) % 11
-        let second  = (MultiplyAndAccumulate NorwayRegNoMultiplyPattern2 regNo) % 11
-
-        if first <> 0 || second <> 0 then
-            Some "Registration number checksum not correct"
-        else 
-            None
+// ----------------------------------------------------------------------------
+// The model for partner registration
+// ----------------------------------------------------------------------------
 
 type IndividualInfo =
     {
@@ -100,21 +60,10 @@ type PartnerInfo =
         AddressInfo         :   AddressInfo
     }
 
-let Validated t validator = 
-    Input.Text "" 
-    |> Enhance.WithValidation validator
-    |> Enhance.WithErrorBorder
-    |> Enhance.WithLabel t
-
-let NonEmpty t = 
-    Input.Text "" 
-    |> Enhance.WithValidation_NonEmpty
-    |> Enhance.WithErrorBorder
-    |> Enhance.WithLabel t
-
-let AllowEmpty t = 
-    Input.Text "" 
-    |> Enhance.WithLabel t
+// ----------------------------------------------------------------------------
+// The formlets for partner registration
+//   ie the user inteaction defined
+// ----------------------------------------------------------------------------
 
 let IndividualFormlet regNoValidator = 
     Formlet.Do
@@ -196,6 +145,10 @@ let PartnerFormlet =
         |> Enhance.WithErrorLog
         |> Enhance.WithSubmitAndReset
         |> Enhance.WithGroup "Partner registration"
+
+// ----------------------------------------------------------------------------
+// Opening the FormletContainer over the PartnerFormlet
+// ----------------------------------------------------------------------------
 
 [<EntryPoint>]
 [<STAThread>]
