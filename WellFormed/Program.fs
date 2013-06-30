@@ -13,8 +13,47 @@
 open System
 open System.Windows
 
+open System.Text.RegularExpressions
+
 open WellFormed.Core
 
+let MultiplyAndAccumulate (mp : int array) (s : string) = 
+    s.ToCharArray()
+    |> Array.zip mp
+    |> Array.map (fun (l,r) -> l*(int r - int '0'))
+    |> Array.map (fun v -> v / 10 + v % 10)
+    |> Array.sum
+
+let SwedenRegexRegNoPattern = Regex (@"^\d{6}-\d{4}$", RegexOptions.Compiled)
+let SwedenRegNoMultiplyPattern = [|2;1;2;1;2;1;0;2;1;2;1;|]
+
+let SwedenRegNo regNo = 
+    if not  <| SwedenRegexRegNoPattern.IsMatch (regNo) then
+        Some "Registration number needs the form: YYMMDD-CCCC"
+    else
+        let maa = (MultiplyAndAccumulate SwedenRegNoMultiplyPattern regNo) % 10
+
+        if maa <> 0 then
+            Some "Registration number checksum not correct"
+        else 
+            None
+
+let NorwayRegexRegNoPattern = Regex (@"^\d{6}-\d{5}$", RegexOptions.Compiled)
+let NorwayRegNoMultiplyPattern1 = [|3;7;6;1;8;9;4;5;0;2;1;0;|]
+let NorwayRegNoMultiplyPattern2 = [|5;4;3;2;7;6;5;4;0;3;2;1;|]
+
+
+let NorwayRegNo regNo = 
+    if not <| NorwayRegexRegNoPattern.IsMatch (regNo) then
+        Some "Registration number needs the form: DDMMYY-CCCCC"
+    else
+        let first   = (MultiplyAndAccumulate NorwayRegNoMultiplyPattern1 regNo) % 11
+        let second  = (MultiplyAndAccumulate NorwayRegNoMultiplyPattern2 regNo) % 11
+
+        if first <> 0 or second <> 0 then
+            Some "Registration number checksum not correct"
+        else 
+            None
 
 type IndividualInfo =
     {
@@ -47,6 +86,18 @@ type AddressInfo =
         Country             :   string
     }
 
+type PartnerInfo = 
+    {
+        RegistrationCountry :   string
+        Entity              :   EntityInfo
+        AddressInfo         :   AddressInfo
+    }
+
+let Validated t validator = 
+    Input "" 
+    |> Enhance.WithValidation validator
+    |> Enhance.WithLabel t
+
 let NonEmpty t = 
     Input "" 
     |> Enhance.WithValidation_NonEmpty
@@ -56,22 +107,22 @@ let AllowEmpty t =
     Input "" 
     |> Enhance.WithLabel t
 
-let IndividualFormlet = 
+let IndividualFormlet regNoValidator = 
     Formlet.Do
         {
             let!    firstName   = NonEmpty "First name"
             let!    lastName    = NonEmpty "Last name"
-            let!    regno       = NonEmpty "Registration no"
+            let!    regno       = Validated "Registration no" regNoValidator
 
             return Individual {FirstName = firstName; LastName = lastName; RegNo = regno;}
         }
         |> Enhance.WithGroup "Individual Information"
 
-let CompanyFormlet = 
+let CompanyFormlet regNoValidator = 
     Formlet.Do
         {
             let!    name        = NonEmpty "Company name"
-            let!    regno       = NonEmpty "Registration no"
+            let!    regno       = Validated "Registration no" regNoValidator
             let!    contact     = NonEmpty "Contact"
 
             return Company {Name = name; RegNo = regno; Contact = contact;}
@@ -79,7 +130,7 @@ let CompanyFormlet =
         |> Enhance.WithGroup "Company Information"
 
 
-let CountryFormlet = Select 0 ["Sweden", "SE"; "Norway", "NO"; "Denmark", "DK"]
+let CountryFormlet =    Select 0 ["Sweden", ("SE", SwedenRegNo); "Norway", ("NO", NorwayRegNo)]
                         |> Enhance.WithLabel "Country"
 let AddressFormlet = 
     Formlet.Do
@@ -91,7 +142,7 @@ let AddressFormlet =
             let!    zip             = AllowEmpty    "Zip"
             let!    city            = NonEmpty      "City"
             let!    county          = AllowEmpty    "County"
-            let!    country         = CountryFormlet
+            let!    country,_       = CountryFormlet
 
             return 
                 {
@@ -108,13 +159,34 @@ let AddressFormlet =
         |> Enhance.WithGroup "Address Information"
 
 
-let EntityFormlet = 
+let EntityFormlet individualRegNoValidator companyRegNoValidator =  
+        let select   =  Select 0 ["Individual", IndividualFormlet individualRegNoValidator;  "Company",  CompanyFormlet companyRegNoValidator]
+                        |> Enhance.WithLabel "Type"
+        Formlet.Do
+            {
+                let! result = select  
+                return! result
+            }
+
+let PartnerFormlet = 
     Formlet.Do
         {
-            let! select = Select 0 ["Individual", IndividualFormlet; "Company",  CompanyFormlet]
+            let! registrationCountry, regNoValidator = CountryFormlet
 
-            return! select
+            let! entity = EntityFormlet regNoValidator regNoValidator
+
+            let! address = AddressFormlet
+
+            return 
+                {
+                    RegistrationCountry = registrationCountry
+                    Entity              = entity
+                    AddressInfo         = address
+                }
         }
+        |> Enhance.WithErrorLog
+        |> Enhance.WithSubmitAndReset
+        |> Enhance.WithGroup "Partner registration"
 
 [<EntryPoint>]
 [<STAThread>]
@@ -124,18 +196,7 @@ let main argv =
     window.MinHeight <- 400.0
     window.Title <- "WellFormed App"
 
-    let formlet = Formlet.Do
-                        {
-                            let! entity = EntityFormlet
-
-                            let! address = AddressFormlet
-
-                            return entity, address
-                        }
-                        |> Enhance.WithErrorLog
-                        |> Enhance.WithSubmitAndReset
-                        |> Enhance.WithGroup "Partner registration"
-
+    let formlet = PartnerFormlet
 
 //    let formlet = Formlet.Do
 //                        {
