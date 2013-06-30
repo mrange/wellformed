@@ -17,11 +17,18 @@ open System.Text.RegularExpressions
 
 open WellFormed.Core
 
-let MultiplyAndAccumulate (mp : int array) (s : string) = 
+let Multiply (mp : int array) (s : string) = 
     s.ToCharArray()
     |> Array.zip mp
     |> Array.map (fun (l,r) -> l*(int r - int '0'))
+
+let MultiplyAndAccumulateWithFlatten (mp : int array) (s : string) = 
+    Multiply mp s
     |> Array.map (fun v -> v / 10 + v % 10)
+    |> Array.sum
+
+let MultiplyAndAccumulate (mp : int array) (s : string) = 
+    Multiply mp s
     |> Array.sum
 
 let SwedenRegexRegNoPattern = Regex (@"^\d{6}-\d{4}$", RegexOptions.Compiled)
@@ -31,7 +38,7 @@ let SwedenRegNo regNo =
     if not  <| SwedenRegexRegNoPattern.IsMatch (regNo) then
         Some "Registration number needs the form: YYMMDD-CCCC"
     else
-        let maa = (MultiplyAndAccumulate SwedenRegNoMultiplyPattern regNo) % 10
+        let maa = (MultiplyAndAccumulateWithFlatten SwedenRegNoMultiplyPattern regNo) % 10
 
         if maa <> 0 then
             Some "Registration number checksum not correct"
@@ -39,8 +46,8 @@ let SwedenRegNo regNo =
             None
 
 let NorwayRegexRegNoPattern = Regex (@"^\d{6}-\d{5}$", RegexOptions.Compiled)
-let NorwayRegNoMultiplyPattern1 = [|3;7;6;1;8;9;4;5;0;2;1;0;|]
-let NorwayRegNoMultiplyPattern2 = [|5;4;3;2;7;6;5;4;0;3;2;1;|]
+let NorwayRegNoMultiplyPattern1 = [|3;7;6;1;8;9;0;4;5;2;1;0;|]
+let NorwayRegNoMultiplyPattern2 = [|5;4;3;2;7;6;0;5;4;3;2;1;|]
 
 
 let NorwayRegNo regNo = 
