@@ -36,12 +36,13 @@
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
   <ItemGroup>
+    <Compile Include="BasicTypes.fs" />
     <Compile Include="Utils.fs" />
     <Compile Include="FormletControls.fs" />
     <Compile Include="Formlet.fs" />
     <Compile Include="Controls.fs" />
     <Compile Include="Enhance.fs" />
-    <Compile Include="FormletControl.fs" />
+    <Compile Include="FormletContainer.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

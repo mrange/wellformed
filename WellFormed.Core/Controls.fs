@@ -15,20 +15,19 @@ namespace WellFormed.Core
 open System.Windows
 open System.Windows.Controls
 
-[<AutoOpen>]
-module Controls =
+module Input =
 
-    let Input t = 
-        let rebuild (ui :FrameworkElement) = CreateElement ui (fun () -> new InputControl(t)) :> FrameworkElement
-        let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : InputControl)-> Success ui'.Text)
+    let Text t = 
+        let rebuild (ui :FrameworkElement) = CreateElement ui (fun () -> new InputTextControl(t)) :> FrameworkElement
+        let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : InputTextControl)-> Success ui'.Text)
 
         Formlet.New rebuild collect
 
-    let Select<'T> (options : (string * 'T) array)  = 
-        let rebuild (ui :FrameworkElement) =    let select = CreateElement ui (fun () -> new SelectControl<'T>())
+    let Option (options : (string * 'T) array)  = 
+        let rebuild (ui :FrameworkElement) =    let select = CreateElement ui (fun () -> new InputOptionControl<'T>())
                                                 select.Options <- options
                                                 select :> FrameworkElement
-        let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : SelectControl<'T>) ->    
+        let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : InputOptionControl<'T>) ->    
             let c = ui'.Collect()
             match c with
             |   Some v  -> Success v

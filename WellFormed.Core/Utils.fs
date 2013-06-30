@@ -19,41 +19,20 @@ open System.Windows.Input
 open System.Windows.Media
 open System.Windows.Threading
 
-type LayoutOrientation = 
-    |   TopToBottom
-    |   LeftToRight
-
-type StretchBehavior = 
-    |   NoStretch
-    |   RightStretches
-
-
-type Failure =
-    {
-        Context : string list
-        Message : string
-    }
-
-type Collect<'T> =
-    {
-        Value       : 'T option
-        Failures    : Failure list
-    }
-
-type Command(canExecute : unit -> bool, execute : unit -> unit) = 
-    let canExecuteChanged           = new Event<EventHandler, EventArgs> ()
-
-    interface ICommand with
-
-        member this.CanExecute          (ctx : obj)     = canExecute ()
-        member this.Execute             (ctx : obj)     = execute ()
-
-        member this.add_CanExecuteChanged(handler)      = CommandManager.RequerySuggested.AddHandler(handler)
-        member this.remove_CanExecuteChanged(handler)   = CommandManager.RequerySuggested.RemoveHandler(handler)
-
-
 [<AutoOpen>]
-module Utils =
+module internal Utils =
+
+    type Command(canExecute : unit -> bool, execute : unit -> unit) = 
+        let canExecuteChanged           = new Event<EventHandler, EventArgs> ()
+
+        interface ICommand with
+
+            member this.CanExecute          (ctx : obj)     = canExecute ()
+            member this.Execute             (ctx : obj)     = execute ()
+
+            member this.add_CanExecuteChanged(handler)      = CommandManager.RequerySuggested.AddHandler(handler)
+            member this.remove_CanExecuteChanged(handler)   = CommandManager.RequerySuggested.RemoveHandler(handler)
+
 
     let rec LastOrDefault defaultTo ls = 
         match ls with

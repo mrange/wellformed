@@ -18,7 +18,7 @@ open System.Windows.Controls
 open System.Windows.Threading
 open System.Windows.Media
 
-type FormletControl<'T>(action : 'T -> unit, formlet : Formlet<'T>) as this=
+type FormletContainer<'T>(action : 'T -> unit, formlet : Formlet<'T>) as this=
     inherit UnaryControl()
 
     let mutable isDispatching                       = false
@@ -27,9 +27,9 @@ type FormletControl<'T>(action : 'T -> unit, formlet : Formlet<'T>) as this=
     do
         this.LayoutTransform <- new ScaleTransform (1.5, 1.5)
 
-        AddRoutedEventHandler FormletContainerControl.RebuildEvent  this this.OnRebuild
-        AddRoutedEventHandler FormletContainerControl.SubmitEvent   this this.OnSubmit
-        AddRoutedEventHandler FormletContainerControl.ResetEvent    this this.OnReset
+        AddRoutedEventHandler FormletControl.RebuildEvent  this this.OnRebuild
+        AddRoutedEventHandler FormletControl.SubmitEvent   this this.OnSubmit
+        AddRoutedEventHandler FormletControl.ResetEvent    this this.OnReset
 
         scrollViewer.HorizontalScrollBarVisibility  <- ScrollBarVisibility.Disabled
         scrollViewer.VerticalScrollBarVisibility    <- ScrollBarVisibility.Visible
@@ -80,7 +80,7 @@ type FormletControl<'T>(action : 'T -> unit, formlet : Formlet<'T>) as this=
 
         ()
 
-module FormletControl =
-    let New<'T> (action : 'T -> unit) (formlet : Formlet<'T>) = new FormletControl<'T>(action, formlet)
+module FormletContainer =
+    let New<'T> (action : 'T -> unit) (formlet : Formlet<'T>) = new FormletContainer<'T>(action, formlet)
 
 

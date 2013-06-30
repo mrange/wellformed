@@ -101,17 +101,17 @@ type PartnerInfo =
     }
 
 let Validated t validator = 
-    Input "" 
+    Input.Text "" 
     |> Enhance.WithValidation validator
     |> Enhance.WithLabel t
 
 let NonEmpty t = 
-    Input "" 
+    Input.Text "" 
     |> Enhance.WithValidation_NonEmpty
     |> Enhance.WithLabel t
 
 let AllowEmpty t = 
-    Input "" 
+    Input.Text "" 
     |> Enhance.WithLabel t
 
 let IndividualFormlet regNoValidator = 
@@ -137,7 +137,7 @@ let CompanyFormlet regNoValidator =
         |> Enhance.WithGroup "Company Information"
 
 
-let CountryFormlet =    Select [|"Sweden", ("SE", SwedenRegNo); "Norway", ("NO", NorwayRegNo)|]
+let CountryFormlet =    Input.Option [|"Sweden", ("SE", SwedenRegNo); "Norway", ("NO", NorwayRegNo)|]
                         |> Enhance.WithLabel "Country"
 let AddressFormlet = 
     Formlet.Do
@@ -167,12 +167,12 @@ let AddressFormlet =
 
 
 let EntityFormlet individualRegNoValidator companyRegNoValidator =  
-        let select   =  Select [|"Individual", IndividualFormlet individualRegNoValidator; "Company",  CompanyFormlet companyRegNoValidator|]
+        let options  =  Input.Option [|"Individual", IndividualFormlet individualRegNoValidator; "Company",  CompanyFormlet companyRegNoValidator|]
                         |> Enhance.WithLabel "Type"
         Formlet.Do
             {
-                let! result = select  
-                return! result
+                let! option = options  
+                return! option
             }
 
 let PartnerFormlet = 
@@ -205,21 +205,7 @@ let main argv =
 
     let formlet = PartnerFormlet
 
-//    let formlet = Formlet.Do
-//                        {
-//                            let! first = Input ""
-//
-//                            if first <> "" then 
-//                                return first
-//                            else
-//                                return! Input "Bogus"
-//                                
-//                            
-//                        }
-
-//    let formlet = Input ""
-
-    window.Content <- FormletControl.New (fun v -> 
+    window.Content <- FormletContainer.New (fun v -> 
             ignore <| MessageBox.Show ("Form submitted")
         ) formlet :> obj
 

@@ -59,9 +59,8 @@ module Formlet =
                 )
         Formlet.New rebuild collect
 
-    let Bind<'T1, 'T2> (f : Formlet<'T1>) (b : 'T1 -> Formlet<'T2>) : Formlet<'T2> = 
+    let Bind (f : Formlet<'T1>) (b : 'T1 -> Formlet<'T2>) : Formlet<'T2> = 
         f |> Map b |> Join
-
 
     let Return (x : 'T) : Formlet<'T> = 
         let rebuild (ui :FrameworkElement) = null
@@ -76,12 +75,12 @@ module Formlet =
 
     let ReturnFrom (f : Formlet<'T>) = f
 
+    [<Sealed>]
     type FormletBuilder() =
-        member this.Return x = Return x
-        member this.Bind(x, f) = Bind x f
-        member this.Delay f = Delay f
-        member this.ReturnFrom f = ReturnFrom f
+        member this.Return      x       = Return        x
+        member this.Bind        (x, f)  = Bind          x f
+        member this.Delay       f       = Delay         f
+        member this.ReturnFrom  f       = ReturnFrom    f
 
-    let Do = new FormletBuilder()
-
+    let Do = FormletBuilder()
 

@@ -24,22 +24,22 @@ open System.Windows.Input
 open System.Windows.Media
 
 [<AbstractClass>]
-type FormletContainerControl() =
+type FormletControl() =
     inherit FrameworkElement()
 
     let mutable isInitialized = false
 
-    static let rebuildEvent     = CreateRoutedEvent<FormletContainerControl> "Rebuild"
-    static let submitEvent      = CreateRoutedEvent<FormletContainerControl> "Submit"
-    static let resetEvent       = CreateRoutedEvent<FormletContainerControl> "Reset"
+    static let rebuildEvent     = CreateRoutedEvent<FormletControl> "Rebuild"
+    static let submitEvent      = CreateRoutedEvent<FormletControl> "Submit"
+    static let resetEvent       = CreateRoutedEvent<FormletControl> "Reset"
 
     static member RebuildEvent  = rebuildEvent
     static member SubmitEvent   = submitEvent 
     static member ResetEvent    = resetEvent  
 
-    static member RaiseRebuild (sender : FrameworkElement) = RaiseRoutedEvent FormletContainerControl.RebuildEvent  sender
-    static member RaiseSubmit  (sender : FrameworkElement) = RaiseRoutedEvent FormletContainerControl.SubmitEvent   sender
-    static member RaiseReset   (sender : FrameworkElement) = RaiseRoutedEvent FormletContainerControl.ResetEvent    sender
+    static member RaiseRebuild (sender : FrameworkElement) = RaiseRoutedEvent FormletControl.RebuildEvent  sender
+    static member RaiseSubmit  (sender : FrameworkElement) = RaiseRoutedEvent FormletControl.SubmitEvent   sender
+    static member RaiseReset   (sender : FrameworkElement) = RaiseRoutedEvent FormletControl.ResetEvent    sender
 
     override this.MeasureOverride(sz : Size) =
         if not isInitialized then
@@ -68,11 +68,11 @@ type FormletContainerControl() =
             this.AddLogicalChild(fe)
             this.AddVisualChild(fe)
 
-    member this.Rebuild () = FormletContainerControl.RaiseRebuild this
+    member this.Rebuild () = FormletControl.RaiseRebuild this
 
 [<AbstractClass>]
 type UnaryControl() =
-    inherit FormletContainerControl()
+    inherit FormletControl()
 
     let mutable value : FrameworkElement = null
 
@@ -107,12 +107,12 @@ type UnaryControl() =
 
 [<AbstractClass>]
 type BinaryControl() =
-    inherit FormletContainerControl()
+    inherit FormletControl()
 
     let mutable left                : FrameworkElement  = null
     let mutable right               : FrameworkElement  = null
-    let mutable orientation         : LayoutOrientation = LayoutOrientation.TopToBottom
-    let mutable stretchBehavior     : StretchBehavior   = StretchBehavior.NoStretch
+    let mutable orientation         : LayoutOrientation = TopToBottom
+    let mutable stretchBehavior     : StretchBehavior   = NoStretch
 
     override this.Children 
         with    get ()   = 
@@ -123,15 +123,15 @@ type BinaryControl() =
                 |   l,r         -> [|l;r;|]
 
 
-    member this.Orientation
-        with get ()                         = orientation
-        and  set (value)                    = orientation <- value
-                                              this.InvalidateMeasure ()
+    member this.Orientation                 
+        with get ()                         =   orientation
+        and  set (value)                    =   orientation <- value
+                                                this.InvalidateMeasure ()
 
-    member this.StretchBehavior
-        with get ()                         = stretchBehavior
-        and  set (value)                    = stretchBehavior <- value
-                                              this.InvalidateArrange ()
+    member this.StretchBehavior             
+        with get ()                         =   stretchBehavior
+        and  set (value)                    =   stretchBehavior <- value
+                                                this.InvalidateArrange ()
 
     member this.Left 
         with    get ()                      = left
@@ -178,7 +178,7 @@ type BinaryControl() =
             |   [||]    ->  ()
             |   [|v|]   ->  let r = TranslateUsingOrientation orientation false sz EmptyRect v.DesiredSize
                             ignore <| v.Arrange(r)
-            |   [|l;r;|]->  let fillRight = stretchBehavior = StretchBehavior.RightStretches
+            |   [|l;r;|]->  let fillRight = stretchBehavior = RightStretches
                             let lr = TranslateUsingOrientation orientation false sz EmptyRect l.DesiredSize
                             let rr = TranslateUsingOrientation orientation fillRight sz lr r.DesiredSize
                             l.Arrange(lr)
@@ -188,149 +188,152 @@ type BinaryControl() =
             
         sz
 
-type JoinControl<'T>() =
-    inherit BinaryControl()
+[<AutoOpen>]
+module internal FormletControls =
 
-    member val Formlet  : 'T option     = None                  with get, set
-    member val Collect  : Collect<'T>   = Fail_NeverBuiltUp ()  with get, set
+    type JoinControl<'T>() =
+        inherit BinaryControl()
+
+        member val Formlet  : 'T option     = None                  with get, set
+        member val Collect  : Collect<'T>   = Fail_NeverBuiltUp ()  with get, set
 
 
-type InputControl(initialText : string) as this =
-    inherit TextBox()
+    type InputTextControl(initialText : string) as this =
+        inherit TextBox()
 
-    do
-        this.Text   <- initialText
-        this.Margin <- DefaultMargin
+        do
+            this.Text   <- initialText
+            this.Margin <- DefaultMargin
 
-    override this.OnLostFocus(e) = 
-        base.OnLostFocus(e)
-        FormletContainerControl.RaiseRebuild this
+        override this.OnLostFocus(e) = 
+            base.OnLostFocus(e)
+            FormletControl.RaiseRebuild this
 
-type SelectControl<'T>() as this =
-    inherit ComboBox()
+    type InputOptionControl<'T>() as this =
+        inherit ComboBox()
 
-    let itemSource = new ObservableCollection<ComboBoxItem> ()
+        let itemSource = new ObservableCollection<ComboBoxItem> ()
 
-    let mutable options : (string * 'T) array = [||]
+        let mutable options : (string * 'T) array = [||]
 
-    do
-        this.Margin         <- DefaultMargin
-        this.ItemsSource    <- itemSource
+        do
+            this.Margin         <- DefaultMargin
+            this.ItemsSource    <- itemSource
                           
-    member this.Options 
-        with get ()         =   options
-        and  set (value)    =   options <- value
-                                for i in itemSource.Count..options.Length - 1 do
-                                    let t,_ = options.[i]
-                                    let tb = new TextBlock ()
-                                    tb.Text <- t
-                                    let cbi = new ComboBoxItem ()
-                                    cbi.Content <- tb
-                                    itemSource.Add (cbi)
+        member this.Options 
+            with get ()         =   options
+            and  set (value)    =   options <- value
+                                    for i in itemSource.Count..options.Length - 1 do
+                                        let t,_ = options.[i]
+                                        let tb = new TextBlock ()
+                                        tb.Text <- t
+                                        let cbi = new ComboBoxItem ()
+                                        cbi.Content <- tb
+                                        itemSource.Add (cbi)
 
-                                for i in 0..options.Length - 1 do
-                                    let t,_ = options.[i]
-                                    let cbi = itemSource.[i]
-                                    let tb = cbi.Content :?> TextBlock
-                                    tb.Text <- t
+                                    for i in 0..options.Length - 1 do
+                                        let t,_ = options.[i]
+                                        let cbi = itemSource.[i]
+                                        let tb = cbi.Content :?> TextBlock
+                                        tb.Text <- t
                                 
-                                if this.SelectedIndex < 0 && itemSource.Count > 0 then
-                                    this.SelectedIndex <- 0 
+                                    if this.SelectedIndex < 0 && itemSource.Count > 0 then
+                                        this.SelectedIndex <- 0 
 
-    member this.Collect ()  =   let i = this.SelectedIndex
-                                if i < 0 || i >= options.Length then None
-                                else 
-                                    let _,v = options.[i]
-                                    Some v
+        member this.Collect ()  =   let i = this.SelectedIndex
+                                    if i < 0 || i >= options.Length then None
+                                    else 
+                                        let _,v = options.[i]
+                                        Some v
 
-    override this.OnSelectionChanged(e) = 
-        base.OnSelectionChanged(e)
-        FormletContainerControl.RaiseRebuild this
+        override this.OnSelectionChanged(e) = 
+            base.OnSelectionChanged(e)
+            FormletControl.RaiseRebuild this
 
-type GroupControl() as this =
-    inherit UnaryControl()
+    type GroupControl() as this =
+        inherit UnaryControl()
 
-    let outer, label, inner = CreateGroup "Group"
+        let outer, label, inner = CreateGroup "Group"
 
-    do
-        this.Value <- outer
+        do
+            this.Value <- outer
 
-    member this.Inner
-        with get ()                         = inner.Child :?> FrameworkElement
-        and  set (value : FrameworkElement) = inner.Child <- value
+        member this.Inner
+            with get ()                         = inner.Child :?> FrameworkElement
+            and  set (value : FrameworkElement) = inner.Child <- value
 
-    member this.Text
-        with get ()                         = label.Text
-        and  set (value)                    = label.Text <- value
-
-
-
-type LabelControl(labelWidth : double) as this =
-    inherit BinaryControl()
-
-    let label = CreateLabel "Label" labelWidth
-
-    do
-        this.Orientation    <- LayoutOrientation.LeftToRight
-        this.StretchBehavior<- StretchBehavior.RightStretches
-        this.Left           <- label
-
-    member this.Text
-        with get ()                         = label.Text
-        and  set (value)                    = label.Text <- value
-
-type ValidationErrorPresenterControl() as this =
-    inherit BinaryControl()
-
-    let label = CreateTextBlock ""
-
-    do
-        label.Foreground    <- Brushes.Red
-        label.FontWeight    <- FontWeights.Bold
-        this.Left           <- label
-
-    member this.Failures
-        with set (value : Failure list) =   
-            label.Inlines.Clear ()
-            let inlines = 
-                value
-                |>  List.collect (fun f -> 
-                    [
-                        new Run (f.Context |> LastOrDefault "No context")   :> Inline
-                        new Run (" - ")         :> Inline
-                        new Run (f.Message)     :> Inline
-                        new LineBreak()         :> Inline
-                    ])
-                |>  List.toArray
-            label.Inlines.AddRange (inlines)
-            if label.Inlines.Count = 0 then
-                label.Visibility <- Visibility.Collapsed
-            else
-                label.Visibility <- Visibility.Visible
+        member this.Text
+            with get ()                         = label.Text
+            and  set (value)                    = label.Text <- value
 
 
-type SubmitResetControl() as this =
-    inherit BinaryControl()
 
-    let submit      = lazy CreateButton "_Submit" this.CanSubmit this.Submit
-    let reset       = lazy CreateButton "_Reset" this.CanReset this.Reset
-    let stackPanel  = lazy CreateStackPanel Orientation.Horizontal
+    type LabelControl(labelWidth : double) as this =
+        inherit BinaryControl()
 
-    let mutable submitAllowed = false
+        let label = CreateLabel "Label" labelWidth
 
-    override this.OnStartUp () =
-        ignore <| stackPanel.Value.Children.Add(submit.Value)
-        ignore <| stackPanel.Value.Children.Add(reset.Value)
-        this.Left <- stackPanel.Value
+        do
+            this.Orientation    <- LeftToRight
+            this.StretchBehavior<- RightStretches
+            this.Left           <- label
 
-    member this.SubmitAllowed   
-        with get()          =   submitAllowed
-        and  set(value)     =   submitAllowed <- value
-                                CommandManager.InvalidateRequerySuggested()
+        member this.Text
+            with get ()                         = label.Text
+            and  set (value)                    = label.Text <- value
 
-    member this.Submit ()   = FormletContainerControl.RaiseSubmit this
-    member this.CanSubmit ()= this.SubmitAllowed
+    type ValidationErrorPresenterControl() as this =
+        inherit BinaryControl()
 
-    member this.Reset ()    = FormletContainerControl.RaiseReset this
-    member this.CanReset () = true
+        let label = CreateTextBlock ""
+
+        do
+            label.Foreground    <- Brushes.Red
+            label.FontWeight    <- FontWeights.Bold
+            this.Left           <- label
+
+        member this.Failures
+            with set (value : Failure list) =   
+                label.Inlines.Clear ()
+                let inlines = 
+                    value
+                    |>  List.collect (fun f -> 
+                        [
+                            new Run (f.Context |> LastOrDefault "No context")   :> Inline
+                            new Run (" - ")         :> Inline
+                            new Run (f.Message)     :> Inline
+                            new LineBreak()         :> Inline
+                        ])
+                    |>  List.toArray
+                label.Inlines.AddRange (inlines)
+                if label.Inlines.Count = 0 then
+                    label.Visibility <- Visibility.Collapsed
+                else
+                    label.Visibility <- Visibility.Visible
+
+
+    type SubmitResetControl() as this =
+        inherit BinaryControl()
+
+        let submit      = lazy CreateButton "_Submit" this.CanSubmit this.Submit
+        let reset       = lazy CreateButton "_Reset" this.CanReset this.Reset
+        let stackPanel  = lazy CreateStackPanel Orientation.Horizontal
+
+        let mutable submitAllowed = false
+
+        override this.OnStartUp () =
+            ignore <| stackPanel.Value.Children.Add(submit.Value)
+            ignore <| stackPanel.Value.Children.Add(reset.Value)
+            this.Left <- stackPanel.Value
+
+        member this.SubmitAllowed   
+            with get()          =   submitAllowed
+            and  set(value)     =   submitAllowed <- value
+                                    CommandManager.InvalidateRequerySuggested()
+
+        member this.Submit ()   = FormletControl.RaiseSubmit this
+        member this.CanSubmit ()= this.SubmitAllowed
+
+        member this.Reset ()    = FormletControl.RaiseReset this
+        member this.CanReset () = true
 
