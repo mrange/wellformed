@@ -282,7 +282,7 @@ module internal FormletControls =
             with get ()                         = label.Text
             and  set (value)                    = label.Text <- value
 
-    type ValidationErrorPresenterControl() as this =
+    type ValidationErrorLogControl() as this =
         inherit BinaryControl()
 
         let label = CreateTextBlock ""
@@ -310,6 +310,26 @@ module internal FormletControls =
                     label.Visibility <- Visibility.Collapsed
                 else
                     label.Visibility <- Visibility.Visible
+
+    type ValidationErrorBorderControl()=
+        inherit UnaryControl()
+
+        let mutable failures : Failure list = []
+
+        static member pen = CreatePen Brushes.Red 1.0
+
+        member this.Failures 
+            with get ()         =   failures
+            and  set (value)    =   failures <- value
+                                    this.InvalidateVisual ()
+
+        override this.OnRender (dc : DrawingContext) = 
+            if this.Failures.Length > 0 then
+                let rs = this.RenderSize
+                let rect = Rect (rs)
+                dc.DrawRectangle (null, ValidationErrorBorderControl.pen, rect)
+            
+
 
 
     type SubmitResetControl() as this =

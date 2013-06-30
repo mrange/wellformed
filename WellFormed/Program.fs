@@ -57,7 +57,7 @@ let NorwayRegNo regNo =
         let first   = (MultiplyAndAccumulate NorwayRegNoMultiplyPattern1 regNo) % 11
         let second  = (MultiplyAndAccumulate NorwayRegNoMultiplyPattern2 regNo) % 11
 
-        if first <> 0 or second <> 0 then
+        if first <> 0 || second <> 0 then
             Some "Registration number checksum not correct"
         else 
             None
@@ -103,11 +103,13 @@ type PartnerInfo =
 let Validated t validator = 
     Input.Text "" 
     |> Enhance.WithValidation validator
+    |> Enhance.WithErrorBorder
     |> Enhance.WithLabel t
 
 let NonEmpty t = 
     Input.Text "" 
     |> Enhance.WithValidation_NonEmpty
+    |> Enhance.WithErrorBorder
     |> Enhance.WithLabel t
 
 let AllowEmpty t = 

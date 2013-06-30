@@ -140,6 +140,10 @@ module internal Utils =
                                                             sender.RaiseEvent args
     let AddRoutedEventHandler routedEvent (receiver : UIElement) (h : obj -> RoutedEventArgs -> unit) = receiver.AddHandler (routedEvent, RoutedEventHandler h)
 
+    let CreatePen br th = 
+        let p = new Pen (br, th)
+        p.Freeze ()
+        p
 
     let CreateStackPanel orientation =
         let stackPanel = new StackPanel()

@@ -56,13 +56,24 @@ module Enhance =
         Formlet.New rebuild collect
 
     let WithErrorLog (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (ui :FrameworkElement) =    let control = CreateElement ui (fun () -> new ValidationErrorPresenterControl()) 
+        let rebuild (ui :FrameworkElement) =    let control = CreateElement ui (fun () -> new ValidationErrorLogControl()) 
                                                 control.Right <- f.Rebuild(control.Right)
                                                 control :> FrameworkElement
-        let collect (ui :FrameworkElement) =    CollectFromElement ui (fun (ui' : ValidationErrorPresenterControl) ->   let collect = f.Collect(ui'.Right)
-                                                                                                                        ui'.Failures <- collect.Failures
-                                                                                                                        collect
-                                                                                                                        )
+        let collect (ui :FrameworkElement) =    CollectFromElement ui (fun (ui' : ValidationErrorLogControl) -> let collect = f.Collect(ui'.Right)
+                                                                                                                ui'.Failures <- collect.Failures
+                                                                                                                collect
+                                                                                                                )
+
+        Formlet.New rebuild collect
+
+    let WithErrorBorder (f : Formlet<'T>) : Formlet<'T> = 
+        let rebuild (ui :FrameworkElement) =    let control = CreateElement ui (fun () -> new ValidationErrorBorderControl()) 
+                                                control.Value <- f.Rebuild(control.Value)
+                                                control :> FrameworkElement
+        let collect (ui :FrameworkElement) =    CollectFromElement ui (fun (ui' : ValidationErrorBorderControl) ->  let collect = f.Collect(ui'.Value)
+                                                                                                                    ui'.Failures <- collect.Failures
+                                                                                                                    collect
+                                                                                                                    )
 
         Formlet.New rebuild collect
 
