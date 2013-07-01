@@ -72,13 +72,13 @@ module Utils =
     let Validated t validator = 
         Input.Text "" 
         |> Enhance.WithValidation validator
-        |> Enhance.WithErrorBorder
+        |> Enhance.WithErrorVisual
         |> Enhance.WithLabel t
 
     let NonEmpty t = 
         Input.Text "" 
         |> Enhance.WithValidation_NonEmpty
-        |> Enhance.WithErrorBorder
+        |> Enhance.WithErrorVisual
         |> Enhance.WithLabel t
 
     let AllowEmpty t = 

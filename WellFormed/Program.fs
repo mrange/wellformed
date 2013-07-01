@@ -74,7 +74,7 @@ let IndividualFormlet regNoValidator =
 
             return Individual {FirstName = firstName; LastName = lastName; RegNo = regno;}
         }
-        |> Enhance.WithGroup "Individual Information"
+        |> Enhance.WithLegend "Individual Information"
 
 let CompanyFormlet regNoValidator = 
     Formlet.Do
@@ -85,7 +85,7 @@ let CompanyFormlet regNoValidator =
 
             return Company {Name = name; RegNo = regno; Contact = contact;}
         }
-        |> Enhance.WithGroup "Company Information"
+        |> Enhance.WithLegend "Company Information"
 
 
 let CountryFormlet =    Input.Option [|"Sweden", ("SE", SwedenRegNo); "Norway", ("NO", NorwayRegNo)|]
@@ -114,7 +114,7 @@ let AddressFormlet =
                     Country         = country       
                 }
         }
-        |> Enhance.WithGroup "Address Information"
+        |> Enhance.WithLegend "Address Information"
 
 
 let EntityFormlet individualRegNoValidator companyRegNoValidator =  
@@ -142,9 +142,9 @@ let PartnerFormlet =
                     AddressInfo         = address
                 }
         }
-        |> Enhance.WithErrorLog
+        |> Enhance.WithErrorSummary
         |> Enhance.WithSubmitAndReset
-        |> Enhance.WithGroup "Partner registration"
+        |> Enhance.WithLegend "Partner registration"
 
 // ----------------------------------------------------------------------------
 // Opening the FormletContainer over the PartnerFormlet

@@ -21,12 +21,12 @@ open System.Windows.Controls
 
 module Enhance = 
     
-    let WithGroup (t : string) (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (ui : FrameworkElement) =   let group = CreateElement ui (fun () -> new GroupElement())
-                                                group.Text <- t
-                                                group.Inner <- f.Rebuild(group.Inner)
-                                                group :> FrameworkElement
-        let collect (ui : FrameworkElement) =   AppendFailureContext t <| CollectFromElement ui (fun (ui' : GroupElement) -> f.Collect(ui'.Inner))
+    let WithLegend (t : string) (f : Formlet<'T>) : Formlet<'T> = 
+        let rebuild (ui : FrameworkElement) =   let legend = CreateElement ui (fun () -> new LegendElement())
+                                                legend.Text <- t
+                                                legend.Inner <- f.Rebuild(legend.Inner)
+                                                legend :> FrameworkElement
+        let collect (ui : FrameworkElement) =   AppendFailureContext t <| CollectFromElement ui (fun (ui' : LegendElement) -> f.Collect(ui'.Inner))
 
         Formlet.New rebuild collect
 
@@ -55,25 +55,25 @@ module Enhance =
 
         Formlet.New rebuild collect
 
-    let WithErrorLog (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (ui :FrameworkElement) =    let control = CreateElement ui (fun () -> new ValidationErrorLogElement()) 
-                                                control.Right <- f.Rebuild(control.Right)
-                                                control :> FrameworkElement
-        let collect (ui :FrameworkElement) =    CollectFromElement ui (fun (ui' : ValidationErrorLogElement) -> let collect = f.Collect(ui'.Right)
-                                                                                                                ui'.Failures <- collect.Failures
-                                                                                                                collect
-                                                                                                                )
+    let WithErrorSummary (f : Formlet<'T>) : Formlet<'T> = 
+        let rebuild (ui :FrameworkElement) =    let summary = CreateElement ui (fun () -> new ErrorSummaryElement()) 
+                                                summary.Right <- f.Rebuild(summary.Right)
+                                                summary :> FrameworkElement
+        let collect (ui :FrameworkElement) =    CollectFromElement ui (fun (ui' : ErrorSummaryElement) ->   let collect = f.Collect(ui'.Right)
+                                                                                                            ui'.Failures <- collect.Failures
+                                                                                                            collect
+                                                                                                            )
 
         Formlet.New rebuild collect
 
-    let WithErrorBorder (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (ui :FrameworkElement) =    let control = CreateElement ui (fun () -> new ValidationErrorBorderElement()) 
-                                                control.Value <- f.Rebuild(control.Value)
-                                                control :> FrameworkElement
-        let collect (ui :FrameworkElement) =    CollectFromElement ui (fun (ui' : ValidationErrorBorderElement) ->  let collect = f.Collect(ui'.Value)
-                                                                                                                    ui'.Failures <- collect.Failures
-                                                                                                                    collect
-                                                                                                                    )
+    let WithErrorVisual (f : Formlet<'T>) : Formlet<'T> = 
+        let rebuild (ui :FrameworkElement) =    let visual = CreateElement ui (fun () -> new ErrorVisualElement()) 
+                                                visual.Value <- f.Rebuild(visual.Value)
+                                                visual :> FrameworkElement
+        let collect (ui :FrameworkElement) =    CollectFromElement ui (fun (ui' : ErrorVisualElement)   ->  let collect = f.Collect(ui'.Value)
+                                                                                                            ui'.Failures <- collect.Failures
+                                                                                                            collect
+                                                                                                            )
 
         Formlet.New rebuild collect
 

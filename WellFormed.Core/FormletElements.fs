@@ -250,7 +250,7 @@ module internal FormletElements =
             base.OnSelectionChanged(e)
             FormletElement.RaiseRebuild this
 
-    type GroupElement() as this =
+    type LegendElement() as this =
         inherit UnaryElement()
 
         let outer, label, inner = CreateGroup "Group"
@@ -282,7 +282,7 @@ module internal FormletElements =
             with get ()                         = label.Text
             and  set (value)                    = label.Text <- value
 
-    type ValidationErrorLogElement() as this =
+    type ErrorSummaryElement() as this =
         inherit BinaryElement()
 
         let label = CreateTextBlock ""
@@ -311,12 +311,12 @@ module internal FormletElements =
                 else
                     label.Visibility <- Visibility.Visible
 
-    type ValidationErrorBorderElement()=
+    type ErrorVisualElement()=
         inherit UnaryElement()
 
         let mutable failures : Failure list = []
 
-        static member pen = CreatePen Brushes.Red 1.0
+        static member pen = CreatePen Brushes.Red 2.0
 
         member this.Failures 
             with get ()         =   failures
@@ -326,8 +326,16 @@ module internal FormletElements =
         override this.OnRender (dc : DrawingContext) = 
             if this.Failures.Length > 0 then
                 let rs = this.RenderSize
-                let rect = Rect (rs)
-                dc.DrawRectangle (null, ValidationErrorBorderElement.pen, rect)
+
+                let innerMargin = if this.Value <> null then this.Value.Margin else Thickness ()
+
+                let rect = Rect (   innerMargin.Left                                        ,
+                                    innerMargin.Top                                         ,
+                                    rs.Width        - innerMargin.Right - innerMargin.Left  ,
+                                    rs.Height       - innerMargin.Bottom- innerMargin.Top      
+                                    )
+
+                dc.DrawRectangle (null, ErrorVisualElement.pen, rect)
             
 
 
