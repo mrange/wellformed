@@ -30,17 +30,17 @@ module Enhance =
 
         Formlet.New rebuild collect
 
-    let WithWidth (width : double) (f : Formlet<'T>) : Formlet<'T> = 
+    let WithStyle (style : Style) (f : Formlet<'T>) : Formlet<'T> = 
         let rebuild (ui : FrameworkElement) =   let ui' = f.Rebuild(ui)
-                                                ui'.Width <- width
+                                                ui'.Style <- style
                                                 ui'
         let collect (ui : FrameworkElement) =   f.Collect(ui)
 
         Formlet.New rebuild collect
 
-    let WithStyle (style : Style) (f : Formlet<'T>) : Formlet<'T> = 
+    let WithWidth (width : double) (f : Formlet<'T>) : Formlet<'T> = 
         let rebuild (ui : FrameworkElement) =   let ui' = f.Rebuild(ui)
-                                                ui'.Style <- style
+                                                ui'.Width <- width
                                                 ui'
         let collect (ui : FrameworkElement) =   f.Collect(ui)
 
