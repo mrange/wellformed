@@ -49,14 +49,14 @@ open System.Windows.Controls
             the user input but other mutable state should be updated accordingly
 
         Typically a rebuild action could look like this:
-        let rebuild (ui :FrameworkElement) =    let option = CreateElement ui (fun () -> new InputOptionControl<'T>())
+        let rebuild (ui :FrameworkElement) =    let option = CreateElement ui (fun () -> new InputOptionElement<'T>())
                                                 option.Options <- options
                                                 option :> FrameworkElement
 
-        The method CreateElement creates a new InputOptionControl if the input UI doesn't match, 
+        The method CreateElement creates a new InputOptionElement if the input UI doesn't match, 
         otherwise returns existing instance.
 
-        The mutable state of the InputOptionControl control is updated, 
+        The mutable state of the InputOptionElement control is updated, 
         if the state is identical it shouldn't update the control
 
         Finally the control is returned
@@ -84,7 +84,7 @@ open System.Windows.Controls
 
         Typically a collect action could look like this:
 
-        let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : InputOptionControl<'T>) ->    
+        let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : InputOptionElement<'T>) ->    
             let c = ui'.Collect()
             match c with
             |   Some v  -> Success v
@@ -122,7 +122,7 @@ module Formlet =
 
     let Join (f: Formlet<Formlet<'T>>) : Formlet<'T> = 
         let rebuild (ui :FrameworkElement) = 
-            let result = CreateElement ui (fun () -> new JoinControl<Formlet<'T>> ())
+            let result = CreateElement ui (fun () -> new JoinElement<Formlet<'T>> ())
             result.Left <- f.Rebuild(result.Left)
             let collect = f.Collect(result.Left)
             result.Collect <- collect
@@ -132,7 +132,7 @@ module Formlet =
                 result.Right    <- f'.Rebuild(result.Right)
             |   _           -> ()
             result :> FrameworkElement
-        let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : JoinControl<Formlet<'T>>) -> 
+        let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : JoinElement<Formlet<'T>>) -> 
                 match ui'.Formlet with
                 |   Some f' -> JoinFailures ui'.Collect (f'.Collect (ui'.Right))
                 |   None    -> JoinFailures ui'.Collect (Fail_NeverBuiltUp ())

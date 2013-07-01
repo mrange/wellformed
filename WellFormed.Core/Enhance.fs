@@ -22,11 +22,11 @@ open System.Windows.Controls
 module Enhance = 
     
     let WithGroup (t : string) (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (ui : FrameworkElement) =   let group = CreateElement ui (fun () -> new GroupControl())
+        let rebuild (ui : FrameworkElement) =   let group = CreateElement ui (fun () -> new GroupElement())
                                                 group.Text <- t
                                                 group.Inner <- f.Rebuild(group.Inner)
                                                 group :> FrameworkElement
-        let collect (ui : FrameworkElement) =   AppendFailureContext t <| CollectFromElement ui (fun (ui' : GroupControl) -> f.Collect(ui'.Inner))
+        let collect (ui : FrameworkElement) =   AppendFailureContext t <| CollectFromElement ui (fun (ui' : GroupElement) -> f.Collect(ui'.Inner))
 
         Formlet.New rebuild collect
 
@@ -47,19 +47,19 @@ module Enhance =
         Formlet.New rebuild collect
 
     let WithLabel (t : string) (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (ui :FrameworkElement) =    let label = CreateElement ui (fun () -> new LabelControl(100.0)) 
+        let rebuild (ui :FrameworkElement) =    let label = CreateElement ui (fun () -> new LabelElement(100.0)) 
                                                 label.Text <- t
                                                 label.Right <- f.Rebuild(label.Right)
                                                 label :> FrameworkElement
-        let collect (ui :FrameworkElement) =    AppendFailureContext t <| CollectFromElement ui (fun (ui' : LabelControl) -> f.Collect(ui'.Right))
+        let collect (ui :FrameworkElement) =    AppendFailureContext t <| CollectFromElement ui (fun (ui' : LabelElement) -> f.Collect(ui'.Right))
 
         Formlet.New rebuild collect
 
     let WithErrorLog (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (ui :FrameworkElement) =    let control = CreateElement ui (fun () -> new ValidationErrorLogControl()) 
+        let rebuild (ui :FrameworkElement) =    let control = CreateElement ui (fun () -> new ValidationErrorLogElement()) 
                                                 control.Right <- f.Rebuild(control.Right)
                                                 control :> FrameworkElement
-        let collect (ui :FrameworkElement) =    CollectFromElement ui (fun (ui' : ValidationErrorLogControl) -> let collect = f.Collect(ui'.Right)
+        let collect (ui :FrameworkElement) =    CollectFromElement ui (fun (ui' : ValidationErrorLogElement) -> let collect = f.Collect(ui'.Right)
                                                                                                                 ui'.Failures <- collect.Failures
                                                                                                                 collect
                                                                                                                 )
@@ -67,10 +67,10 @@ module Enhance =
         Formlet.New rebuild collect
 
     let WithErrorBorder (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (ui :FrameworkElement) =    let control = CreateElement ui (fun () -> new ValidationErrorBorderControl()) 
+        let rebuild (ui :FrameworkElement) =    let control = CreateElement ui (fun () -> new ValidationErrorBorderElement()) 
                                                 control.Value <- f.Rebuild(control.Value)
                                                 control :> FrameworkElement
-        let collect (ui :FrameworkElement) =    CollectFromElement ui (fun (ui' : ValidationErrorBorderControl) ->  let collect = f.Collect(ui'.Value)
+        let collect (ui :FrameworkElement) =    CollectFromElement ui (fun (ui' : ValidationErrorBorderElement) ->  let collect = f.Collect(ui'.Value)
                                                                                                                     ui'.Failures <- collect.Failures
                                                                                                                     collect
                                                                                                                     )
@@ -102,10 +102,10 @@ module Enhance =
         WithValidation (fun s -> if r.IsMatch s then None else Some msg) f
 
     let WithSubmitAndReset (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (ui :FrameworkElement) =    let submitReset = CreateElement ui (fun () -> new SubmitResetControl()) 
+        let rebuild (ui :FrameworkElement) =    let submitReset = CreateElement ui (fun () -> new SubmitResetElement()) 
                                                 submitReset.Right <- f.Rebuild(submitReset.Right)
                                                 submitReset :> FrameworkElement
-        let collect (ui :FrameworkElement) =    CollectFromElement ui (fun (ui' : SubmitResetControl) -> 
+        let collect (ui :FrameworkElement) =    CollectFromElement ui (fun (ui' : SubmitResetElement) -> 
                                                     let collect = f.Collect(ui'.Right)
                                                     ui'.SubmitAllowed <-
                                                         match collect.Value, collect.Failures.Length with   

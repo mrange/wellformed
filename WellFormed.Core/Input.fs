@@ -18,16 +18,16 @@ open System.Windows.Controls
 module Input =
 
     let Text t = 
-        let rebuild (ui :FrameworkElement) = CreateElement ui (fun () -> new InputTextControl(t)) :> FrameworkElement
-        let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : InputTextControl)-> Success ui'.Text)
+        let rebuild (ui :FrameworkElement) = CreateElement ui (fun () -> new InputTextElement(t)) :> FrameworkElement
+        let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : InputTextElement)-> Success ui'.Text)
 
         Formlet.New rebuild collect
 
     let Option (options : (string * 'T) array)  = 
-        let rebuild (ui :FrameworkElement) =    let option = CreateElement ui (fun () -> new InputOptionControl<'T>())
+        let rebuild (ui :FrameworkElement) =    let option = CreateElement ui (fun () -> new InputOptionElement<'T>())
                                                 option.Options <- options
                                                 option :> FrameworkElement
-        let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : InputOptionControl<'T>) ->    
+        let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : InputOptionElement<'T>) ->    
             let c = ui'.Collect()
             match c with
             |   Some v  -> Success v

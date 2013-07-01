@@ -24,22 +24,22 @@ open System.Windows.Input
 open System.Windows.Media
 
 [<AbstractClass>]
-type FormletControl() =
+type FormletElement() =
     inherit FrameworkElement()
 
     let mutable isInitialized = false
 
-    static let rebuildEvent     = CreateRoutedEvent<FormletControl> "Rebuild"
-    static let submitEvent      = CreateRoutedEvent<FormletControl> "Submit"
-    static let resetEvent       = CreateRoutedEvent<FormletControl> "Reset"
+    static let rebuildEvent     = CreateRoutedEvent<FormletElement> "Rebuild"
+    static let submitEvent      = CreateRoutedEvent<FormletElement> "Submit"
+    static let resetEvent       = CreateRoutedEvent<FormletElement> "Reset"
 
     static member RebuildEvent  = rebuildEvent
     static member SubmitEvent   = submitEvent 
     static member ResetEvent    = resetEvent  
 
-    static member RaiseRebuild (sender : FrameworkElement) = RaiseRoutedEvent FormletControl.RebuildEvent  sender
-    static member RaiseSubmit  (sender : FrameworkElement) = RaiseRoutedEvent FormletControl.SubmitEvent   sender
-    static member RaiseReset   (sender : FrameworkElement) = RaiseRoutedEvent FormletControl.ResetEvent    sender
+    static member RaiseRebuild (sender : FrameworkElement) = RaiseRoutedEvent FormletElement.RebuildEvent  sender
+    static member RaiseSubmit  (sender : FrameworkElement) = RaiseRoutedEvent FormletElement.SubmitEvent   sender
+    static member RaiseReset   (sender : FrameworkElement) = RaiseRoutedEvent FormletElement.ResetEvent    sender
 
     override this.MeasureOverride(sz : Size) =
         if not isInitialized then
@@ -68,11 +68,11 @@ type FormletControl() =
             this.AddLogicalChild(fe)
             this.AddVisualChild(fe)
 
-    member this.Rebuild () = FormletControl.RaiseRebuild this
+    member this.Rebuild () = FormletElement.RaiseRebuild this
 
 [<AbstractClass>]
-type UnaryControl() =
-    inherit FormletControl()
+type UnaryElement() =
+    inherit FormletElement()
 
     let mutable value : FrameworkElement = null
 
@@ -106,8 +106,8 @@ type UnaryControl() =
 
 
 [<AbstractClass>]
-type BinaryControl() =
-    inherit FormletControl()
+type BinaryElement() =
+    inherit FormletElement()
 
     let mutable left                : FrameworkElement  = null
     let mutable right               : FrameworkElement  = null
@@ -189,16 +189,16 @@ type BinaryControl() =
         sz
 
 [<AutoOpen>]
-module internal FormletControls =
+module internal FormletElements =
 
-    type JoinControl<'T>() =
-        inherit BinaryControl()
+    type JoinElement<'T>() =
+        inherit BinaryElement()
 
         member val Formlet  : 'T option     = None                  with get, set
         member val Collect  : Collect<'T>   = Fail_NeverBuiltUp ()  with get, set
 
 
-    type InputTextControl(initialText : string) as this =
+    type InputTextElement(initialText : string) as this =
         inherit TextBox()
 
         do
@@ -207,9 +207,9 @@ module internal FormletControls =
 
         override this.OnLostFocus(e) = 
             base.OnLostFocus(e)
-            FormletControl.RaiseRebuild this
+            FormletElement.RaiseRebuild this
 
-    type InputOptionControl<'T>() as this =
+    type InputOptionElement<'T>() as this =
         inherit ComboBox()
 
         let itemSource = new ObservableCollection<ComboBoxItem> ()
@@ -248,10 +248,10 @@ module internal FormletControls =
 
         override this.OnSelectionChanged(e) = 
             base.OnSelectionChanged(e)
-            FormletControl.RaiseRebuild this
+            FormletElement.RaiseRebuild this
 
-    type GroupControl() as this =
-        inherit UnaryControl()
+    type GroupElement() as this =
+        inherit UnaryElement()
 
         let outer, label, inner = CreateGroup "Group"
 
@@ -268,8 +268,8 @@ module internal FormletControls =
 
 
 
-    type LabelControl(labelWidth : double) as this =
-        inherit BinaryControl()
+    type LabelElement(labelWidth : double) as this =
+        inherit BinaryElement()
 
         let label = CreateLabel "Label" labelWidth
 
@@ -282,8 +282,8 @@ module internal FormletControls =
             with get ()                         = label.Text
             and  set (value)                    = label.Text <- value
 
-    type ValidationErrorLogControl() as this =
-        inherit BinaryControl()
+    type ValidationErrorLogElement() as this =
+        inherit BinaryElement()
 
         let label = CreateTextBlock ""
 
@@ -311,8 +311,8 @@ module internal FormletControls =
                 else
                     label.Visibility <- Visibility.Visible
 
-    type ValidationErrorBorderControl()=
-        inherit UnaryControl()
+    type ValidationErrorBorderElement()=
+        inherit UnaryElement()
 
         let mutable failures : Failure list = []
 
@@ -327,13 +327,13 @@ module internal FormletControls =
             if this.Failures.Length > 0 then
                 let rs = this.RenderSize
                 let rect = Rect (rs)
-                dc.DrawRectangle (null, ValidationErrorBorderControl.pen, rect)
+                dc.DrawRectangle (null, ValidationErrorBorderElement.pen, rect)
             
 
 
 
-    type SubmitResetControl() as this =
-        inherit BinaryControl()
+    type SubmitResetElement() as this =
+        inherit BinaryElement()
 
         let submit      = lazy CreateButton "_Submit" this.CanSubmit this.Submit
         let reset       = lazy CreateButton "_Reset" this.CanReset this.Reset
@@ -351,9 +351,9 @@ module internal FormletControls =
             and  set(value)     =   submitAllowed <- value
                                     CommandManager.InvalidateRequerySuggested()
 
-        member this.Submit ()   = FormletControl.RaiseSubmit this
+        member this.Submit ()   = FormletElement.RaiseSubmit this
         member this.CanSubmit ()= this.SubmitAllowed
 
-        member this.Reset ()    = FormletControl.RaiseReset this
+        member this.Reset ()    = FormletElement.RaiseReset this
         member this.CanReset () = true
 

@@ -38,9 +38,9 @@
   <ItemGroup>
     <Compile Include="Types.fs" />
     <Compile Include="Utils.fs" />
-    <Compile Include="FormletControls.fs" />
+    <Compile Include="FormletElements.fs" />
     <Compile Include="Formlet.fs" />
-    <Compile Include="Controls.fs" />
+    <Compile Include="Input.fs" />
     <Compile Include="Enhance.fs" />
     <Compile Include="FormletContainer.fs" />
   </ItemGroup>
