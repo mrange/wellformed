@@ -181,8 +181,9 @@ module internal Utils =
         textBlock.Width <- w
         textBlock
 
-    let CreateGroup t : FrameworkElement*TextBox*Decorator = 
+    let CreateLegend t : FrameworkElement*TextBox*Decorator = 
         let label = CreateTextBox t
+        label.IsTabStop <- false
         label.IsReadOnly <- true
         label.VerticalAlignment <- VerticalAlignment.Top
         label.HorizontalAlignment <- HorizontalAlignment.Left

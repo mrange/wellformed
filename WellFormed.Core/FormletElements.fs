@@ -266,7 +266,7 @@ module internal FormletElements =
     type LegendElement() as this =
         inherit UnaryElement()
 
-        let outer, label, inner = CreateGroup "Group"
+        let outer, label, inner = CreateLegend "Group"
 
         do
             this.Value <- outer
