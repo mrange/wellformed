@@ -49,7 +49,14 @@ First time it takes a while to see what it does but that comes more from having 
 
 This sold me on using computation expressions for forms.
 
-The currently state of WellFormed is honestly a bag of ideas but the code is slowly transforming into something more and more useful.
+The current state of wellformed is that it works pretty well and should be good enough to be considered if you are looking for something like this for WPF and F#.
+
+TODO
+====
+
+1. Implement Enhance.Many - In order to create formlets that supports create list of objects
+1. Support Visual Styling of controls.
+1. Refactor Formlet<T> - In order to support advance layout, visual tree collapsing and smarter preserving of user state they way formlets are implemented will need a major overhaul. How you compose formlets will not be affected but custom implementations of formlets will.
 
 Feedback appreciated
 
