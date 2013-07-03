@@ -27,6 +27,7 @@ type IndividualInfo =
         FirstName           :   string
         LastName            :   string
         RegNo               :   string
+        DayOfBirth          :   DateTime
     }
 
 type CompanyInfo =
@@ -71,8 +72,9 @@ let IndividualFormlet regNoValidator =
             let!    firstName   = NonEmpty "First name"
             let!    lastName    = NonEmpty "Last name"
             let!    regno       = Validated "Registration no" regNoValidator
+            let!    dayOfBirth  = Date "Birth date"
 
-            return Individual {FirstName = firstName; LastName = lastName; RegNo = regno;}
+            return Individual {FirstName = firstName; LastName = lastName; RegNo = regno; DayOfBirth = dayOfBirth; }
         }
         |> Enhance.WithLegend "Individual Information"
 

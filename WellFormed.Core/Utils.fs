@@ -62,6 +62,12 @@ module internal Utils =
 
     let HardFail_InvalidCase () = HardFail "WellFormed.ProgrammmingError: This case shouldn't be reached"
 
+    let FailWithValue value (msg : string)   = 
+        {
+            Value       = Some value
+            Failures    = [{Context = []; Message = msg;}]
+        }
+
     let Fail (msg : string)   = 
         {
             Value       = None

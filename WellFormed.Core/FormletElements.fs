@@ -209,6 +209,19 @@ module internal FormletElements =
             base.OnLostFocus(e)
             FormletElement.RaiseRebuild this
 
+    type InputDateTimeElement(initialDate : DateTime option) as this =
+        inherit DatePicker()
+
+        do
+            this.Margin <- DefaultMargin
+            match initialDate with
+            | Some dt -> this.SelectedDate <- new Nullable<DateTime> (dt)
+            | _       -> ()
+
+        override this.OnSelectedDateChanged(e) = 
+            base.OnSelectedDateChanged(e)
+            FormletElement.RaiseRebuild this
+
     type InputOptionElement<'T>() as this =
         inherit ComboBox()
 

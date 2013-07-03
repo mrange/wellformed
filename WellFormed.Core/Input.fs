@@ -12,6 +12,7 @@
 
 namespace WellFormed.Core
 
+open System
 open System.Windows
 open System.Windows.Controls
 
@@ -20,6 +21,16 @@ module Input =
     let Text t = 
         let rebuild (ui :FrameworkElement) = CreateElement ui (fun () -> new InputTextElement(t)) :> FrameworkElement
         let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : InputTextElement)-> Success ui'.Text)
+
+        Formlet.New rebuild collect
+
+    let DateTime d = 
+        let failDate = DateTime.Today
+        let rebuild (ui :FrameworkElement) = CreateElement ui (fun () -> new InputDateTimeElement(d)) :> FrameworkElement
+        let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : InputDateTimeElement)-> 
+            let selectedDate = ui'.SelectedDate
+            if selectedDate.HasValue then Success selectedDate.Value
+            else FailWithValue failDate "Select a date")
 
         Formlet.New rebuild collect
 
