@@ -62,9 +62,11 @@ type FormletContainer<'T>(action : 'T -> unit, formlet : Formlet<'T>) as this=
             | :? FrameworkElement as fe -> formlet.Collect (fe)
             | _                         -> Fail_NeverBuiltUp()
 
-        match collect.Value, collect.Failures.Length with   
-        |   Some v, 0   -> action v
-        |   _           -> ()
+        let v = collect.Value
+
+        match collect.Failures.Length with   
+        |   0   -> action v
+        |   _   -> ()
 
 
     member this.BuildForm() = 

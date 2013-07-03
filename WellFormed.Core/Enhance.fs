@@ -89,15 +89,14 @@ module Enhance =
     let WithValidation (validator : 'T -> string option) (f : Formlet<'T>) : Formlet<'T> = 
         let rebuild (ui :FrameworkElement) =    f.Rebuild(ui)
         let collect (ui :FrameworkElement) =    let result = f.Collect(ui)
-                                                match result.Value with
-                                                |   Some v      ->  let fs = validator v
-                                                                    match fs with
-                                                                    |   Some fs'    ->  { 
-                                                                                            Value = Some v  
-                                                                                            Failures = {Context = []; Message = fs';}::result.Failures
-                                                                                        }
-                                                                    |   _           -> result
-                                                |   _           ->  result
+                                                let v = result.Value
+                                                let fs = validator v
+                                                match fs with
+                                                |   Some fs'    ->  { 
+                                                                        Value = v  
+                                                                        Failures = {Context = []; Message = fs';}::result.Failures
+                                                                    }
+                                                |   _           -> result
                                                 
 
         Formlet.New rebuild collect
@@ -115,10 +114,7 @@ module Enhance =
                                                 submitReset :> FrameworkElement
         let collect (ui :FrameworkElement) =    CollectFromElement ui (fun (ui' : SubmitResetElement) -> 
                                                     let collect = f.Collect(ui'.Right)
-                                                    ui'.SubmitAllowed <-
-                                                        match collect.Value, collect.Failures.Length with   
-                                                        |   Some _, 0   -> true
-                                                        |   _           -> false
+                                                    ui'.SubmitAllowed <- collect.Failures.Length = 0
                                                     collect
                                                     )
                                                 

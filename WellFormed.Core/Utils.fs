@@ -54,7 +54,7 @@ module internal Utils =
 
     let Success v   = 
         {
-            Value       = Some v
+            Value       = v
             Failures    = []
         }
 
@@ -64,13 +64,13 @@ module internal Utils =
 
     let FailWithValue value (msg : string)   = 
         {
-            Value       = Some value
+            Value       = value
             Failures    = [{Context = []; Message = msg;}]
         }
 
-    let Fail (msg : string)   = 
+    let Fail<'T> (msg : string)   = 
         {
-            Value       = None
+            Value       = Unchecked.defaultof<'T>
             Failures    = [{Context = []; Message = msg;}]
         }
 

@@ -28,7 +28,7 @@ type Failure =
 
 type Collect<'T> =
     {
-        Value       : 'T option
+        Value       : 'T
         Failures    : Failure list
     }
 
