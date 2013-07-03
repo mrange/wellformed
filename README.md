@@ -11,16 +11,17 @@ A simple form using WellFormed could then be
 
 ```
 
-let IndividualFormlet = 
+let IndividualFormlet regNoValidator = 
     Formlet.Do
         {
-            let!    firstName   = LabelInput "First name"
-            let!    lastName    = LabelInput "Last name"
-            let!    regno       = LabelInput "Registration no"
+            let!    firstName   = NonEmpty "First name"
+            let!    lastName    = NonEmpty "Last name"
+            let!    regno       = Validated "Registration no" regNoValidator
+            let!    dayOfBirth  = Date "Birth date"
 
-            return Individual {FirstName = firstName; LastName = lastName; RegNo = regno;}
+            return Individual {FirstName = firstName; LastName = lastName; RegNo = regno; DayOfBirth = dayOfBirth; }
         }
-        |> Enchance.WithGroup "Individual Information"
+        |> Enhance.WithLegend "Individual Information"
 
 
 ```
@@ -35,13 +36,14 @@ This how to use a combobox to show either the formlet to collect information abo
 
 ```
 
-let EntityFormlet = 
-    Formlet.Do
-        {
-            let! select = Select 0 ["Individual", IndividualFormlet; "Company",  CompanyFormlet]
-
-            return! select
-        }
+let EntityFormlet individualRegNoValidator companyRegNoValidator =  
+        let options  =  Input.Option [|"Individual", IndividualFormlet individualRegNoValidator; "Company",  CompanyFormlet companyRegNoValidator|]
+                        |> Enhance.WithLabel "Type"
+        Formlet.Do
+            {
+                let! option = options  
+                return! option
+            }
 
 ```
 
