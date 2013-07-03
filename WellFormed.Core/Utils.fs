@@ -137,7 +137,7 @@ module internal Utils =
     let DefaultButtonPadding    = Thickness(8.0,2.0,8.0,2.0)
 
     let DefaultBorderMargin     = Thickness(4.0,12.0,4.0,4.0)
-    let DefaultBorderPadding    = Thickness(0.0,24.0,0.0,0.0)
+    let DefaultBorderPadding    = Thickness(0.0,16.0,4.0,8.0)
     let DefaultBorderThickness  = Thickness(2.0)
     let DefaultBorderBrush      = Brushes.LightBlue
 
@@ -176,17 +176,17 @@ module internal Utils =
         textBox.Margin <- DefaultMargin
         textBox
 
-    let CreateLabel t w = 
-        let textBlock = CreateTextBlock t
-        textBlock.Width <- w
-        textBlock
-
-    let CreateLegend t : FrameworkElement*TextBox*Decorator = 
+    let CreateLabel t = 
         let label = CreateTextBox t
-        label.IsTabStop <- false
         label.IsReadOnly <- true
+        label.IsTabStop <- false
+        label.BorderThickness <- new Thickness (0.0)
         label.VerticalAlignment <- VerticalAlignment.Top
         label.HorizontalAlignment <- HorizontalAlignment.Left
+        label
+
+    let CreateLegend t : FrameworkElement*TextBox*Decorator = 
+        let label = CreateLabel t
         label.RenderTransform <- new TranslateTransform (8.0, 0.0)
         let border = new Border ()
         let outer = new Grid ()

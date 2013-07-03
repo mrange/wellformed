@@ -284,9 +284,10 @@ module internal FormletElements =
     type LabelElement(labelWidth : double) as this =
         inherit BinaryElement()
 
-        let label = CreateLabel "Label" labelWidth
+        let label = CreateLabel "Label"
 
         do
+            label.Width <- labelWidth
             this.Orientation    <- LeftToRight
             this.StretchBehavior<- RightStretches
             this.Left           <- label
