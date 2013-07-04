@@ -57,6 +57,8 @@ TODO
 ====
 
 1. Implement Enhance.Many - In order to create formlets that supports create list of objects
+1.1. Begun implement Enhance.Many, the UI is functional but a bit rough
+1. Tweak the UI to be more appealing
 1. Support Visual Styling of controls.
 1. Refactor Formlet<T> - In order to support advance layout, visual tree collapsing and smarter preserving of user state they way formlets are implemented will need a major overhaul. How you compose formlets will not be affected but custom implementations of formlets will.
 
