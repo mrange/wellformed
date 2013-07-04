@@ -20,15 +20,21 @@ type StretchBehavior =
     |   NoStretch
     |   RightStretches
 
+[<StructuralEquality>]
+[<StructuralComparison>]
 type Failure =
     {
         Context : string list
         Message : string
     }
+    static member New (context : string list) (message : string) = { Context = context; Message = message;}
 
+[<StructuralEquality>]
+[<StructuralComparison>]
 type Collect<'T> =
     {
         Value       : 'T
         Failures    : Failure list
     }
+    static member New (value : 'T) (failures : Failure list) = { Value = value; Failures = failures;}
 

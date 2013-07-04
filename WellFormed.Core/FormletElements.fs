@@ -263,12 +263,41 @@ module internal FormletElements =
             base.OnSelectionChanged(e)
             FormletElement.RaiseRebuild this
 
+    type ManyElement(initialCount : int) as this =
+        inherit BinaryElement()
+
+        let lazyState = lazy (CreateMany this.CanExecuteNew this.ExecuteNew)
+
+        let inner = new ObservableCollection<FrameworkElement> ()
+
+        override this.OnStartUp () =
+            let listBox, buttons, newButton = lazyState.Value
+
+            for i in 0..initialCount - 1 do
+                inner.Add null
+            this.Margin <- DefaultMargin
+            this.StretchBehavior <- RightStretches
+            listBox.ItemsSource <- inner
+            this.Left <- buttons
+            this.Right <- listBox
+
+            FormletElement.RaiseRebuild this
+
+        member this.ExecuteNew ()   =   inner.Add null
+                                        FormletElement.RaiseRebuild this
+        member this.CanExecuteNew ()=   true
+
+        member this.Inner
+            with get ()             = inner
+
+
     type LegendElement() as this =
         inherit UnaryElement()
 
         let outer, label, inner = CreateLegend "Group"
 
         do
+            this.Margin <- DefaultMargin
             this.Value <- outer
 
         member this.Inner
@@ -351,7 +380,6 @@ module internal FormletElements =
 
                 dc.DrawRectangle (null, ErrorVisualElement.pen, rect)
             
-
 
 
     type SubmitResetElement() as this =

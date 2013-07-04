@@ -54,11 +54,17 @@ type AddressInfo =
         Country             :   string
     }
 
+type StartKit =
+    {
+        StartKitId          :   string
+    }
+
 type PartnerInfo = 
     {
         RegistrationCountry :   string
         Entity              :   EntityInfo
         AddressInfo         :   AddressInfo
+        StartKits           :   StartKit array
     }
 
 // ----------------------------------------------------------------------------
@@ -118,6 +124,19 @@ let AddressFormlet =
         }
         |> Enhance.WithLegend "Address Information"
 
+let StartKitsFormlet = 
+    Formlet.Do
+        {
+            let!    startKitId      = NonEmpty      "StartKitId"
+
+            return 
+                {
+                    StartKitId       = startKitId      
+                }
+        }
+        |> Enhance.Many 1
+        |> Enhance.WithLegend "Pick one or more start kits"
+
 
 let EntityFormlet individualRegNoValidator companyRegNoValidator =  
         let options  =  Input.Option [|"Individual", IndividualFormlet individualRegNoValidator; "Company",  CompanyFormlet companyRegNoValidator|]
@@ -137,11 +156,14 @@ let PartnerFormlet =
 
             let! address = AddressFormlet
 
+            let! startKits = StartKitsFormlet
+
             return 
                 {
                     RegistrationCountry = registrationCountry
                     Entity              = entity
                     AddressInfo         = address
+                    StartKits           = startKits
                 }
         }
         |> Enhance.WithErrorSummary

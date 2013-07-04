@@ -22,6 +22,19 @@ open System.Windows.Threading
 [<AutoOpen>]
 module internal Utils =
 
+    type MyListBox () = 
+        inherit ListBox ()
+
+        override this.GetContainerForItemOverride () =
+            let container = base.GetContainerForItemOverride ()
+            
+            match container with
+            | :? ListBoxItem as lbi -> lbi.HorizontalContentAlignment <- HorizontalAlignment.Stretch
+            | _                     -> ()
+            
+            container 
+
+
     type Command(canExecute : unit -> bool, execute : unit -> unit) = 
         let canExecuteChanged           = new Event<EventHandler, EventArgs> ()
 
@@ -52,27 +65,15 @@ module internal Utils =
                             |> List.map (fun f -> {Context = ctx::f.Context; Message = f.Message})
         }
 
-    let Success v   = 
-        {
-            Value       = v
-            Failures    = []
-        }
+    let Success v = Collect.New v []
 
     let HardFail msg            = failwith msg
 
     let HardFail_InvalidCase () = HardFail "WellFormed.ProgrammmingError: This case shouldn't be reached"
 
-    let FailWithValue value (msg : string)   = 
-        {
-            Value       = value
-            Failures    = [{Context = []; Message = msg;}]
-        }
+    let FailWithValue value (msg : string) = Collect.New value [{Context = []; Message = msg;}]
 
-    let Fail<'T> (msg : string)   = 
-        {
-            Value       = Unchecked.defaultof<'T>
-            Failures    = [{Context = []; Message = msg;}]
-        }
+    let Fail<'T> (msg : string)   = Collect.New Unchecked.defaultof<'T> [{Context = []; Message = msg;}]
 
     let Fail_NeverBuiltUp ()= Fail "WellFormed.ProgrammmingError: Never built up"
              
@@ -136,7 +137,7 @@ module internal Utils =
 
     let DefaultButtonPadding    = Thickness(8.0,2.0,8.0,2.0)
 
-    let DefaultBorderMargin     = Thickness(4.0,12.0,4.0,4.0)
+    let DefaultBorderMargin     = Thickness(0.0,8.0,0.0,0.0)
     let DefaultBorderPadding    = Thickness(0.0,16.0,4.0,8.0)
     let DefaultBorderThickness  = Thickness(2.0)
     let DefaultBorderBrush      = Brushes.LightBlue
@@ -150,6 +151,13 @@ module internal Utils =
         let p = new Pen (br, th)
         p.Freeze ()
         p
+
+    let CreateListBox () = 
+        let listBox = new MyListBox() :> ListBox
+        listBox.MinHeight <- 24.0
+        ScrollViewer.SetVerticalScrollBarVisibility(listBox, ScrollBarVisibility.Visible)
+        ScrollViewer.SetHorizontalScrollBarVisibility(listBox, ScrollBarVisibility.Disabled)
+        listBox
 
     let CreateStackPanel orientation =
         let stackPanel = new StackPanel()
@@ -184,6 +192,14 @@ module internal Utils =
         label.VerticalAlignment <- VerticalAlignment.Top
         label.HorizontalAlignment <- HorizontalAlignment.Left
         label
+
+    let CreateMany canExecuteNew executeNew : ListBox*Panel*Button = 
+        let buttons = CreateStackPanel Orientation.Horizontal
+        let newButton = CreateButton "_New" canExecuteNew executeNew
+        ignore <| buttons.Children.Add newButton
+        let listBox = CreateListBox ()
+        listBox, buttons :> Panel, newButton
+        
 
     let CreateLegend t : FrameworkElement*TextBox*Decorator = 
         let label = CreateLabel t

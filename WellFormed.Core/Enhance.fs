@@ -13,14 +13,33 @@
 namespace WellFormed.Core
 
 open System
-
+open System.Collections.Generic
 open System.Text.RegularExpressions
-
 open System.Windows
 open System.Windows.Controls
 
 module Enhance = 
     
+    let Many initialCount (f : Formlet<'T>) : Formlet<'T array> = 
+        let rebuild (ui : FrameworkElement) =   let many = CreateElement ui (fun () -> new ManyElement(initialCount))
+                                                let inner = many.Inner
+                                                for i in 0..inner.Count - 1 do
+                                                    inner.[i] <- f.Rebuild(inner.[i])
+                                                many :> FrameworkElement
+        let collect (ui : FrameworkElement) =   CollectFromElement ui (fun (ui' : ManyElement) ->   let inner = ui'.Inner
+                                                                                                    let failures = HashSet<Failure>()
+                                                                                                    let result = Array.create inner.Count Unchecked.defaultof<'T>
+                                                                                                    for i in 0..inner.Count - 1 do
+                                                                                                        let fe = inner.[i]
+                                                                                                        let collect = f.Collect(fe)
+                                                                                                        result.[i] <- collect.Value
+                                                                                                        for failure in collect.Failures do
+                                                                                                            ignore <| failures.Add failure
+                                                                                                    Collect.New result (failures |> Seq.toList)
+                                                                                                    )
+
+        Formlet.New rebuild collect
+
     let WithLegend (t : string) (f : Formlet<'T>) : Formlet<'T> = 
         let rebuild (ui : FrameworkElement) =   let legend = CreateElement ui (fun () -> new LegendElement())
                                                 legend.Text <- t
