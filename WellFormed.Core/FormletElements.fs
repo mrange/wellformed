@@ -267,7 +267,7 @@ module internal FormletElements =
     type ManyElement(initialCount : int) as this =
         inherit BinaryElement()
 
-        let listBox, buttons, newButton = CreateMany this.CanExecuteNew this.ExecuteNew
+        let listBox, buttons, newButton, deleteButton = CreateMany this.CanExecuteNew this.ExecuteNew this.CanExecuteDelete this.ExecuteDelete
 
         let inner = new ObservableCollection<FrameworkElement> ()
 
@@ -285,6 +285,17 @@ module internal FormletElements =
         member this.ExecuteNew ()   =   inner.Add null
                                         FormletElement.RaiseRebuild this
         member this.CanExecuteNew ()=   true
+
+        member this.ExecuteDelete ()    =   let selectedItems = listBox.SelectedItems
+                                            let selection = Array.create selectedItems.Count (null :> FrameworkElement)
+                                            for i in 0..selectedItems.Count - 1 do
+                                                selection.[i] <- selectedItems.[i] :?> FrameworkElement
+
+                                            for i in selectedItems.Count - 1..-1..0 do
+                                                ignore <| inner.Remove(selection.[i])
+
+                                            FormletElement.RaiseRebuild this
+        member this.CanExecuteDelete () =   listBox.SelectedItems.Count > 0
 
         member this.Inner
             with get ()             = inner

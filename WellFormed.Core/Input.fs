@@ -24,6 +24,18 @@ module Input =
 
         Formlet.New rebuild collect
 
+    let Integer v = 
+        let map (collect : Collect<string>) : Collect<int> =
+            if collect.Failures.Length > 0 then
+                Collect.New 0 collect.Failures
+            else
+                let i = ref 0
+                if Int32.TryParse (collect.Value, i) then
+                    Success !i
+                else
+                    Fail "Input is not an integer" 
+        Text (v.ToString())
+        |> Formlet.MapResult map
     let DateTime d = 
         let failDate = DateTime.Today
         let rebuild (ui :FrameworkElement) = CreateElement ui (fun () -> new InputDateTimeElement(d)) :> FrameworkElement

@@ -74,6 +74,38 @@ module Enhance =
 
         Formlet.New rebuild collect
 
+    let WithMaxWidth (width : double) (f : Formlet<'T>) : Formlet<'T> = 
+        let rebuild (ui : FrameworkElement) =   let ui' = f.Rebuild(ui)
+                                                ui'.MaxWidth <- width
+                                                ui'
+        let collect (ui : FrameworkElement) =   f.Collect(ui)
+
+        Formlet.New rebuild collect
+
+    let WithMaxHeight (height : double) (f : Formlet<'T>) : Formlet<'T> = 
+        let rebuild (ui : FrameworkElement) =   let ui' = f.Rebuild(ui)
+                                                ui'.MaxHeight <- height
+                                                ui'
+        let collect (ui : FrameworkElement) =   f.Collect(ui)
+
+        Formlet.New rebuild collect
+
+    let WithMinWidth (width : double) (f : Formlet<'T>) : Formlet<'T> = 
+        let rebuild (ui : FrameworkElement) =   let ui' = f.Rebuild(ui)
+                                                ui'.MinWidth <- width
+                                                ui'
+        let collect (ui : FrameworkElement) =   f.Collect(ui)
+
+        Formlet.New rebuild collect
+
+    let WithMinHeight (height : double) (f : Formlet<'T>) : Formlet<'T> = 
+        let rebuild (ui : FrameworkElement) =   let ui' = f.Rebuild(ui)
+                                                ui'.MinHeight <- height
+                                                ui'
+        let collect (ui : FrameworkElement) =   f.Collect(ui)
+
+        Formlet.New rebuild collect
+
     let WithLabel (t : string) (f : Formlet<'T>) : Formlet<'T> = 
         let rebuild (ui :FrameworkElement) =    let label = CreateElement ui (fun () -> new LabelElement(100.0)) 
                                                 label.Text <- t

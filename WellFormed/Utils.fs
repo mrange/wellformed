@@ -85,6 +85,11 @@ module Utils =
         Input.Text "" 
         |> Enhance.WithLabel t
 
+    let Int t v = 
+        Input.Integer v
+        |> Enhance.WithErrorVisual
+        |> Enhance.WithLabel t
+
     let Date t = 
         Input.DateTime None
         |> Enhance.WithErrorVisual

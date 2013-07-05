@@ -57,6 +57,7 @@ type AddressInfo =
 type StartKit =
     {
         StartKitId          :   string
+        Quantity            :   int
     }
 
 type PartnerInfo = 
@@ -124,14 +125,18 @@ let AddressFormlet =
         }
         |> Enhance.WithLegend "Address Information"
 
+let StartKitIdFormlet   =    Input.Option [|"Coffee", "COFFEE"; "Food", "FOOD"|]
+                            |> Enhance.WithLabel "StartKitId"
 let StartKitsFormlet = 
     Formlet.Do
         {
-            let!    startKitId      = NonEmpty      "StartKitId"
+            let!    startKitId      = StartKitIdFormlet
+            let!    quantity        = Int           "Quantity"  1
 
             return 
                 {
-                    StartKitId       = startKitId      
+                    StartKitId      = startKitId      
+                    Quantity        = quantity      
                 }
         }
         |> Enhance.Many 1

@@ -22,19 +22,6 @@ open System.Windows.Threading
 [<AutoOpen>]
 module internal Utils =
 
-    type MyListBox () = 
-        inherit ListBox ()
-
-        override this.GetContainerForItemOverride () =
-            let container = base.GetContainerForItemOverride ()
-            
-            match container with
-            | :? ListBoxItem as lbi -> lbi.HorizontalContentAlignment <- HorizontalAlignment.Stretch
-            | _                     -> ()
-            
-            container 
-
-
     type Command(canExecute : unit -> bool, execute : unit -> unit) = 
         let canExecuteChanged           = new Event<EventHandler, EventArgs> ()
 
@@ -141,7 +128,8 @@ module internal Utils =
 
     let DefaultMargin           = Thickness(4.0)
 
-    let DefaultButtonPadding    = Thickness(8.0,2.0,8.0,2.0)
+    let DefaultButtonPadding    = Thickness(16.0,2.0,16.0,2.0)
+    let DefaultListBoxItemPadding   = Thickness(8.0,0.0,0.0,0.0)
 
     let DefaultBorderMargin     = Thickness(0.0,8.0,0.0,0.0)
     let DefaultBorderPadding    = Thickness(0.0,16.0,4.0,8.0)
@@ -158,9 +146,26 @@ module internal Utils =
         p.Freeze ()
         p
 
+    type MyListBox () = 
+        inherit ListBox ()
+
+        override this.GetContainerForItemOverride () =
+            let container = base.GetContainerForItemOverride ()
+            
+            match container with
+            | :? ListBoxItem as lbi -> lbi.HorizontalContentAlignment <- HorizontalAlignment.Stretch
+                                       lbi.Padding <- DefaultListBoxItemPadding 
+            | _                     -> ()
+            
+            container 
+
+
     let CreateListBox () = 
         let listBox = new MyListBox() :> ListBox
+        listBox.Margin <- DefaultMargin
+        listBox.SelectionMode <- SelectionMode.Extended
         listBox.MinHeight <- 24.0
+        listBox.MaxHeight <- 120.0
         ScrollViewer.SetVerticalScrollBarVisibility(listBox, ScrollBarVisibility.Visible)
         ScrollViewer.SetHorizontalScrollBarVisibility(listBox, ScrollBarVisibility.Disabled)
         listBox
@@ -205,12 +210,14 @@ module internal Utils =
         label.HorizontalAlignment <- HorizontalAlignment.Left
         label
 
-    let CreateMany canExecuteNew executeNew : ListBox*Panel*Button = 
+    let CreateMany canExecuteNew executeNew canExecuteDelete executeDelete : ListBox*Panel*Button*Button = 
         let buttons = CreateStackPanel Orientation.Horizontal
         let newButton = CreateButton "_New" canExecuteNew executeNew
+        let deleteButton = CreateButton "_Delete" canExecuteDelete executeDelete
         ignore <| buttons.Children.Add newButton
+        ignore <| buttons.Children.Add deleteButton
         let listBox = CreateListBox ()
-        listBox, buttons :> Panel, newButton
+        listBox, buttons :> Panel, newButton, deleteButton
         
 
     let CreateLegend t : FrameworkElement*TextBox*Decorator = 
