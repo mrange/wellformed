@@ -267,13 +267,11 @@ module internal FormletElements =
     type ManyElement(initialCount : int) as this =
         inherit BinaryElement()
 
-        let lazyState = lazy (CreateMany this.CanExecuteNew this.ExecuteNew)
+        let listBox, buttons, newButton = CreateMany this.CanExecuteNew this.ExecuteNew
 
         let inner = new ObservableCollection<FrameworkElement> ()
 
-        override this.OnStartUp () =
-            let listBox, buttons, newButton = lazyState.Value
-
+        do
             for i in 0..initialCount - 1 do
                 inner.Add null
             this.Margin <- DefaultMargin
@@ -370,21 +368,21 @@ module internal FormletElements =
     type SubmitResetElement() as this =
         inherit BinaryElement()
 
-        let submit      = lazy CreateButton "_Submit" this.CanSubmit this.Submit
-        let reset       = lazy CreateButton "_Reset" this.CanReset this.Reset
-        let stackPanel  = lazy CreateStackPanel Orientation.Horizontal
+        let submit      = CreateButton "_Submit" this.CanSubmit this.Submit
+        let reset       = CreateButton "_Reset" this.CanReset this.Reset
+        let stackPanel  = CreateStackPanel Orientation.Horizontal
 
         let mutable submitAllowed = false
 
-        override this.OnStartUp () =
-            ignore <| stackPanel.Value.Children.Add(submit.Value)
-            ignore <| stackPanel.Value.Children.Add(reset.Value)
-            this.Left <- stackPanel.Value
+        do
+            ignore <| stackPanel.Children.Add(submit)
+            ignore <| stackPanel.Children.Add(reset)
+            this.Left <- stackPanel
 
         member this.SubmitAllowed   
-            with get()          =   submitAllowed
-            and  set(value)     =   submitAllowed <- value
-                                    CommandManager.InvalidateRequerySuggested()
+            with get()          = submitAllowed
+            and  set(value)     = submitAllowed <- value
+                                  CommandManager.InvalidateRequerySuggested()
 
         member this.Submit ()   = FormletElement.RaiseSubmit this
         member this.CanSubmit ()= this.SubmitAllowed

@@ -175,7 +175,12 @@ module internal Utils =
         button.Content  <- t
         button.Margin   <- DefaultMargin
         button.Padding  <- DefaultButtonPadding
-        button.Command  <- Command (canExecute, execute)
+        let handler = ref null
+        let onLoaded s e =
+            button.Command  <- Command (canExecute, execute)
+            button.Loaded.RemoveHandler !handler
+        handler := RoutedEventHandler onLoaded
+        button.Loaded.AddHandler !handler
         button
 
     let CreateTextBlock t = 
