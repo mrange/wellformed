@@ -44,7 +44,7 @@ type EntityInfo =
 
 type AddressInfo =
     {
-        CarryOver           :   string
+        CareOf              :   string
         AddressLine1        :   string
         AddressLine2        :   string
         AddressLine3        :   string
@@ -102,7 +102,7 @@ let CountryFormlet =    Input.Option [|"Sweden", ("SE", SwedenRegNo); "Norway", 
 let AddressFormlet = 
     Formlet.Do
         {
-            let!    carryOver       = AllowEmpty    "C/O"
+            let!    careOf          = AllowEmpty    "C/O"
             let!    addressLine1    = NonEmpty      "Address"
             let!    addressLine2    = AllowEmpty    "Address"
             let!    addressLine3    = AllowEmpty    "Address"
@@ -113,7 +113,7 @@ let AddressFormlet =
 
             return 
                 {
-                    CarryOver       = carryOver      
+                    CareOf          = careOf
                     AddressLine1    = addressLine1  
                     AddressLine2    = addressLine2  
                     AddressLine3    = addressLine3  
