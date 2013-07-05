@@ -17,6 +17,7 @@ open System.Collections.Generic
 open System.Text.RegularExpressions
 open System.Windows
 open System.Windows.Controls
+open System.Windows.Documents
 
 module Enhance = 
     
@@ -94,14 +95,29 @@ module Enhance =
         Formlet.New rebuild collect
 
     let WithErrorVisual (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (ui :FrameworkElement) =    let visual = CreateElement ui (fun () -> new ErrorVisualElement()) 
-                                                visual.Value <- f.Rebuild(visual.Value)
-                                                visual :> FrameworkElement
-        let collect (ui :FrameworkElement) =    CollectFromElement ui (fun (ui' : ErrorVisualElement)   ->  let collect = f.Collect(ui'.Value)
-                                                                                                            ui'.Failures <- collect.Failures
-                                                                                                            collect
-                                                                                                            )
+        let rebuild (ui :FrameworkElement) =    f.Rebuild(ui)
+        let collect (ui :FrameworkElement) =    let collect = f.Collect(ui)
 
+                                                let layer = AdornerLayer.GetAdornerLayer(ui)
+                                                if layer <> null then
+                                                    let adorners = layer.GetAdorners(ui) ?^? [||]
+                                                    let adornerOption = 
+                                                        adorners
+                                                        |>  Array.tryFind (fun a -> 
+                                                            match a with 
+                                                            | :? ErrorVisualAdorner -> true
+                                                            | _ -> false
+                                                            )
+
+                                                    if collect.Failures.Length > 0 then
+                                                        match adornerOption with
+                                                        |   Some adorner    -> ()
+                                                        |   _               -> layer.Add(new ErrorVisualAdorner (ui))
+                                                    else
+                                                        match adornerOption with
+                                                        |   Some adorner    -> layer.Remove (adorner)
+                                                        |   _               -> ()
+                                                collect
         Formlet.New rebuild collect
 
  

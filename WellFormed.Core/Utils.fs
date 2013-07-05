@@ -65,6 +65,12 @@ module internal Utils =
                             |> List.map (fun f -> {Context = ctx::f.Context; Message = f.Message})
         }
 
+    let Coalesce x y = 
+        if x <> null then x
+        else y
+
+    let (?^?) = Coalesce
+
     let Success v = Collect.New v []
 
     let HardFail msg            = failwith msg
@@ -188,6 +194,7 @@ module internal Utils =
         let label = CreateTextBox t
         label.IsReadOnly <- true
         label.IsTabStop <- false
+        label.Background <- Brushes.Transparent
         label.BorderThickness <- new Thickness (0.0)
         label.VerticalAlignment <- VerticalAlignment.Top
         label.HorizontalAlignment <- HorizontalAlignment.Left
@@ -203,7 +210,8 @@ module internal Utils =
 
     let CreateLegend t : FrameworkElement*TextBox*Decorator = 
         let label = CreateLabel t
-        label.RenderTransform <- new TranslateTransform (8.0, 0.0)
+        label.Background <- DefaultBackgroundBrush
+        label.RenderTransform <- new TranslateTransform (8.0, -4.0)
         let border = new Border ()
         let outer = new Grid ()
         border.Margin <- DefaultBorderMargin

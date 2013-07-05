@@ -25,8 +25,6 @@ type FormletContainer<'T>(action : 'T -> unit, formlet : Formlet<'T>) as this=
     let         scrollViewer                        = new ScrollViewer()
 
     do
-        this.LayoutTransform <- new ScaleTransform (1.5, 1.5)
-
         AddRoutedEventHandler FormletElement.RebuildEvent  this this.OnRebuild
         AddRoutedEventHandler FormletElement.SubmitEvent   this this.OnSubmit
         AddRoutedEventHandler FormletElement.ResetEvent    this this.OnReset

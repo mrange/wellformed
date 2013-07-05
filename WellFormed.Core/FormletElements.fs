@@ -45,6 +45,7 @@ type FormletElement() =
         if not isInitialized then
             isInitialized <- true
             this.OnStartUp ()
+            FormletElement.RaiseRebuild this
 
         base.MeasureOverride sz
 
@@ -354,33 +355,17 @@ module internal FormletElements =
                 else
                     label.Visibility <- Visibility.Visible
 
-    type ErrorVisualElement()=
-        inherit UnaryElement()
+    type ErrorVisualAdorner(adornedElement) as this = 
+        inherit Adorner(adornedElement)
 
-        let mutable failures : Failure list = []
+        static let pen = CreatePen Brushes.Red 2.0
 
-        static member pen = CreatePen Brushes.Red 2.0
+        do 
+            this.IsHitTestVisible <- true
 
-        member this.Failures 
-            with get ()         =   failures
-            and  set (value)    =   failures <- value
-                                    this.InvalidateVisual ()
-
-        override this.OnRender (dc : DrawingContext) = 
-            if this.Failures.Length > 0 then
-                let rs = this.RenderSize
-
-                let innerMargin = if this.Value <> null then this.Value.Margin else Thickness ()
-
-                let rect = Rect (   innerMargin.Left                                        ,
-                                    innerMargin.Top                                         ,
-                                    rs.Width        - innerMargin.Right - innerMargin.Left  ,
-                                    rs.Height       - innerMargin.Bottom- innerMargin.Top      
-                                    )
-
-                dc.DrawRectangle (null, ErrorVisualElement.pen, rect)
-            
-
+        override this.OnRender (drawingContext) =
+            let rect = Rect (this.AdornedElement.RenderSize)
+            drawingContext.DrawRectangle (null, pen, rect)
 
     type SubmitResetElement() as this =
         inherit BinaryElement()
