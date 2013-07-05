@@ -7,7 +7,7 @@ I stumbled upon WebSharper for F# which was amazing. One of the most interesting
 
 That gave me the idea for WellFormed - Use F# computation expressions to define WPF forms
 
-A simple form using WellFormed could then be
+A simple [form] [1] using WellFormed could then be
 
 ```
 
@@ -65,3 +65,5 @@ TODO
 Feedback appreciated
 
 Mårten
+
+  [1]: https://github.com/mrange/wellformed/blob/master/snapshot.PNG        "WellFormed snapshot"
