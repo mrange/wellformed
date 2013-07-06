@@ -19,8 +19,8 @@ open System.Windows.Controls
 module Input =
 
     let Text t = 
-        let rebuild (ui :FrameworkElement) = CreateElement ui (fun () -> new InputTextElement(t)) :> FrameworkElement
-        let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : InputTextElement)-> Success ui'.Text)
+        let rebuild (fe :FrameworkElement) = CreateElement fe (fun () -> new InputTextElement(t)) :> FrameworkElement
+        let collect (fe :FrameworkElement) = CollectFromElement fe (fun (ui : InputTextElement)-> Success ui.Text)
 
         Formlet.New rebuild collect
 
@@ -38,20 +38,20 @@ module Input =
         |> Formlet.MapResult map
     let DateTime d = 
         let failDate = DateTime.Today
-        let rebuild (ui :FrameworkElement) = CreateElement ui (fun () -> new InputDateTimeElement(d)) :> FrameworkElement
-        let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : InputDateTimeElement)-> 
-            let selectedDate = ui'.SelectedDate
+        let rebuild (fe :FrameworkElement) = CreateElement fe (fun () -> new InputDateTimeElement(d)) :> FrameworkElement
+        let collect (fe :FrameworkElement) = CollectFromElement fe (fun (ui : InputDateTimeElement)-> 
+            let selectedDate = ui.SelectedDate
             if selectedDate.HasValue then Success selectedDate.Value
             else FailWithValue failDate "Select a date")
 
         Formlet.New rebuild collect
 
     let Option (options : (string * 'T) array)  = 
-        let rebuild (ui :FrameworkElement) =    let option = CreateElement ui (fun () -> new InputOptionElement<'T>())
+        let rebuild (fe :FrameworkElement) =    let option = CreateElement fe (fun () -> new InputOptionElement<'T>())
                                                 option.Options <- options
                                                 option :> FrameworkElement
-        let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : InputOptionElement<'T>) ->    
-            let c = ui'.Collect()
+        let collect (fe :FrameworkElement) = CollectFromElement fe (fun (ui : InputOptionElement<'T>) ->    
+            let c = ui.Collect()
             match c with
             |   Some v  -> Success v
             |   None    -> Fail "Select a value"

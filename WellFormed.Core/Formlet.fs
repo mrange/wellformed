@@ -49,7 +49,7 @@ open System.Windows.Controls
             the user input but other mutable state should be updated accordingly
 
         Typically a rebuild action could look like this:
-        let rebuild (ui :FrameworkElement) =    let option = CreateElement ui (fun () -> new InputOptionElement<'T>())
+        let rebuild (ui : FrameworkElement) =   let option = CreateElement ui (fun () -> new InputOptionElement<'T>())
                                                 option.Options <- options
                                                 option :> FrameworkElement
 
@@ -84,8 +84,8 @@ open System.Windows.Controls
 
         Typically a collect action could look like this:
 
-        let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : InputOptionElement<'T>) ->    
-            let c = ui'.Collect()
+        let collect (fe : FrameworkElement) = CollectFromElement ui (fun (ui : InputOptionElement<'T>) ->    
+            let c = ui.Collect()
             match c with
             |   Some v  -> Success v
             |   None    -> Fail "Select a value"
@@ -109,8 +109,8 @@ type Formlet<'T> =
 module Formlet =
     
     let MapResult (m : Collect<'T> -> Collect<'U>) (f : Formlet<'T>) : Formlet<'U> = 
-        let rebuild (ui :FrameworkElement) = f.Rebuild ui
-        let collect (ui :FrameworkElement) = m (f.Collect ui)
+        let rebuild (ui : FrameworkElement) = f.Rebuild ui
+        let collect (ui : FrameworkElement) = m (f.Collect ui)
         Formlet.New rebuild collect
 
     let Map (m : 'T -> 'U) (f : Formlet<'T>) : Formlet<'U> = 
@@ -118,7 +118,7 @@ module Formlet =
         MapResult m' f
 
     let Join (f: Formlet<Formlet<'T>>) : Formlet<'T> = 
-        let rebuild (ui :FrameworkElement) = 
+        let rebuild (ui : FrameworkElement) = 
             let result = CreateElement ui (fun () -> new JoinElement<Formlet<'T>> ())
             result.Left <- f.Rebuild result.Left
             let collect = f.Collect result.Left
@@ -127,10 +127,10 @@ module Formlet =
             result.Formlet  <- Some f'
             result.Right    <- f'.Rebuild result.Right
             result :> FrameworkElement
-        let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : JoinElement<Formlet<'T>>) -> 
-                match ui'.Formlet with
-                |   Some f' -> JoinFailures ui'.Collect (f'.Collect (ui'.Right))
-                |   None    -> JoinFailures ui'.Collect (Fail_NeverBuiltUp ())
+        let collect (fe : FrameworkElement) = CollectFromElement fe (fun (ui : JoinElement<Formlet<'T>>) -> 
+                match ui.Formlet with
+                |   Some f' -> JoinFailures ui.Collect (f'.Collect (ui.Right))
+                |   None    -> JoinFailures ui.Collect (Fail_NeverBuiltUp ())
                 )
         Formlet.New rebuild collect
 
@@ -138,14 +138,14 @@ module Formlet =
         f |> Map b |> Join
 
     let Return (x : 'T) : Formlet<'T> = 
-        let rebuild (ui :FrameworkElement) = null
-        let collect (ui :FrameworkElement) = Success x
+        let rebuild (ui : FrameworkElement) = null
+        let collect (ui : FrameworkElement) = Success x
         Formlet.New rebuild collect
 
     let Delay (f : unit -> Formlet<'T>) : Formlet<'T> = 
         let f' = lazy (f())
-        let rebuild (ui :FrameworkElement) = f'.Value.Rebuild ui
-        let collect (ui :FrameworkElement) = f'.Value.Collect ui
+        let rebuild (ui : FrameworkElement) = f'.Value.Rebuild ui
+        let collect (ui : FrameworkElement) = f'.Value.Collect ui
         Formlet.New rebuild collect
 
     let ReturnFrom (f : Formlet<'T>) = f

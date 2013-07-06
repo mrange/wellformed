@@ -236,16 +236,16 @@ module internal Utils =
 
 [<AutoOpen>]
 module PublicUtils =
-    let CreateElement (ui : FrameworkElement) (creator : unit -> #FrameworkElement) : #FrameworkElement = 
-        match ui with
-        | :? #FrameworkElement as ui' -> ui'
+    let CreateElement (fe : FrameworkElement) (creator : unit -> #FrameworkElement) : #FrameworkElement = 
+        match fe with
+        | :? #FrameworkElement as ui -> ui
         | _                 -> creator()
 
-    let ApplyToElement defaultTo (ui : FrameworkElement) (apply : #FrameworkElement -> 'T) : 'T = 
-        match ui with
-        | :? #FrameworkElement as ui'   -> apply ui'
+    let ApplyToElement defaultTo (fe : FrameworkElement) (apply : #FrameworkElement -> 'T) : 'T = 
+        match fe with
+        | :? #FrameworkElement as ui    -> apply ui
         | _                             -> defaultTo
 
-    let CollectFromElement (ui : FrameworkElement) (apply : #FrameworkElement -> Collect<'T>) : Collect<'T> = 
-        ApplyToElement (Fail_NeverBuiltUp ()) ui apply 
+    let CollectFromElement (fe : FrameworkElement) (apply : #FrameworkElement -> Collect<'T>) : Collect<'T> = 
+        ApplyToElement (Fail_NeverBuiltUp ()) fe apply 
 

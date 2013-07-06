@@ -22,12 +22,12 @@ open System.Windows.Documents
 module Enhance = 
     
     let Many initialCount (f : Formlet<'T>) : Formlet<'T array> = 
-        let rebuild (ui : FrameworkElement) =   let many = CreateElement ui (fun () -> new ManyElement(initialCount))
+        let rebuild (fe : FrameworkElement) =   let many = CreateElement fe (fun () -> new ManyElement(initialCount))
                                                 let inner = many.Inner
                                                 for i in 0..inner.Count - 1 do
                                                     inner.[i] <- f.Rebuild inner.[i]
                                                 many :> FrameworkElement
-        let collect (ui : FrameworkElement) =   CollectFromElement ui (fun (ui' : ManyElement) ->   let inner = ui'.Inner
+        let collect (fe : FrameworkElement) =   CollectFromElement fe (fun (ui : ManyElement) ->    let inner = ui.Inner
                                                                                                     let failures = HashSet<Failure>()
                                                                                                     let result = Array.create inner.Count Unchecked.defaultof<'T>
                                                                                                     for i in 0..inner.Count - 1 do
@@ -42,84 +42,84 @@ module Enhance =
         Formlet.New rebuild collect
 
     let WithLegend (t : string) (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (ui : FrameworkElement) =   let legend = CreateElement ui (fun () -> new LegendElement())
+        let rebuild (fe : FrameworkElement) =   let legend = CreateElement fe (fun () -> new LegendElement())
                                                 legend.Text <- t
                                                 legend.Inner <- f.Rebuild legend.Inner
                                                 legend :> FrameworkElement
-        let collect (ui : FrameworkElement) =   AppendFailureContext t <| CollectFromElement ui (fun (ui' : LegendElement) -> f.Collect ui'.Inner)
+        let collect (fe : FrameworkElement) =   AppendFailureContext t <| CollectFromElement fe (fun (ui' : LegendElement) -> f.Collect ui'.Inner)
 
         Formlet.New rebuild collect
 
     let WithStyle (style : Style) (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (ui : FrameworkElement) =   let ui' = f.Rebuild ui
+        let rebuild (fe : FrameworkElement) =   let ui' = f.Rebuild fe
                                                 ui'.Style <- style
                                                 ui'
-        let collect (ui : FrameworkElement) =   f.Collect ui
+        let collect (fe : FrameworkElement) =   f.Collect fe
 
         Formlet.New rebuild collect
 
     let WithWidth (width : double) (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (ui : FrameworkElement) =   let ui' = f.Rebuild ui
+        let rebuild (fe : FrameworkElement) =   let ui' = f.Rebuild fe
                                                 ui'.Width <- width
                                                 ui'
-        let collect (ui : FrameworkElement) =   f.Collect ui
+        let collect (fe : FrameworkElement) =   f.Collect fe
 
         Formlet.New rebuild collect
 
     let WithHeight (height : double) (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (ui : FrameworkElement) =   let ui' = f.Rebuild ui
+        let rebuild (fe : FrameworkElement) =   let ui' = f.Rebuild fe
                                                 ui'.Height <- height
                                                 ui'
-        let collect (ui : FrameworkElement) =   f.Collect ui
+        let collect (fe : FrameworkElement) =   f.Collect fe
 
         Formlet.New rebuild collect
 
     let WithMaxWidth (width : double) (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (ui : FrameworkElement) =   let ui' = f.Rebuild ui
+        let rebuild (fe : FrameworkElement) =   let ui' = f.Rebuild fe
                                                 ui'.MaxWidth <- width
                                                 ui'
-        let collect (ui : FrameworkElement) =   f.Collect ui
+        let collect (fe : FrameworkElement) =   f.Collect fe
 
         Formlet.New rebuild collect
 
     let WithMaxHeight (height : double) (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (ui : FrameworkElement) =   let ui' = f.Rebuild ui
+        let rebuild (fe : FrameworkElement) =   let ui' = f.Rebuild fe
                                                 ui'.MaxHeight <- height
                                                 ui'
-        let collect (ui : FrameworkElement) =   f.Collect ui
+        let collect (fe : FrameworkElement) =   f.Collect fe
 
         Formlet.New rebuild collect
 
     let WithMinWidth (width : double) (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (ui : FrameworkElement) =   let ui' = f.Rebuild ui
+        let rebuild (fe : FrameworkElement) =   let ui' = f.Rebuild fe
                                                 ui'.MinWidth <- width
                                                 ui'
-        let collect (ui : FrameworkElement) =   f.Collect ui
+        let collect (fe : FrameworkElement) =   f.Collect fe
 
         Formlet.New rebuild collect
 
     let WithMinHeight (height : double) (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (ui : FrameworkElement) =   let ui' = f.Rebuild(ui)
+        let rebuild (fe : FrameworkElement) =   let ui' = f.Rebuild fe
                                                 ui'.MinHeight <- height
                                                 ui'
-        let collect (ui : FrameworkElement) =   f.Collect ui
+        let collect (fe : FrameworkElement) =   f.Collect fe
 
         Formlet.New rebuild collect
 
     let WithLabel (t : string) (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (ui :FrameworkElement) =    let label = CreateElement ui (fun () -> new LabelElement(100.0)) 
+        let rebuild (fe : FrameworkElement) =   let label = CreateElement fe (fun () -> new LabelElement(100.0)) 
                                                 label.Text <- t
                                                 label.Right <- f.Rebuild label.Right
                                                 label :> FrameworkElement
-        let collect (ui :FrameworkElement) =    AppendFailureContext t <| CollectFromElement ui (fun (ui' : LabelElement) -> f.Collect ui'.Right)
+        let collect (fe : FrameworkElement) =   AppendFailureContext t <| CollectFromElement fe (fun (ui' : LabelElement) -> f.Collect ui'.Right)
 
         Formlet.New rebuild collect
 
     let WithErrorSummary (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (ui :FrameworkElement) =    let summary = CreateElement ui (fun () -> new ErrorSummaryElement()) 
+        let rebuild (fe : FrameworkElement) =   let summary = CreateElement fe (fun () -> new ErrorSummaryElement()) 
                                                 summary.Right <- f.Rebuild summary.Right
                                                 summary :> FrameworkElement
-        let collect (ui :FrameworkElement) =    CollectFromElement ui (fun (ui' : ErrorSummaryElement) ->   let collect = f.Collect ui'.Right
+        let collect (fe : FrameworkElement) =   CollectFromElement fe (fun (ui' : ErrorSummaryElement) ->   let collect = f.Collect ui'.Right
                                                                                                             ui'.Failures <- collect.Failures
                                                                                                             collect
                                                                                                             )
@@ -127,12 +127,12 @@ module Enhance =
         Formlet.New rebuild collect
 
     let WithErrorVisual (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (ui :FrameworkElement) =    f.Rebuild ui 
-        let collect (ui :FrameworkElement) =    let collect = f.Collect ui
+        let rebuild (fe : FrameworkElement) =   f.Rebuild fe 
+        let collect (fe : FrameworkElement) =   let collect = f.Collect fe
 
-                                                let layer = AdornerLayer.GetAdornerLayer(ui)
+                                                let layer = AdornerLayer.GetAdornerLayer fe
                                                 if layer <> null then
-                                                    let adorners = layer.GetAdorners(ui) ?^? [||]
+                                                    let adorners = layer.GetAdorners fe ?^? [||]
                                                     let adornerOption = 
                                                         adorners
                                                         |>  Array.tryFind (fun a -> 
@@ -144,7 +144,7 @@ module Enhance =
                                                     if collect.Failures.Length > 0 then
                                                         match adornerOption with
                                                         |   Some adorner    -> ()
-                                                        |   _               -> layer.Add(new ErrorVisualAdorner (ui))
+                                                        |   _               -> layer.Add(new ErrorVisualAdorner (fe))
                                                     else
                                                         match adornerOption with
                                                         |   Some adorner    -> layer.Remove (adorner)
@@ -154,8 +154,8 @@ module Enhance =
 
  
     let WithValidation (validator : 'T -> string option) (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (ui :FrameworkElement) =    f.Rebuild ui 
-        let collect (ui :FrameworkElement) =    let result = f.Collect ui
+        let rebuild (fe : FrameworkElement) =   f.Rebuild fe 
+        let collect (fe : FrameworkElement) =   let result = f.Collect fe
                                                 let v = result.Value
                                                 let fs = validator v
                                                 match fs with
@@ -176,10 +176,10 @@ module Enhance =
         WithValidation (fun s -> if r.IsMatch s then None else Some msg) f
 
     let WithSubmitAndReset (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (ui :FrameworkElement) =    let submitReset = CreateElement ui (fun () -> new SubmitResetElement()) 
+        let rebuild (fe : FrameworkElement) =   let submitReset = CreateElement fe (fun () -> new SubmitResetElement()) 
                                                 submitReset.Right <- f.Rebuild submitReset.Right
                                                 submitReset :> FrameworkElement
-        let collect (ui :FrameworkElement) =    CollectFromElement ui (fun (ui' : SubmitResetElement) -> 
+        let collect (fe : FrameworkElement) =   CollectFromElement fe (fun (ui' : SubmitResetElement) -> 
                                                     let collect = f.Collect ui'.Right
                                                     ui'.SubmitAllowed <- collect.Failures.Length = 0
                                                     collect
