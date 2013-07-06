@@ -46,62 +46,62 @@ module Enhance =
                                                 legend.Text <- t
                                                 legend.Inner <- f.Rebuild legend.Inner
                                                 legend :> FrameworkElement
-        let collect (fe : FrameworkElement) =   AppendFailureContext t <| CollectFromElement fe (fun (ui' : LegendElement) -> f.Collect ui'.Inner)
+        let collect (fe : FrameworkElement) =   AppendFailureContext t <| CollectFromElement fe (fun (ui : LegendElement) -> f.Collect ui.Inner)
 
         Formlet.New rebuild collect
 
     let WithStyle (style : Style) (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (fe : FrameworkElement) =   let ui' = f.Rebuild fe
-                                                ui'.Style <- style
-                                                ui'
+        let rebuild (fe : FrameworkElement) =   let ui = f.Rebuild fe
+                                                ui.Style <- style
+                                                ui
         let collect (fe : FrameworkElement) =   f.Collect fe
 
         Formlet.New rebuild collect
 
     let WithWidth (width : double) (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (fe : FrameworkElement) =   let ui' = f.Rebuild fe
-                                                ui'.Width <- width
-                                                ui'
+        let rebuild (fe : FrameworkElement) =   let ui = f.Rebuild fe
+                                                ui.Width <- width
+                                                ui
         let collect (fe : FrameworkElement) =   f.Collect fe
 
         Formlet.New rebuild collect
 
     let WithHeight (height : double) (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (fe : FrameworkElement) =   let ui' = f.Rebuild fe
-                                                ui'.Height <- height
-                                                ui'
+        let rebuild (fe : FrameworkElement) =   let ui = f.Rebuild fe
+                                                ui.Height <- height
+                                                ui
         let collect (fe : FrameworkElement) =   f.Collect fe
 
         Formlet.New rebuild collect
 
     let WithMaxWidth (width : double) (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (fe : FrameworkElement) =   let ui' = f.Rebuild fe
-                                                ui'.MaxWidth <- width
-                                                ui'
+        let rebuild (fe : FrameworkElement) =   let ui = f.Rebuild fe
+                                                ui.MaxWidth <- width
+                                                ui
         let collect (fe : FrameworkElement) =   f.Collect fe
 
         Formlet.New rebuild collect
 
     let WithMaxHeight (height : double) (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (fe : FrameworkElement) =   let ui' = f.Rebuild fe
-                                                ui'.MaxHeight <- height
-                                                ui'
+        let rebuild (fe : FrameworkElement) =   let ui = f.Rebuild fe
+                                                ui.MaxHeight <- height
+                                                ui
         let collect (fe : FrameworkElement) =   f.Collect fe
 
         Formlet.New rebuild collect
 
     let WithMinWidth (width : double) (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (fe : FrameworkElement) =   let ui' = f.Rebuild fe
-                                                ui'.MinWidth <- width
-                                                ui'
+        let rebuild (fe : FrameworkElement) =   let ui = f.Rebuild fe
+                                                ui.MinWidth <- width
+                                                ui
         let collect (fe : FrameworkElement) =   f.Collect fe
 
         Formlet.New rebuild collect
 
     let WithMinHeight (height : double) (f : Formlet<'T>) : Formlet<'T> = 
-        let rebuild (fe : FrameworkElement) =   let ui' = f.Rebuild fe
-                                                ui'.MinHeight <- height
-                                                ui'
+        let rebuild (fe : FrameworkElement) =   let ui = f.Rebuild fe
+                                                ui.MinHeight <- height
+                                                ui
         let collect (fe : FrameworkElement) =   f.Collect fe
 
         Formlet.New rebuild collect
@@ -111,7 +111,7 @@ module Enhance =
                                                 label.Text <- t
                                                 label.Right <- f.Rebuild label.Right
                                                 label :> FrameworkElement
-        let collect (fe : FrameworkElement) =   AppendFailureContext t <| CollectFromElement fe (fun (ui' : LabelElement) -> f.Collect ui'.Right)
+        let collect (fe : FrameworkElement) =   AppendFailureContext t <| CollectFromElement fe (fun (ui : LabelElement) -> f.Collect ui.Right)
 
         Formlet.New rebuild collect
 
@@ -119,8 +119,8 @@ module Enhance =
         let rebuild (fe : FrameworkElement) =   let summary = CreateElement fe (fun () -> new ErrorSummaryElement()) 
                                                 summary.Right <- f.Rebuild summary.Right
                                                 summary :> FrameworkElement
-        let collect (fe : FrameworkElement) =   CollectFromElement fe (fun (ui' : ErrorSummaryElement) ->   let collect = f.Collect ui'.Right
-                                                                                                            ui'.Failures <- collect.Failures
+        let collect (fe : FrameworkElement) =   CollectFromElement fe (fun (ui : ErrorSummaryElement) ->    let collect = f.Collect ui.Right
+                                                                                                            ui.Failures <- collect.Failures
                                                                                                             collect
                                                                                                             )
 
@@ -179,9 +179,9 @@ module Enhance =
         let rebuild (fe : FrameworkElement) =   let submitReset = CreateElement fe (fun () -> new SubmitResetElement()) 
                                                 submitReset.Right <- f.Rebuild submitReset.Right
                                                 submitReset :> FrameworkElement
-        let collect (fe : FrameworkElement) =   CollectFromElement fe (fun (ui' : SubmitResetElement) -> 
-                                                    let collect = f.Collect ui'.Right
-                                                    ui'.SubmitAllowed <- collect.Failures.Length = 0
+        let collect (fe : FrameworkElement) =   CollectFromElement fe (fun (ui : SubmitResetElement) -> 
+                                                    let collect = f.Collect ui.Right
+                                                    ui.SubmitAllowed <- collect.Failures.Length = 0
                                                     collect
                                                     )
                                                 
