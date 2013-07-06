@@ -140,6 +140,7 @@ let StartKitsFormlet =
                 }
         }
         |> Enhance.Many 1
+        |> Enhance.WithMinHeight 200.0
         |> Enhance.WithLegend "Pick one or more start kits"
 
 

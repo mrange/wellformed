@@ -52,56 +52,49 @@ module Enhance =
 
     let WithStyle (style : Style) (f : Formlet<'T>) : Formlet<'T> = 
         let rebuild (fe : FrameworkElement) =   let ui = f.Rebuild fe
-                                                ui.Style <- style
-                                                ui
+                                                ProcessElement ui (fun ui' -> ui.Style <- style)
         let collect (fe : FrameworkElement) =   f.Collect fe
 
         Formlet.New rebuild collect
 
     let WithWidth (width : double) (f : Formlet<'T>) : Formlet<'T> = 
         let rebuild (fe : FrameworkElement) =   let ui = f.Rebuild fe
-                                                ui.Width <- width
-                                                ui
+                                                ProcessElement ui (fun ui' -> ui.Width <- width)
         let collect (fe : FrameworkElement) =   f.Collect fe
 
         Formlet.New rebuild collect
 
     let WithHeight (height : double) (f : Formlet<'T>) : Formlet<'T> = 
         let rebuild (fe : FrameworkElement) =   let ui = f.Rebuild fe
-                                                ui.Height <- height
-                                                ui
+                                                ProcessElement ui (fun ui' -> ui.Height <- height)
         let collect (fe : FrameworkElement) =   f.Collect fe
 
         Formlet.New rebuild collect
 
-    let WithMaxWidth (width : double) (f : Formlet<'T>) : Formlet<'T> = 
+    let WithMaxWidth (maxWidth : double) (f : Formlet<'T>) : Formlet<'T> = 
         let rebuild (fe : FrameworkElement) =   let ui = f.Rebuild fe
-                                                ui.MaxWidth <- width
-                                                ui
+                                                ProcessElement ui (fun ui' -> ui.MaxWidth <- maxWidth)
         let collect (fe : FrameworkElement) =   f.Collect fe
 
         Formlet.New rebuild collect
 
-    let WithMaxHeight (height : double) (f : Formlet<'T>) : Formlet<'T> = 
+    let WithMaxHeight (maxHeight : double) (f : Formlet<'T>) : Formlet<'T> = 
         let rebuild (fe : FrameworkElement) =   let ui = f.Rebuild fe
-                                                ui.MaxHeight <- height
-                                                ui
+                                                ProcessElement ui (fun ui' -> ui.MaxHeight <- maxHeight)
         let collect (fe : FrameworkElement) =   f.Collect fe
 
         Formlet.New rebuild collect
 
-    let WithMinWidth (width : double) (f : Formlet<'T>) : Formlet<'T> = 
+    let WithMinWidth (minWidth : double) (f : Formlet<'T>) : Formlet<'T> = 
         let rebuild (fe : FrameworkElement) =   let ui = f.Rebuild fe
-                                                ui.MinWidth <- width
-                                                ui
+                                                ProcessElement ui (fun ui' -> ui.MinWidth <- minWidth)
         let collect (fe : FrameworkElement) =   f.Collect fe
 
         Formlet.New rebuild collect
 
-    let WithMinHeight (height : double) (f : Formlet<'T>) : Formlet<'T> = 
+    let WithMinHeight (minHeight : double) (f : Formlet<'T>) : Formlet<'T> = 
         let rebuild (fe : FrameworkElement) =   let ui = f.Rebuild fe
-                                                ui.MinHeight <- height
-                                                ui
+                                                ProcessElement ui (fun ui' -> ui.MinHeight <- minHeight)
         let collect (fe : FrameworkElement) =   f.Collect fe
 
         Formlet.New rebuild collect

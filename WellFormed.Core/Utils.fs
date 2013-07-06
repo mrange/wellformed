@@ -241,6 +241,12 @@ module PublicUtils =
         | :? #FrameworkElement as ui -> ui
         | _                 -> creator()
 
+    let ProcessElement (fe : FrameworkElement) (p : FrameworkElement -> unit) : FrameworkElement = 
+        if fe = null then null
+        else
+            p fe
+            fe
+
     let ApplyToElement defaultTo (fe : FrameworkElement) (apply : #FrameworkElement -> 'T) : 'T = 
         match fe with
         | :? #FrameworkElement as ui    -> apply ui
