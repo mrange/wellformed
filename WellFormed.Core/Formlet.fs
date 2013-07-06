@@ -120,12 +120,12 @@ module Formlet =
     let Join (f: Formlet<Formlet<'T>>) : Formlet<'T> = 
         let rebuild (ui :FrameworkElement) = 
             let result = CreateElement ui (fun () -> new JoinElement<Formlet<'T>> ())
-            result.Left <- f.Rebuild(result.Left)
-            let collect = f.Collect(result.Left)
+            result.Left <- f.Rebuild result.Left
+            let collect = f.Collect result.Left
             result.Collect <- collect
             let f' = collect.Value
             result.Formlet  <- Some f'
-            result.Right    <- f'.Rebuild(result.Right)
+            result.Right    <- f'.Rebuild result.Right
             result :> FrameworkElement
         let collect (ui :FrameworkElement) = CollectFromElement ui (fun (ui' : JoinElement<Formlet<'T>>) -> 
                 match ui'.Formlet with
@@ -144,8 +144,8 @@ module Formlet =
 
     let Delay (f : unit -> Formlet<'T>) : Formlet<'T> = 
         let f' = lazy (f())
-        let rebuild (ui :FrameworkElement) = f'.Value.Rebuild(ui)
-        let collect (ui :FrameworkElement) = f'.Value.Collect(ui)
+        let rebuild (ui :FrameworkElement) = f'.Value.Rebuild ui
+        let collect (ui :FrameworkElement) = f'.Value.Collect ui
         Formlet.New rebuild collect
 
     let ReturnFrom (f : Formlet<'T>) = f

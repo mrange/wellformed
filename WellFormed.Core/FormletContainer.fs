@@ -57,7 +57,7 @@ type FormletContainer<'T>(action : 'T -> unit, formlet : Formlet<'T>) as this=
     member this.SubmitForm() = 
         let collect = 
             match scrollViewer.Content with 
-            | :? FrameworkElement as fe -> formlet.Collect (fe)
+            | :? FrameworkElement as fe -> formlet.Collect fe
             | _                         -> Fail_NeverBuiltUp()
 
         let v = collect.Value
@@ -69,12 +69,12 @@ type FormletContainer<'T>(action : 'T -> unit, formlet : Formlet<'T>) as this=
 
     member this.BuildForm() = 
         match scrollViewer.Content with 
-            | :? FrameworkElement as fe -> scrollViewer.Content <- formlet.Rebuild(fe)
-            | _                         -> scrollViewer.Content <- formlet.Rebuild(null)
+            | :? FrameworkElement as fe -> scrollViewer.Content <- formlet.Rebuild fe
+            | _                         -> scrollViewer.Content <- formlet.Rebuild null
 
         let collect = 
             match scrollViewer.Content with 
-            | :? FrameworkElement as fe -> formlet.Collect (fe)
+            | :? FrameworkElement as fe -> formlet.Collect fe
             | _                         -> Fail_NeverBuiltUp()
 
 
