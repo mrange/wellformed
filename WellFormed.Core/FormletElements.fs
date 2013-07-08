@@ -341,7 +341,7 @@ module internal FormletElements =
         let label = CreateTextBlock ""
 
         do
-            label.Foreground    <- Brushes.Red
+            label.Foreground    <- DefaultErrorBrush
             label.FontWeight    <- FontWeights.Bold
             this.Left           <- label
 
@@ -367,7 +367,7 @@ module internal FormletElements =
     type ErrorVisualAdorner(adornedElement) as this = 
         inherit Adorner(adornedElement)
 
-        static let pen = CreatePen Brushes.Red 2.0
+        static let pen = CreatePen DefaultErrorBrush 2.0
 
         do 
             this.IsHitTestVisible <- true

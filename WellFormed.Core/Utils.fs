@@ -123,19 +123,6 @@ module internal Utils =
         let d = ActionAsDelegate action
         ignore <| dispatcher.BeginInvoke (DispatcherPriority.ApplicationIdle, d)
 
-
-    let DefaultBackgroundBrush  = Brushes.White
-
-    let DefaultMargin           = Thickness(4.0)
-
-    let DefaultButtonPadding    = Thickness(16.0,2.0,16.0,2.0)
-    let DefaultListBoxItemPadding   = Thickness(8.0,0.0,0.0,0.0)
-
-    let DefaultBorderMargin     = Thickness(0.0,8.0,0.0,0.0)
-    let DefaultBorderPadding    = Thickness(0.0,16.0,4.0,8.0)
-    let DefaultBorderThickness  = Thickness(2.0)
-    let DefaultBorderBrush      = Brushes.LightBlue
-
     let CreateRoutedEvent<'TOwner> name = EventManager.RegisterRoutedEvent (name + "Event", RoutingStrategy.Bubble, typeof<RoutedEventHandler>, typeof<'TOwner>)
     let RaiseRoutedEvent routedEvent (sender : UIElement) = let args = new RoutedEventArgs (routedEvent, sender)
                                                             sender.RaiseEvent args
@@ -146,18 +133,87 @@ module internal Utils =
         p.Freeze ()
         p
 
-    type MyListBox () = 
+    let DefaultBackgroundBrush  = Brushes.White
+    let DefaultForegroundBrush  = Brushes.Black
+    let DefaultBorderBrush      = Brushes.LightBlue
+    let DefaultErrorBrush       = Brushes.Red
+
+    let DefaultMargin           = Thickness(4.0)
+
+    let DefaultButtonPadding    = Thickness(16.0,2.0,16.0,2.0)
+
+    let DefaultListBoxItemPadding   = Thickness(24.0,0.0,0.0,0.0)
+
+    let DefaultBorderMargin     = Thickness(0.0,8.0,0.0,0.0)
+    let DefaultBorderPadding    = Thickness(0.0,16.0,4.0,8.0)
+    let DefaultBorderThickness  = Thickness(2.0)
+
+    type MyListBoxItem () as this =
+        inherit ListBoxItem ()
+
+        static let pen      = CreatePen DefaultBorderBrush 1.0
+        static let typeFace = Typeface("Calibri")
+
+        static let transform = 
+            let transform = Matrix.Identity
+            transform.Rotate 90.0
+            transform.Translate (DefaultListBoxItemPadding.Left + 2.0, 4.0)
+            MatrixTransform (transform)
+
+        let mutable formattedText = Unchecked.defaultof<FormattedText>
+        let mutable lastIndex = -1
+
+        do 
+            this.HorizontalContentAlignment <- HorizontalAlignment.Stretch
+            this.Padding <- DefaultListBoxItemPadding
+
+        override this.OnPropertyChanged (e) =
+            base.OnPropertyChanged e
+            if e.Property = ListBox.AlternationIndexProperty then
+                this.InvalidateVisual ()
+
+        override this.OnRender (drawingContext) =
+
+            let culture = System.Threading.Thread.CurrentThread.CurrentUICulture
+
+            let index = ListBox.GetAlternationIndex (this)
+            if index <> lastIndex || formattedText = null then
+                formattedText <- FormattedText (
+                    index.ToString("000", culture)  ,
+                    culture                         ,
+                    FlowDirection.LeftToRight       ,
+                    typeFace                        ,
+                    24.0                            ,
+                    DefaultBackgroundBrush
+                    )
+                lastIndex <- index
+
+            let rs = this.RenderSize
+
+            let rect = Rect (0.0, 0.0, this.Padding.Left, rs.Height)
+
+            drawingContext.DrawRectangle (DefaultBorderBrush, null, rect)
+
+            let p0 = Point (0.0, rs.Height)
+            let p1 = Point (rs.Width, rs.Height)
+            drawingContext.DrawLine (pen, p0, p1)
+
+            drawingContext.PushTransform transform
+
+            drawingContext.DrawText (formattedText, Point (0.0, 0.0))
+
+            drawingContext.Pop ()
+
+
+
+    type MyListBox () as this = 
         inherit ListBox ()
 
+        do
+            this.AlternationCount <- Int32.MaxValue
+
         override this.GetContainerForItemOverride () =
-            let container = base.GetContainerForItemOverride ()
-            
-            match container with
-            | :? ListBoxItem as lbi -> lbi.HorizontalContentAlignment <- HorizontalAlignment.Stretch
-                                       lbi.Padding <- DefaultListBoxItemPadding 
-            | _                     -> ()
-            
-            container 
+            new MyListBoxItem () :> DependencyObject
 
 
     let CreateListBox () = 
@@ -165,7 +221,7 @@ module internal Utils =
         listBox.Margin <- DefaultMargin
         listBox.SelectionMode <- SelectionMode.Extended
         listBox.MinHeight <- 24.0
-        listBox.MaxHeight <- 120.0
+        listBox.MaxHeight <- 240.0
         ScrollViewer.SetVerticalScrollBarVisibility(listBox, ScrollBarVisibility.Visible)
         ScrollViewer.SetHorizontalScrollBarVisibility(listBox, ScrollBarVisibility.Disabled)
         listBox
