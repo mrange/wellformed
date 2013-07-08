@@ -135,7 +135,7 @@ module internal Utils =
 
     let DefaultBackgroundBrush  = Brushes.White
     let DefaultForegroundBrush  = Brushes.Black
-    let DefaultBorderBrush      = Brushes.LightBlue
+    let DefaultBorderBrush      = Brushes.SkyBlue
     let DefaultErrorBrush       = Brushes.Red
 
     let DefaultMargin           = Thickness(4.0)
@@ -179,11 +179,11 @@ module internal Utils =
             let index = ListBox.GetAlternationIndex (this)
             if index <> lastIndex || formattedText = null then
                 formattedText <- FormattedText (
-                    index.ToString("000", culture)  ,
-                    culture                         ,
-                    FlowDirection.LeftToRight       ,
-                    typeFace                        ,
-                    24.0                            ,
+                    (index + 1).ToString("000", culture)    ,
+                    culture                                 ,
+                    FlowDirection.LeftToRight               ,
+                    typeFace                                ,
+                    24.0                                    ,
                     DefaultBackgroundBrush
                     )
                 lastIndex <- index
@@ -279,7 +279,8 @@ module internal Utils =
     let CreateLegend t : FrameworkElement*TextBox*Decorator = 
         let label = CreateLabel t
         label.Background <- DefaultBackgroundBrush
-        label.RenderTransform <- new TranslateTransform (8.0, -4.0)
+        label.RenderTransform <- new TranslateTransform (8.0, -6.0)
+        label.FontSize <- 16.0
         let border = new Border ()
         let outer = new Grid ()
         border.Margin <- DefaultBorderMargin
