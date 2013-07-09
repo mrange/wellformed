@@ -49,7 +49,7 @@ open System.Windows.Controls
             the user input but other mutable state should be updated accordingly
 
         Typically a rebuild action could look like this:
-        let rebuild (ui : FrameworkElement) =   let option = CreateElement ui (fun () -> new InputOptionElement<'T>())
+        let rebuild (ui : FrameworkElement) =   let option = CreateElement (fun () -> new InputOptionElement<'T>()) ui 
                                                 option.Options <- options
                                                 option :> FrameworkElement
 
@@ -118,8 +118,8 @@ module Formlet =
         MapResult m' f
 
     let Join (f: Formlet<Formlet<'T>>) : Formlet<'T> = 
-        let rebuild (ui : FrameworkElement) = 
-            let result = CreateElement ui (fun () -> new JoinElement<Formlet<'T>> ())
+        let rebuild (fe : FrameworkElement) = 
+            let result = fe |> CreateElement (fun () -> new JoinElement<Formlet<'T>> ()) 
             result.Left <- f.Rebuild result.Left
             let collect = f.Collect result.Left
             result.Collect <- collect
@@ -127,7 +127,7 @@ module Formlet =
             result.Formlet  <- Some f'
             result.Right    <- f'.Rebuild result.Right
             result :> FrameworkElement
-        let collect (fe : FrameworkElement) = CollectFromElement fe (fun (ui : JoinElement<Formlet<'T>>) -> 
+        let collect (fe : FrameworkElement) = fe |> CollectFromElement (fun (ui : JoinElement<Formlet<'T>>) -> 
                 match ui.Formlet with
                 |   Some f' -> JoinFailures ui.Collect (f'.Collect (ui.Right))
                 |   None    -> JoinFailures ui.Collect (Fail_NeverBuiltUp ())

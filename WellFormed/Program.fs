@@ -173,7 +173,6 @@ let PartnerFormlet =
                 }
         }
         |> Enhance.WithErrorSummary
-        |> Enhance.WithSubmitAndReset
         |> Enhance.WithLegend "Partner registration"
 
 // ----------------------------------------------------------------------------

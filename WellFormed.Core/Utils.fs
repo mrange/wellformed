@@ -56,7 +56,12 @@ module internal Utils =
         if x <> null then x
         else y
 
-    let (?^?) = Coalesce
+    let PostProcess (y : 'a -> unit) (x : 'a) = 
+        y x
+        x
+
+    let inline (?^?) x y = Coalesce x y
+    let inline (|?>) x y = PostProcess y x
 
     let Success v = Collect.New v []
 
@@ -96,6 +101,9 @@ module internal Utils =
     let Intersect (l : Size) (r : Size) = 
         Size (min l.Width r.Width, min l.Height r.Height)
 
+    let Union (l : Size) (r : Size) = 
+        Size (max l.Width r.Width, max l.Height r.Height)
+
     let UnionVertically (l : Size) (r : Size) = 
         Size (max l.Width r.Width, l.Height + r.Height)
 
@@ -128,15 +136,94 @@ module internal Utils =
                                                             sender.RaiseEvent args
     let AddRoutedEventHandler routedEvent (receiver : UIElement) (h : obj -> RoutedEventArgs -> unit) = receiver.AddHandler (routedEvent, RoutedEventHandler h)
 
+    let ToNibble ch = 
+        match ch with
+        | c when Char.IsDigit (c)   -> byte  c - byte '0'
+        | 'a'   -> byte 0xA
+        | 'b'   -> byte 0xB
+        | 'c'   -> byte 0xC
+        | 'd'   -> byte 0xD
+        | 'e'   -> byte 0xE
+        | 'f'   -> byte 0xF
+        | 'A'   -> byte 0xA
+        | 'B'   -> byte 0xB
+        | 'C'   -> byte 0xC
+        | 'D'   -> byte 0xD
+        | 'E'   -> byte 0xE
+        | 'F'   -> byte 0xF
+        |   _   -> byte 0
+
+    let ExpandNibble (nibble : byte) = 
+        (nibble <<< 4) ||| (nibble &&& byte 0xF)
+
+    let ToByteFromChar = ToNibble >> ExpandNibble
+
+    let ToByteFromChars (left : char) (right : char) = 
+        let left' = ToNibble left
+        let right' = ToNibble right
+        (left' <<< 4) ||| (right' &&& byte 0xF)
+
+    let CreateColor (color : string) = 
+        let (|ARGB|RGB|LARGB|LRGB|NOCOLOR|) (color : string) = 
+            match color with 
+            | ""                    -> NOCOLOR
+            | c when c.[0] <> '#'   -> NOCOLOR
+            | c -> 
+                match c.Length with 
+                | 4 -> RGB 
+                | 5 -> ARGB
+                | 7 -> LRGB    
+                | 9 -> LARGB
+                | _ -> NOCOLOR
+         
+        match color with 
+        | RGB   -> Color.FromRgb    (ToByteFromChar color.[1]           , ToByteFromChar color.[2]              , ToByteFromChar color.[3]              )
+        | ARGB  -> Color.FromArgb   (ToByteFromChar color.[1]           , ToByteFromChar color.[2]              , ToByteFromChar color.[3]              , ToByteFromChar color.[4]              )
+        | LRGB  -> Color.FromRgb    (ToByteFromChars color.[1] color.[2], ToByteFromChars color.[3] color.[4]   , ToByteFromChars color.[5] color.[6]   )
+        | LARGB -> Color.FromArgb   (ToByteFromChars color.[1] color.[2], ToByteFromChars color.[3] color.[4]   , ToByteFromChars color.[5] color.[6]   , ToByteFromChars color.[7] color.[8]   )
+        | _ -> Colors.Red
+
+
+    let CreateBrush color = 
+        let br = new SolidColorBrush (color)
+        br.Freeze ()
+        br
+
     let CreatePen br th = 
         let p = new Pen (br, th)
         p.Freeze ()
         p
 
-    let DefaultBackgroundBrush  = Brushes.White
-    let DefaultForegroundBrush  = Brushes.Black
-    let DefaultBorderBrush      = Brushes.SkyBlue
-    let DefaultErrorBrush       = Brushes.Red
+    let CreateSimpleGradient fromColor toColor =
+        let br = LinearGradientBrush (fromColor, toColor, 90.0)
+        br.Freeze ()
+        br
+
+    let AddGridColumn w (grid : Grid) =
+        let gridColumn = ColumnDefinition ()
+        gridColumn.Width <- w
+        grid.ColumnDefinitions.Add gridColumn
+        grid        
+
+    let AddGridColumn_Auto g =
+        AddGridColumn GridLength.Auto g
+
+    let AddGridColumn_Star w g =
+        AddGridColumn (GridLength (w, GridUnitType.Star)) g
+
+    let AddGridColumn_Pixel w g =
+        AddGridColumn (GridLength (w, GridUnitType.Pixel)) g
+
+    let AddGridChild ch c r (grid : Grid) =
+        ignore <| Grid.SetColumn    (ch, c)
+        ignore <| Grid.SetRow       (ch, r)
+        ignore <| grid.Children.Add ch
+        grid        
+
+    let DefaultBackgroundBrush  = Brushes.White     :> Brush
+    let DefaultForegroundBrush  = Brushes.Black     :> Brush
+    let DefaultBorderBrush      = Brushes.SkyBlue   :> Brush
+    let DefaultErrorBrush       = Brushes.Red       :> Brush
 
     let DefaultMargin           = Thickness(4.0)
 
@@ -148,16 +235,33 @@ module internal Utils =
     let DefaultBorderPadding    = Thickness(0.0,16.0,4.0,8.0)
     let DefaultBorderThickness  = Thickness(2.0)
 
+    let DefaultFontFamily       = FontFamily "Segoe UI"
+    let SymbolFonFamilyt        = FontFamily "Segoe UI Symbol"
+    let DefaultTypeFace         = Typeface "Segoe UI"
+    let SymbolTypeFace          = Typeface "Segoe UI Symbol"
+
+    let DefaultCulture          = System.Threading.Thread.CurrentThread.CurrentUICulture
+
+    let FormatText text typeFace fontSize foreGround = 
+        let ft = FormattedText (text                                    ,
+                                DefaultCulture                          ,
+                                FlowDirection.LeftToRight               ,
+                                typeFace                                ,
+                                fontSize                                ,
+                                foreGround
+                                )
+        ft
+
     type MyListBoxItem () as this =
         inherit ListBoxItem ()
 
         static let pen      = CreatePen DefaultBorderBrush 1.0
-        static let typeFace = Typeface("Calibri")
+        static let typeFace = DefaultTypeFace
 
         static let transform = 
             let transform = Matrix.Identity
             transform.Rotate 90.0
-            transform.Translate (DefaultListBoxItemPadding.Left + 2.0, 4.0)
+            transform.Translate (DefaultListBoxItemPadding.Left + 5.0, 4.0)
             MatrixTransform (transform)
 
         let mutable formattedText = Unchecked.defaultof<FormattedText>
@@ -174,18 +278,14 @@ module internal Utils =
 
         override this.OnRender (drawingContext) =
 
-            let culture = System.Threading.Thread.CurrentThread.CurrentUICulture
-
             let index = ListBox.GetAlternationIndex (this)
             if index <> lastIndex || formattedText = null then
-                formattedText <- FormattedText (
-                    (index + 1).ToString("000", culture)    ,
-                    culture                                 ,
-                    FlowDirection.LeftToRight               ,
-                    typeFace                                ,
-                    24.0                                    ,
+                let text  = (index + 1).ToString("000", DefaultCulture)
+                formattedText <- FormatText
+                    text    
+                    typeFace                                
+                    24.0                                    
                     DefaultBackgroundBrush
-                    )
                 lastIndex <- index
 
             let rs = this.RenderSize
@@ -231,8 +331,9 @@ module internal Utils =
         stackPanel.Orientation <- orientation
         stackPanel
 
-    let CreateButton t canExecute execute = 
+    let CreateButton t toolTip canExecute execute = 
         let button      = new Button()
+        button.ToolTip  <- toolTip
         button.Content  <- t
         button.Margin   <- DefaultMargin
         button.Padding  <- DefaultButtonPadding
@@ -268,8 +369,8 @@ module internal Utils =
 
     let CreateMany canExecuteNew executeNew canExecuteDelete executeDelete : ListBox*Panel*Button*Button = 
         let buttons = CreateStackPanel Orientation.Horizontal
-        let newButton = CreateButton "_New" canExecuteNew executeNew
-        let deleteButton = CreateButton "_Delete" canExecuteDelete executeDelete
+        let newButton = CreateButton "_New" "Click to create another item" canExecuteNew executeNew
+        let deleteButton = CreateButton "_Delete" "Click to delete the currently selected items" canExecuteDelete executeDelete
         ignore <| buttons.Children.Add newButton
         ignore <| buttons.Children.Add deleteButton
         let listBox = CreateListBox ()
@@ -293,22 +394,22 @@ module internal Utils =
 
 [<AutoOpen>]
 module PublicUtils =
-    let CreateElement (fe : FrameworkElement) (creator : unit -> #FrameworkElement) : #FrameworkElement = 
+    let CreateElement (creator : unit -> #FrameworkElement) (fe : FrameworkElement) : #FrameworkElement = 
         match fe with
         | :? #FrameworkElement as ui -> ui
         | _                 -> creator()
 
-    let ProcessElement (fe : FrameworkElement) (p : FrameworkElement -> unit) : FrameworkElement = 
+    let ProcessElement (p : FrameworkElement -> unit) (fe : FrameworkElement) : FrameworkElement = 
         if fe = null then null
         else
             p fe
             fe
 
-    let ApplyToElement defaultTo (fe : FrameworkElement) (apply : #FrameworkElement -> 'T) : 'T = 
+    let ApplyToElement defaultTo (apply : #FrameworkElement -> 'T) (fe : FrameworkElement) : 'T = 
         match fe with
         | :? #FrameworkElement as ui    -> apply ui
         | _                             -> defaultTo
 
-    let CollectFromElement (fe : FrameworkElement) (apply : #FrameworkElement -> Collect<'T>) : Collect<'T> = 
-        ApplyToElement (Fail_NeverBuiltUp ()) fe apply 
+    let CollectFromElement (apply : #FrameworkElement -> Collect<'T>) (fe : FrameworkElement) : Collect<'T> = 
+        ApplyToElement (Fail_NeverBuiltUp ()) apply fe 
 
