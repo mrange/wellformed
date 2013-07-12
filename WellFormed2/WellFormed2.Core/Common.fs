@@ -14,22 +14,23 @@
 namespace WellFormed2.Core
 
 [<AutoOpen>]
-module internal InternalCommon =
+module Common =
     
     let ToForm (f : #IForm<'T>) = f :> IForm<'T>
     let ToFormlet (f : #IFormlet<'T>) = f :> IFormlet<'T>
-
-    let EmptyArray = [||]
 
     let Success v = Collect.New v []
 
     let HardFail msg            = failwith msg
 
-    let HardFail_InvalidCase () = HardFail "WellFormed2.ProgrammmingError: This case shouldn't be reached"
-
     let FailWithValue value (msg : string) = Collect.New value [{Context = []; Message = msg;}]
 
     let Fail<'T> (msg : string)   = Collect.New Unchecked.defaultof<'T> [{Context = []; Message = msg;}]
+
+[<AutoOpen>]
+module internal InternalCommon =
+    
+    let HardFail_InvalidCase () = HardFail "WellFormed2.ProgrammmingError: This case shouldn't be reached"
 
     let Fail_NeverBuiltUp ()= Fail "WellFormed2.ProgrammmingError: Never built up"
 

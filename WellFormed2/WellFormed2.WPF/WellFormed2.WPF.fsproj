@@ -5,12 +5,12 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>bf512e81-f5af-4b9a-8e2c-189ccfa5afa8</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>WellFormed2</RootNamespace>
-    <AssemblyName>WellFormed2</AssemblyName>
+    <ProjectGuid>731734d2-c70c-4fe9-8a63-51e606a61665</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>WellFormed2.WPF</RootNamespace>
+    <AssemblyName>WellFormed2.WPF</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>WellFormed2</Name>
+    <Name>WellFormed2.WPF</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -20,9 +20,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\WellFormed2.XML</DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
+    <DocumentationFile>bin\Debug\WellFormed2.WPF.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -31,32 +29,28 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\WellFormed2.XML</DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
+    <DocumentationFile>bin\Release\WellFormed2.WPF.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.fs" />
-    <None Include="App.config" />
+    <Compile Include="Input.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\WellFormed2.Core\WellFormed2.Core.fsproj">
       <Name>WellFormed2.Core</Name>
       <Project>{6dcdbcc6-86c3-4fe0-9fa3-44f6bc9973cf}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\WellFormed2.WPF\WellFormed2.WPF.fsproj">
-      <Name>WellFormed2.WPF</Name>
-      <Project>{731734d2-c70c-4fe9-8a63-51e606a61665}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

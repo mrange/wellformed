@@ -21,7 +21,7 @@ module Formlet =
         static member New form = { Form = form }
 
     let MapCollect (m : Collect<'T> -> Collect<'U>) (f : IFormlet<'T>) : IFormlet<'U> = 
-        let rebuild (form : StatefulForm<'U, MapCollectState<'T>> option)  = 
+        let rebuild (form : StatefulForm<_,_> option)  = 
             let oldForm = 
                 match form with
                 | Some oldState ->  Some oldState.State.Form
@@ -45,7 +45,7 @@ module Formlet =
         static member New left right = { Left = left; Right = right; }
 
     let Join (f: IFormlet<IFormlet<'T>>) : IFormlet<'T> =
-        let rebuild (form : StatefulForm<'T, JoinState<'T>> option)  = 
+        let rebuild (form : StatefulForm<_,_> option)  = 
             let left, right = 
                 match form with
                 | Some oldState ->  Some oldState.State.Left, Some oldState.State.Right
@@ -67,7 +67,7 @@ module Formlet =
         f |> Map b |> Join
 
     let Return (x : 'T) : IFormlet<'T> = 
-        let rebuild (form : Form<'T> option)  = 
+        let rebuild (form : Form<_> option)  = 
             let collect ()  = Success x
             let render ctx  = Empty
             Form<_>.New collect render
@@ -75,7 +75,7 @@ module Formlet =
 
     let Delay (f : unit -> IFormlet<'T>) : IFormlet<'T> = 
         let f' = lazy (f())
-        let rebuild (form : IForm<'T> option)  = f'.Value.Rebuild form
+        let rebuild (form : IForm<_> option)  = f'.Value.Rebuild form
         ToFormlet <| PlainFormlet<_>.New rebuild
 
     let ReturnFrom (f : IFormlet<'T>) = f
