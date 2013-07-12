@@ -118,16 +118,20 @@ module Utils =
 
 module Formlet =
 
-    let MapResult (m : Collect<'T> -> Collect<'U>) (f : IFormlet<'T>) : IFormlet<'U> = 
-        let rebuild (form : IForm<'U> option)  = 
-            let collect ()  = m (f.Collect ())
-            let update ctx  = f.Update ctx
-            ToForm <| StatefulForm<'U>.New () collect update 
-        Formlet<'U>.New rebuild
+    let MapCollect (m : Collect<'T> -> Collect<'U>) (f : IFormlet<'T>) : IFormlet<'U> = 
+        let rebuild (form : StatefulForm<'U, IForm<'T>> option)  = 
+            let innerForm = 
+                match form with
+                | Some sform -> f.Rebuild (Some sform.State)
+                | _          -> f.Rebuild None
+            let collect (state : IForm<'T>)     = m (state.Collect ())
+            let update (state : IForm<'T>) ctx  = state.Update ctx
+            StatefulForm<_,_>.New innerForm collect update 
+        ToFormlet <| Formlet<_,_>.New rebuild
 
     let Map (mapper : 'T -> 'U) (f : IFormlet<'T>) : IFormlet<'U> = 
         let m collect = { Value = mapper collect.Value ; Failures = collect.Failures; }
-        MapResult m f
+        MapCollect m f
 
     let Return (x : 'T) : IFormlet<'T> = 
         let rebuild (form : Form<'T> option)  = 
