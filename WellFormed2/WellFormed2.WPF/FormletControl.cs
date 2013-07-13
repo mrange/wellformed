@@ -12,78 +12,12 @@
 
 using System;
 using System.Windows.Controls;
-using Microsoft.FSharp.Core;
 using WellFormed2.Core;
 
 namespace WellFormed2.WPF
 {
     partial class FormletControl : Control
     {
-        public sealed partial class FormletRebuildContext : Types.IFormletRebuildContext
-        {
-            public T CreateInstance<T>()
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        partial interface IFormletHolder
-        {
-            Types.FlatVisualTree Rebuild ();
-            bool Submit ();
-        }
-
-        sealed partial class FormletHolder<T> : IFormletHolder
-        {
-            public readonly Types.IFormletRebuildContext    Context     ;
-            public readonly Types.IFormlet<T>               Formlet     ;
-            public readonly Action<T>                       Submitter   ;
-
-            public          Types.IForm<T>                  Form        ;
-
-            static readonly Types.LayoutOrientation DefaultOrientation = Types.LayoutOrientation.LeftToRight;
-
-            public FormletHolder(Types.IFormletRebuildContext context, Types.IFormlet<T> formlet, Action<T> submitter)
-            {
-                Context     = context;
-                Formlet     = formlet;
-                Submitter   = submitter ?? (v => {});
-            }
-
-            public Types.FlatVisualTree Rebuild()
-            {
-                if (Formlet == null)
-                {
-                    return Types.FlatVisualTree.NewLayout(DefaultOrientation, new Types.FlatVisualTree[0]);
-                }
-
-                Form = Formlet.Rebuild (Context, Form.ToOption ());
-
-                var ctx = Types.FormRenderContext.New (DefaultOrientation);
-
-                var vt = Form.Render (ctx);
-
-                return Common.FlattenTree (DefaultOrientation, vt);
-            }
-
-            public bool Submit()
-            {
-                if (Form == null)
-                {
-                    return false;
-                }
-
-                var collect = Form.Collect ();
-                if (collect.Failures.Length > 0)
-                {
-                    return false;
-                }
-
-                Submitter (collect.Value);
-
-                return true;
-            }
-        }
 
         FormletRebuildContext m_context;
         IFormletHolder m_holder;
@@ -91,6 +25,25 @@ namespace WellFormed2.WPF
         partial void Constructed__FormletControl()
         {
             m_context = new FormletRebuildContext ();
+
+            this.AddHandler_RebuildForm (OnRebuildForm);
+            this.AddHandler_SubmitForm  (OnSubmitForm);
+            this.AddHandler_ResetForm   (OnResetForm);
+        }
+
+        void OnResetForm(object sender, ResetFormEventArgs eventargs)
+        {
+            throw new NotImplementedException();
+        }
+
+        void OnSubmitForm(object sender, SubmitFormEventArgs eventargs)
+        {
+            throw new NotImplementedException();
+        }
+
+        void OnRebuildForm(object sender, RebuildFormEventArgs eventargs)
+        {
+            throw new NotImplementedException();
         }
 
         public void ShowFormlet<T> (Types.IFormlet<T> formlet, Action<T> submitter)

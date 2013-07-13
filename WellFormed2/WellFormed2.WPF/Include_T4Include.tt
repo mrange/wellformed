@@ -7,6 +7,7 @@
         {
             // Include the basic extension from T4Include
             Include (@"mrange/T4Include/master/Extensions/BasicExtensions.cs"),
+            Include (@"mrange/T4Include/master/Extensions/WpfExtensions.cs"),
 
             // Uncomment below to include dapper
             // Include (@"SamSaffron/dapper-dot-net/master/Dapper/SqlMapper.cs"),
