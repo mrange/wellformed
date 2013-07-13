@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WellFormed2", "WellFormed2\WellFormed2.fsproj", "{BF512E81-F5AF-4B9A-8E2C-189CCFA5AFA8}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WellFormed2.Core", "WellFormed2.Core\WellFormed2.Core.fsproj", "{6DCDBCC6-86C3-4FE0-9FA3-44F6BC9973CF}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WellFormed Libs", "WellFormed Libs", "{6FFA70A5-D043-4277-90A4-F8B0CC4F140D}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WellFormed2.Core", "WellFormed2.Core\WellFormed2.Core.fsproj", "{EB6A12B4-31E7-4D8A-92C9-EC246CDC37BD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,15 +17,15 @@ Global
 		{BF512E81-F5AF-4B9A-8E2C-189CCFA5AFA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF512E81-F5AF-4B9A-8E2C-189CCFA5AFA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BF512E81-F5AF-4B9A-8E2C-189CCFA5AFA8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6DCDBCC6-86C3-4FE0-9FA3-44F6BC9973CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6DCDBCC6-86C3-4FE0-9FA3-44F6BC9973CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6DCDBCC6-86C3-4FE0-9FA3-44F6BC9973CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6DCDBCC6-86C3-4FE0-9FA3-44F6BC9973CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB6A12B4-31E7-4D8A-92C9-EC246CDC37BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB6A12B4-31E7-4D8A-92C9-EC246CDC37BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB6A12B4-31E7-4D8A-92C9-EC246CDC37BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB6A12B4-31E7-4D8A-92C9-EC246CDC37BD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{6DCDBCC6-86C3-4FE0-9FA3-44F6BC9973CF} = {6FFA70A5-D043-4277-90A4-F8B0CC4F140D}
+		{EB6A12B4-31E7-4D8A-92C9-EC246CDC37BD} = {6FFA70A5-D043-4277-90A4-F8B0CC4F140D}
 	EndGlobalSection
 EndGlobal

@@ -10,7 +10,25 @@
 // You must not remove this notice, or any other, from this software.
 // ----------------------------------------------------------------------------------------------
 
+open WellFormed2.Core
+
+
+type CustomerInfo =
+    {
+        FirstName   :   string
+        LastName    :   string
+    }
+
+let CustomerFormlet = 
+    Formlet.Do
+        {
+            let! firstName = Input.Text ""
+            let! lastName = Input.Text ""
+
+            return {FirstName = firstName; LastName = lastName; }
+        }
+
 [<EntryPoint>]
 let main argv = 
-    printfn "%A" argv
+
     0 // return an integer exit code

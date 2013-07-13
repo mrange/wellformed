@@ -51,7 +51,7 @@
   <ItemGroup>
     <ProjectReference Include="..\WellFormed2.Core\WellFormed2.Core.fsproj">
       <Name>WellFormed2.Core</Name>
-      <Project>{6dcdbcc6-86c3-4fe0-9fa3-44f6bc9973cf}</Project>
+      <Project>{eb6a12b4-31e7-4d8a-92c9-ec246cdc37bd}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
