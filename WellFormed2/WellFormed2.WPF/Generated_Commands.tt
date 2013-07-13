@@ -1,0 +1,20 @@
+<#
+    // The namespace the generated code is placed in
+    Namespace   = "WellFormed2.WPF"         ;   
+
+    Model = new []
+    {
+        // The name of a class
+        new ClassDefinition ("FormletControl")
+        {
+            // The name of the command
+            C ("Submit" ), 
+            C ("Reset"  ), 
+        },
+    };
+
+#>
+
+<#@ include file="$(SolutionDir)\packages\T4IncludeWPF.1.0.3\T4\RoutedCommands.ttinclude" #>
+
+

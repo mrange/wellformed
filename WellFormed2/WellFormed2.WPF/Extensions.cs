@@ -10,27 +10,17 @@
 // You must not remove this notice, or any other, from this software.
 // ----------------------------------------------------------------------------------------------
 
-namespace WellFormed2.Core
+using Microsoft.FSharp.Core;
 
-module Input = 
+namespace WellFormed2.WPF
+{
+    static partial class Extensions
+    {
 
-    type TextState = 
+        public static FSharpOption<T> ToOption<T> (this T value)
+            where T : class
         {
-            Text : IText
+            return value != null ? FSharpOption<T>.Some (value) : FSharpOption<T>.None;
         }
-        static member New text = { Text = text; }
-
-    let Text t : IFormlet<string> = 
-        let rebuild (ctx : IFormletRebuildContext) (form : StatefulForm<_,_> option)  = 
-            let text = 
-                match form with
-                | Some oldState ->  oldState.State.Text
-                | _             ->  let text = ctx.CreateInstance<IText> ()
-                                    text.Text <- t
-                                    text
-
-            let newState = TextState.New <| text
-            let collect (state : TextState) = Success <| state.Text.Text
-            let render (state : TextState) ctx  = Leaf <| state.Text.Visual
-            StatefulForm<_,_>.New newState collect render
-        ToFormlet <| Formlet<_,_>.New rebuild
+    }
+}

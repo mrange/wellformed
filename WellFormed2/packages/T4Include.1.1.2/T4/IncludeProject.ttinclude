@@ -1,0 +1,59 @@
+<#
+    // ----------------------------------------------------------------------------------------------
+    // Copyright (c) Mårten Rånge.
+    // ----------------------------------------------------------------------------------------------
+    // This source code is subject to terms and conditions of the Microsoft Public License. A 
+    // copy of the license can be found in the License.html file at the root of this distribution. 
+    // If you cannot locate the  Microsoft Public License, please send an email to 
+    // dlr@microsoft.com. By using this source code in any fashion, you are agreeing to be bound 
+    //  by the terms of the Microsoft Public License.
+    // ----------------------------------------------------------------------------------------------
+    // You must not remove this notice, or any other, from this software.
+    // ----------------------------------------------------------------------------------------------
+#>
+
+<#@ assembly name="System.Core"                       #>
+<#@ assembly name="System.Xml"                        #>
+<#@ assembly name="System.Xml.Linq"                   #>
+<#@ import namespace="System.Collections.Generic"     #>
+<#@ import namespace="System.IO"                      #>
+<#@ import namespace="System.Linq"                    #>
+<#@ import namespace="System.Xml"                     #>
+<#@ import namespace="System.Xml.Linq"                #>
+
+<#
+   
+    const string XmlNamespace   = @"http://schemas.microsoft.com/developer/msbuild/2003";
+    const string Project        = @"{"+XmlNamespace+@"}Project";
+    const string ItemGroup      = @"{"+XmlNamespace+@"}ItemGroup";
+    const string Compile        = @"{"+XmlNamespace+@"}Compile";
+
+    var projectFilePath         = Host.ResolvePath (ProjectFileName);
+
+    RootPath                    = Path.GetDirectoryName (projectFilePath);
+
+    using (var streamReader     = new StreamReader (projectFilePath))
+    {
+        var xdoc = XDocument.Load (streamReader);
+
+        var compileElements = xdoc.Elements (Project).Elements (ItemGroup).Elements (Compile);
+
+        var defines = new List<string> (32);
+        var results = new List<string> (1024);
+
+        Includes = compileElements
+            .Select (compileElement => 
+                Path.GetFullPath (
+                    Path.Combine (
+                        RootPath, 
+                        compileElement.Attribute ("Include").Value)))
+            .Select (p => Include (p))
+            .ToArray ();
+    }
+#>
+
+<#@ include file="IncludeLocalFile.ttinclude" #>
+
+<#+
+    string ProjectFileName      = "Source.csproj";
+#>

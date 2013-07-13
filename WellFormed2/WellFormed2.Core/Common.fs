@@ -29,20 +29,6 @@ module Common =
 
     let Fail<'T> (msg : string)   = Collect.New Unchecked.defaultof<'T> [{Context = []; Message = msg;}]
 
-[<AutoOpen>]
-module internal InternalCommon =
-    
-    let HardFail_InvalidCase () = HardFail "WellFormed2.ProgrammmingError: This case shouldn't be reached"
-
-    let Fail_NeverBuiltUp ()= Fail "WellFormed2.ProgrammmingError: Never built up"
-
-    type MergedOrientation =
-        |   AllSame
-        |   CurrentAndLeftSame
-        |   CurrentAndRightSame
-        |   LeftAndRightSame
-        |   AllDifferent
-
     let FlattenTree (co : LayoutOrientation) (vt : VisualTree) =
         let GetOrientation (o : LayoutOrientation) (vt : VisualTree) =
             match vt with
@@ -83,4 +69,11 @@ module internal InternalCommon =
             .ToArray ())
 
         MakeFlatTree co vt
+
+[<AutoOpen>]
+module internal InternalCommon =
+    
+    let HardFail_InvalidCase () = HardFail "WellFormed2.ProgrammmingError: This case shouldn't be reached"
+
+    let Fail_NeverBuiltUp ()= Fail "WellFormed2.ProgrammmingError: Never built up"
 

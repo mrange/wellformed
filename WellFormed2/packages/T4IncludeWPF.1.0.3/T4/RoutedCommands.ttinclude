@@ -1,0 +1,95 @@
+﻿<#@ include     file        ="Header.ttinclude"  #>
+<#
+    // ----------------------------------------------------------------------------------------------
+    // Copyright (c) Mårten Rånge.
+    // ----------------------------------------------------------------------------------------------
+    // This source code is subject to terms and conditions of the Microsoft Public License. A 
+    // copy of the license can be found in the License.html file at the root of this distribution. 
+    // If you cannot locate the  Microsoft Public License, please send an email to 
+    // dlr@microsoft.com. By using this source code in any fashion, you are agreeing to be bound 
+    //  by the terms of the Microsoft Public License.
+    // ----------------------------------------------------------------------------------------------
+    // You must not remove this notice, or any other, from this software.
+    // ----------------------------------------------------------------------------------------------
+#>
+
+namespace <#=Namespace#>
+{
+    using System.Windows.Input;
+
+<#
+    foreach (var classDef in Model)
+    {
+#>
+    partial class <#=classDef.Name#>
+    {
+<#
+    foreach (var command in classDef)
+    {
+#>
+        public static RoutedUICommand <#=command.Name#> = new RoutedUICommand (
+            "<#=command.Name#>",
+            "<#=command.Name#>",
+            typeof (<#=classDef.Name#>),
+            new InputGestureCollection
+                {
+<#
+    if ((command.Key ?? S_NoName) != S_NoName)
+    {
+#>
+                    new KeyGesture (Key.<#=command.Key#>, ModifierKeys.<#=command.Modifier#>),
+<#
+    }
+#>
+                }
+            );
+<#
+    }
+#>
+    }
+
+<#
+    }
+#>
+}
+<#+
+    string              Namespace   = "T4Include"               ;
+    ClassDefinition[]   Model       = new ClassDefinition[0]    ;
+
+    sealed class ClassDefinition : BaseContainer<Root, CommandDefinition>
+    {
+        public readonly string Name     ;
+        public ClassDefinition (string name)
+        {
+            Name = name ?? S_NoName;
+        }
+    }
+
+    sealed class CommandDefinition : BaseEntity<ClassDefinition> 
+    {
+        public readonly string Name      ;
+        public readonly string Key       ;
+        public readonly string Modifier  ;
+        public readonly string Text      ;
+
+        public CommandDefinition (
+            string name     ,
+            string key      ,
+            string modifier ,
+            string text
+            )
+        {
+            Name        = name      ?? S_NoName ;
+            Key         = key       ?? S_NoName ;
+            Modifier    = modifier  ?? "None"   ;
+            Text        = text      ?? Name     ;
+        }
+
+    }
+
+    static CommandDefinition C (string name, string key = null, string modifier = null, string text = null)
+    {
+        return new CommandDefinition (name, key, modifier, text);
+    }
+
+#>

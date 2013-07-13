@@ -51,14 +51,10 @@ module Types =
         abstract member Text    : string    with get, set
         abstract member Visual  : obj       with get
 
-    type FormletRebuildContext = 
-        {
-            Factory             : Type                          -> obj
-        }
-        member this.CreateInstance<'T> ()   = this.Factory typeof<'T> :?> 'T
-        static member New factory = { Factory = factory; }
+    type IFormletRebuildContext = 
+        abstract member CreateInstance<'T>  : unit -> 'T
 
-    type FormUpdateContext = 
+    type FormRenderContext = 
         {
             LayoutOrientation   : LayoutOrientation
         }
@@ -66,12 +62,12 @@ module Types =
 
     type IForm<'T> = 
         abstract member Collect : unit                          -> Collect<'T>
-        abstract member Render  : FormUpdateContext             -> VisualTree
+        abstract member Render  : FormRenderContext             -> VisualTree
 
     type Form<'T> = 
         {
             Collect         : unit                          -> Collect<'T>
-            Render          : FormUpdateContext             -> VisualTree
+            Render          : FormRenderContext             -> VisualTree
         }
         interface IForm<'T> with
             member this.Collect ()      = this.Collect ()
@@ -82,7 +78,7 @@ module Types =
         {
             State           : 'State
             Collect         : 'State                        -> Collect<'T>
-            Render          : 'State -> FormUpdateContext   -> VisualTree
+            Render          : 'State -> FormRenderContext   -> VisualTree
         }
         interface IForm<'T> with
             member this.Collect ()      = this.Collect this.State
@@ -90,11 +86,11 @@ module Types =
         static member New state collect render = { State = state; Collect = collect; Render = render;}
 
     type IFormlet<'T> = 
-        abstract member Rebuild : FormletRebuildContext -> IForm<'T> option -> IForm<'T>
+        abstract member Rebuild : IFormletRebuildContext -> IForm<'T> option -> IForm<'T>
 
     type PlainFormlet<'T> = 
         {
-            Rebuild     : FormletRebuildContext -> IForm<'T> option -> IForm<'T>
+            Rebuild     : IFormletRebuildContext -> IForm<'T> option -> IForm<'T>
         }
         interface IFormlet<'T> with
             member this.Rebuild ctx f   = this.Rebuild ctx f
@@ -102,7 +98,7 @@ module Types =
 
     type Formlet<'T, 'F when 'F :> IForm<'T>> = 
         {
-            Rebuild     : FormletRebuildContext -> 'F option -> 'F
+            Rebuild     : IFormletRebuildContext -> 'F option -> 'F
         }
         interface IFormlet<'T> with
             member this.Rebuild ctx f   =   let form = 

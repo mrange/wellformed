@@ -1,0 +1,177 @@
+﻿<#@ include     file        ="Header.ttinclude"                #>
+<#
+    // ----------------------------------------------------------------------------------------------
+    // Copyright (c) Mårten Rånge.
+    // ----------------------------------------------------------------------------------------------
+    // This source code is subject to terms and conditions of the Microsoft Public License. A 
+    // copy of the license can be found in the License.html file at the root of this distribution. 
+    // If you cannot locate the  Microsoft Public License, please send an email to 
+    // dlr@microsoft.com. By using this source code in any fashion, you are agreeing to be bound 
+    //  by the terms of the Microsoft Public License.
+    // ----------------------------------------------------------------------------------------------
+    // You must not remove this notice, or any other, from this software.
+    // ----------------------------------------------------------------------------------------------
+#>
+
+// ReSharper disable InconsistentNaming
+// ReSharper disable PartialTypeWithSinglePart
+// ReSharper disable RedundantNameQualifier
+
+namespace <#=Namespace#>
+{
+    using System.Windows;
+
+<#
+    foreach (var classDef in Model)
+    {
+#>
+
+<#
+    foreach (var eventDef in classDef)
+    {
+#>
+    // -------------------------------------------------------------------------
+
+    partial class <#=eventDef.EventType#> : <#=eventDef.BaseEventType#>
+    {
+        public delegate void Handler (object sender, <#=eventDef.EventType#> eventArgs);
+    }
+    // -------------------------------------------------------------------------
+
+<#
+    }
+#>
+
+    partial class <#=classDef.Name#>
+    {
+<#
+      foreach (var eventDef in classDef)
+      {
+#>
+        // ----------------------------------------------------------------------
+        public readonly static RoutedEvent <#=eventDef.Name#>Event = EventManager.RegisterRoutedEvent (
+            "<#=eventDef.Name#>",
+            RoutingStrategy.<#=eventDef.Strategy#>,
+            typeof (<#=eventDef.DelegateType#>),
+            typeof (<#=classDef.Name#>)
+            );
+<#
+    if (!classDef.IsStatic)
+    {
+#>
+        public event <#=eventDef.DelegateType#> <#=eventDef.Name#>
+        {
+            add { this.AddHandler_<#=eventDef.Name#> (value); }
+            remove { this.RemoveHandler_<#=eventDef.Name#> (value); }
+        }
+<#
+    }
+#>
+        // ----------------------------------------------------------------------
+
+
+<#
+    }
+#>
+    }
+
+    static partial class RoutedEventExtensions
+    {
+<#
+    foreach (var eventDef in classDef)
+    {
+#>
+        public static void Raise_<#=eventDef.Name#> (
+            this UIElement uiElement, 
+            <#=eventDef.EventType#> routedEventArgs = null
+            )
+        {
+            if (uiElement != null)
+            {
+                routedEventArgs = routedEventArgs ?? new <#=eventDef.EventType#> ();
+                routedEventArgs.RoutedEvent = <#=eventDef.FullName#>Event;
+                uiElement.RaiseEvent (routedEventArgs);
+            }
+        }
+
+        public static void AddHandler_<#=eventDef.Name#> (
+            this UIElement uiElement,
+            <#=eventDef.DelegateType#> eventHandler,
+            bool handledEventsToo = false
+            )
+        {
+            if (uiElement != null)
+            {
+                uiElement.AddHandler (<#=eventDef.FullName#>Event, eventHandler, handledEventsToo);
+            }
+        }
+
+        public static void RemoveHandler_<#=eventDef.Name#> (
+            this UIElement uiElement,
+            <#=eventDef.DelegateType#> eventHandler
+            )
+        {
+            if (uiElement != null)
+            {
+                uiElement.RemoveHandler (<#=eventDef.FullName#>Event, eventHandler);
+            }
+        }
+<#
+    }
+#>
+    }
+
+<#
+    }
+#>
+}
+<#+
+    string              Namespace   = "T4Include"               ;
+
+    ClassDefinition[]   Model       = new ClassDefinition[0]    ;
+
+    sealed class ClassDefinition : BaseContainer<Root, EventDefinition>
+    {
+        public readonly string  Name             ;
+        public readonly bool    IsStatic         ;
+        public ClassDefinition (string name, bool isStatic = false)
+        {
+            Name        = name ?? S_NoName  ;
+            IsStatic    = isStatic          ; 
+        }
+    }
+
+    sealed class EventDefinition : BaseEntity<ClassDefinition>
+    {
+        public readonly string Name             ;
+        public readonly string DelegateType     ;
+        public readonly string EventType        ;
+        public readonly string BaseEventType    ;
+        public readonly string Strategy         ;
+
+        public EventDefinition (
+            string name             ,
+            string baseEventType    ,
+            string strategy
+            )
+        {
+            Name            = name              ?? S_NoName ;
+            DelegateType    = Name  + "EventArgs.Handler"   ;
+            EventType       = Name + "EventArgs"            ;
+            BaseEventType   = (baseEventType ?? "Routed") + "EventArgs";
+            Strategy        = strategy          ?? "Bubble" ;
+        }
+
+        public string FullName 
+        {
+            get { return Parent.Name + "." + Name; }
+        }
+        
+    }
+
+    static EventDefinition E (string name, string baseEventType = null, string strategy = null)
+    {
+        return new EventDefinition (name, baseEventType, strategy);
+    }
+
+#>

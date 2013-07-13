@@ -1,0 +1,22 @@
+<#
+    // Note that the generating code contains extension points using partial methods
+
+    // The namespace the generated code is placed in
+    Namespace   = "WellFormed2.WPF"         ;   
+
+    Model = new []
+    {
+        // The new of the class that is inheriting DependencyObject
+        new ClassDefinition ("FormletControl")
+        {                            
+            // A normal property
+//            P ("bool"   ,   "IsValid"           ),
+//            P ("string" ,   "AttachedValue"     , flags:PropertyFlags.IsAttached    )
+        },
+    };
+
+#>
+
+<#@ include file="$(SolutionDir)\packages\T4IncludeWPF.1.0.3\T4\DependencyProperties.ttinclude" #>
+
+
