@@ -12,6 +12,8 @@
 
 namespace WellFormed2.Core
 
+open System
+
 [<AutoOpen>]
 module Types =
     type LayoutOrientation = 
@@ -38,8 +40,23 @@ module Types =
 
     type VisualTree = 
         |   Empty
-        |   Visual  of obj
+        |   Leaf    of obj
         |   Fork    of LayoutOrientation*VisualTree*VisualTree
+
+    type FlatVisualTree = 
+        |   Visual  of obj
+        |   Layout  of LayoutOrientation*(FlatVisualTree array)
+
+    type IText = 
+        abstract member Text    : string    with get, set
+        abstract member Visual  : obj       with get
+
+    type FormletRebuildContext = 
+        {
+            Factory             : Type                          -> obj
+        }
+        member this.CreateInstance<'T> ()   = this.Factory typeof<'T> :?> 'T
+        static member New factory = { Factory = factory; }
 
     type FormUpdateContext = 
         {
@@ -73,28 +90,28 @@ module Types =
         static member New state collect render = { State = state; Collect = collect; Render = render;}
 
     type IFormlet<'T> = 
-        abstract member Rebuild : IForm<'T> option -> IForm<'T>
+        abstract member Rebuild : FormletRebuildContext -> IForm<'T> option -> IForm<'T>
 
     type PlainFormlet<'T> = 
         {
-            Rebuild     : IForm<'T> option -> IForm<'T>
+            Rebuild     : FormletRebuildContext -> IForm<'T> option -> IForm<'T>
         }
         interface IFormlet<'T> with
-            member this.Rebuild f   =   this.Rebuild f
-        static member New rebuild   = { Rebuild = rebuild; }
+            member this.Rebuild ctx f   = this.Rebuild ctx f
+        static member New rebuild       = { Rebuild = rebuild; }
 
     type Formlet<'T, 'F when 'F :> IForm<'T>> = 
         {
-            Rebuild     : 'F option    -> 'F
+            Rebuild     : FormletRebuildContext -> 'F option -> 'F
         }
         interface IFormlet<'T> with
-            member this.Rebuild f       =   let form = 
+            member this.Rebuild ctx f   =   let form = 
                                                 match f with
                                                 | Some form ->
                                                     match form with
-                                                    | :? 'F as typedForm-> this.Rebuild <| Some typedForm
-                                                    | _                 -> this.Rebuild None
-                                                | _                 -> this.Rebuild None
+                                                    | :? 'F as typedForm-> this.Rebuild ctx (Some typedForm)
+                                                    | _                 -> this.Rebuild ctx None
+                                                | _                 -> this.Rebuild ctx None
                                             upcast form 
         static member New rebuild = { Rebuild = rebuild; }
 

@@ -13,6 +13,8 @@
 
 namespace WellFormed2.Core
 
+open System.Collections.Generic
+
 [<AutoOpen>]
 module Common =
     
@@ -34,5 +36,51 @@ module internal InternalCommon =
 
     let Fail_NeverBuiltUp ()= Fail "WellFormed2.ProgrammmingError: Never built up"
 
+    type MergedOrientation =
+        |   AllSame
+        |   CurrentAndLeftSame
+        |   CurrentAndRightSame
+        |   LeftAndRightSame
+        |   AllDifferent
 
+    let FlattenTree (co : LayoutOrientation) (vt : VisualTree) =
+        let GetOrientation (o : LayoutOrientation) (vt : VisualTree) =
+            match vt with
+            | Empty         -> o
+            | Leaf _        -> o
+            | Fork (fo,_,_) -> fo
+
+        let rec AppendToList (fvt : List<FlatVisualTree>) (vt : VisualTree) =
+            match vt with
+            | Empty         ->  ()
+            | Leaf v        ->  fvt.Add (Visual v)
+            | Fork (o,l,r)  ->
+                let lo = GetOrientation o l
+                let ro = GetOrientation o r  
+
+                if o = lo && o = ro then
+                    AppendToList fvt l
+                    AppendToList fvt r
+                elif o = lo then
+                    AppendToList fvt l
+                    fvt.Add <| MakeFlatTree ro r
+                elif o = ro then
+                    fvt.Add <| MakeFlatTree lo l
+                    AppendToList fvt r
+                elif lo = ro then
+                    let ifvt = List<FlatVisualTree> ()
+                    AppendToList ifvt l
+                    AppendToList ifvt r
+                    fvt.Add <| Layout (lo, ifvt.ToArray ())
+                else
+                    fvt.Add <| MakeFlatTree lo l
+                    fvt.Add <| MakeFlatTree ro r
+
+        and MakeFlatTree (o : LayoutOrientation) (vt : VisualTree) =
+            let fvt = List<FlatVisualTree> ()
+            AppendToList fvt vt
+            Layout (o, fvt
+            .ToArray ())
+
+        MakeFlatTree co vt
 

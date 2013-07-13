@@ -10,32 +10,27 @@
 // You must not remove this notice, or any other, from this software.
 // ----------------------------------------------------------------------------------------------
 
-namespace WellFormed2.WPF
-
-open System.Windows
-open System.Windows.Controls
-
-open WellFormed2.Core
+namespace WellFormed2.Core
 
 module Input = 
 
     type TextState = 
         {
-            TextBox : TextBox
+            Text : IText
         }
-        static member New textBox = { TextBox = textBox; }
+        static member New text = { Text = text; }
 
     let Text t : IFormlet<string> = 
-        let rebuild (form : StatefulForm<_,_> option)  = 
-            let textBox = 
+        let rebuild (ctx : FormletRebuildContext) (form : StatefulForm<_,_> option)  = 
+            let text = 
                 match form with
-                | Some oldState ->  oldState.State.TextBox
-                | _             ->  let tb = new TextBox ()
-                                    tb.Text <- t
-                                    tb
+                | Some oldState ->  oldState.State.Text
+                | _             ->  let text = ctx.CreateInstance<IText> ()
+                                    text.Text <- t
+                                    text
 
-            let newState = TextState.New <| textBox
-            let collect (state : TextState) = Success state.TextBox.Text
-            let render (state : TextState) ctx  = Leaf state.TextBox
+            let newState = TextState.New <| text
+            let collect (state : TextState) = Success <| state.Text.Text
+            let render (state : TextState) ctx  = Leaf <| state.Text.Visual
             StatefulForm<_,_>.New newState collect render
         ToFormlet <| Formlet<_,_>.New rebuild

@@ -21,13 +21,13 @@ module Formlet =
         static member New form = { Form = form }
 
     let MapCollect (m : Collect<'T> -> Collect<'U>) (f : IFormlet<'T>) : IFormlet<'U> = 
-        let rebuild (form : StatefulForm<_,_> option)  = 
+        let rebuild ctx (form : StatefulForm<_,_> option) = 
             let oldForm = 
                 match form with
                 | Some oldState ->  Some oldState.State.Form
                 | _             ->  None
 
-            let newState = MapCollectState<_>.New <| f.Rebuild oldForm
+            let newState = MapCollectState<_>.New <| f.Rebuild ctx oldForm
             let collect (state : MapCollectState<'T>)     = m <| state.Form.Collect ()
             let render (state : MapCollectState<'T>) ctx  = state.Form.Render ctx
             StatefulForm<_,_>.New newState collect render
@@ -45,14 +45,14 @@ module Formlet =
         static member New left right = { Left = left; Right = right; }
 
     let Join (f: IFormlet<IFormlet<'T>>) : IFormlet<'T> =
-        let rebuild (form : StatefulForm<_,_> option)  = 
+        let rebuild ctx (form : StatefulForm<_,_> option)  = 
             let left, right = 
                 match form with
                 | Some oldState ->  Some oldState.State.Left, Some oldState.State.Right
                 | _             ->  None, None
-            let lform       = f.Rebuild left
+            let lform       = f.Rebuild ctx left
             let rformlet    = lform.Collect ()
-            let rform       = rformlet.Value.Rebuild right
+            let rform       = rformlet.Value.Rebuild ctx right
 
             let newState    = JoinState<_>.New lform rform
             let collect (state : JoinState<'T>)     = state.Right.Collect ()
@@ -67,7 +67,7 @@ module Formlet =
         f |> Map b |> Join
 
     let Return (x : 'T) : IFormlet<'T> = 
-        let rebuild (form : Form<_> option)  = 
+        let rebuild ctx (form : Form<_> option)  = 
             let collect ()  = Success x
             let render ctx  = Empty
             Form<_>.New collect render
@@ -75,7 +75,7 @@ module Formlet =
 
     let Delay (f : unit -> IFormlet<'T>) : IFormlet<'T> = 
         let f' = lazy (f())
-        let rebuild (form : IForm<_> option)  = f'.Value.Rebuild form
+        let rebuild ctx (form : IForm<_> option)  = f'.Value.Rebuild ctx form
         ToFormlet <| PlainFormlet<_>.New rebuild
 
     let ReturnFrom (f : IFormlet<'T>) = f

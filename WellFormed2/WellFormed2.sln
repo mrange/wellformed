@@ -7,8 +7,6 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WellFormed2.Core", "WellFor
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WellFormed Libs", "WellFormed Libs", "{6FFA70A5-D043-4277-90A4-F8B0CC4F140D}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WellFormed2.WPF", "WellFormed2.WPF\WellFormed2.WPF.fsproj", "{731734D2-C70C-4FE9-8A63-51E606A61665}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,16 +21,11 @@ Global
 		{6DCDBCC6-86C3-4FE0-9FA3-44F6BC9973CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6DCDBCC6-86C3-4FE0-9FA3-44F6BC9973CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6DCDBCC6-86C3-4FE0-9FA3-44F6BC9973CF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{731734D2-C70C-4FE9-8A63-51E606A61665}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{731734D2-C70C-4FE9-8A63-51E606A61665}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{731734D2-C70C-4FE9-8A63-51E606A61665}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{731734D2-C70C-4FE9-8A63-51E606A61665}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{6DCDBCC6-86C3-4FE0-9FA3-44F6BC9973CF} = {6FFA70A5-D043-4277-90A4-F8B0CC4F140D}
-		{731734D2-C70C-4FE9-8A63-51E606A61665} = {6FFA70A5-D043-4277-90A4-F8B0CC4F140D}
 	EndGlobalSection
 EndGlobal
