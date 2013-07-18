@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>T4IncludeTemplate</id>
+    <version>1.0.2</version>
+    <title>T4Include Templates</title>
+    <authors>Mårten Rånge</authors>
+    <owners>Mårten Rånge</owners>
+    <licenseUrl>http://opensource.org/licenses/MS-PL</licenseUrl>
+    <projectUrl>https://github.com/mrange/T4Include</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>T4Include Templates is a set of reusable T4 templates intended to accelerate development as well as reducing maintenance cost. For samples on how to use them see the nuget package T4IncludeTemplateSamples.</description>
+    <summary>T4Include Templates is a set of reusable T4 templates</summary>
+    <releaseNotes>* 1.0.2   - Updated templates in order to remove some unnecessary dependencies
+        * 1.0.1   - Initial release</releaseNotes>
+    <copyright />
+    <language />
+    <tags>include T4</tags>
+  </metadata>
+</package>

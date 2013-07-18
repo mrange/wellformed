@@ -1,13 +1,20 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WellFormed2", "WellFormed2\WellFormed2.fsproj", "{BF512E81-F5AF-4B9A-8E2C-189CCFA5AFA8}"
-EndProject
+# Visual Studio 2013
+VisualStudioVersion = 12.0.20617.1 PREVIEW
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WellFormed Libs", "WellFormed Libs", "{6FFA70A5-D043-4277-90A4-F8B0CC4F140D}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WellFormed2", "WellFormed2\WellFormed2.fsproj", "{BF512E81-F5AF-4B9A-8E2C-189CCFA5AFA8}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WellFormed2.Core", "WellFormed2.Core\WellFormed2.Core.fsproj", "{EB6A12B4-31E7-4D8A-92C9-EC246CDC37BD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WellFormed2.WPF", "WellFormed2.WPF\WellFormed2.WPF.csproj", "{5EC90FFE-6C46-425A-A20B-79A329776C99}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{6BC647DE-96DE-43BD-8969-13C705C13653}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

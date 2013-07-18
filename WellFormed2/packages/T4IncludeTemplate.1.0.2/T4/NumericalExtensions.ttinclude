@@ -1,0 +1,199 @@
+﻿<#@ include     file        ="Header.ttinclude"             #>
+
+<#
+    // ----------------------------------------------------------------------------------------------
+    // Copyright (c) Mårten Rånge.
+    // ----------------------------------------------------------------------------------------------
+    // This source code is subject to terms and conditions of the Microsoft Public License. A 
+    // copy of the license can be found in the License.html file at the root of this distribution. 
+    // If you cannot locate the  Microsoft Public License, please send an email to 
+    // dlr@microsoft.com. By using this source code in any fashion, you are agreeing to be bound 
+    //  by the terms of the Microsoft Public License.
+    // ----------------------------------------------------------------------------------------------
+    // You must not remove this notice, or any other, from this software.
+    // ----------------------------------------------------------------------------------------------
+#>
+
+// ReSharper disable PartialTypeWithSinglePart
+
+namespace <#=Namespace#>
+{
+    using System;
+
+    static partial class NumericalExtensions
+    {
+<#
+    foreach (var nd in Model)
+    {
+#>
+        // <#=nd.Name#> (<#=nd.Type#>)
+
+#if !T4INCLUDE__SUPPRESS_<#=nd.Name.ToUpperInvariant ()#>_NUMERICAL_EXTENSIONS
+
+        public static <#=nd.Name#> Min (this <#=nd.Name#> left, <#=nd.Name#> right) 
+        {
+            if (left < right)
+            {
+                return left;
+            }
+        
+            return right;
+        }
+
+        public static <#=nd.Name#> Max (this <#=nd.Name#> left, <#=nd.Name#> right) 
+        {
+            if (left < right)
+            {
+                return right;
+            }
+        
+            return left;
+        }
+
+        public static <#=nd.Name#> Clamp (this <#=nd.Name#> value, <#=nd.Name#> inclusiveMin, <#=nd.Name#> inclusiveMax) 
+        {
+            if (value < inclusiveMin)
+            {
+                return inclusiveMin;
+            }
+        
+            if (value > inclusiveMax)
+            {
+                return inclusiveMax;
+            }
+
+            return value;
+        }
+
+        public static bool IsBetween (this <#=nd.Name#> value, <#=nd.Name#> inclusiveMin, <#=nd.Name#> inclusiveMax) 
+        {
+            if (value < inclusiveMin)
+            {
+                return false;
+            }
+        
+            if (value > inclusiveMax)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+<#
+    if (nd.Type == NumericalType.IntLike)
+    {
+        OutputBitTests (nd.Name);
+    }
+    else if (nd.Type == NumericalType.DateTimeLike)
+    {
+    }
+    else if (nd.Type == NumericalType.TimeSpanLike)
+    {
+    }
+    else if (nd.Type == NumericalType.FloatLike)
+    {
+#>
+        public static <#=nd.Name#> Lerp (
+            this <#=nd.Name#> t,
+            <#=nd.Name#> from,
+            <#=nd.Name#> to
+            )
+        {
+            return t.Clamp (0,1) * (to - from) + from;
+        }
+<#
+    }
+    else if (nd.Type == NumericalType.EnumLike)
+    {
+        OutputBitTests (nd.Name);
+    }
+#>
+
+#endif // T4INCLUDE__SUPPRESS_<#=nd.Name.ToUpperInvariant ()#>_NUMERICAL_EXTENSIONS
+
+<#
+    }
+#>
+    }
+}
+
+<#+
+    enum NumericalType
+    {
+        IntLike     ,
+        FloatLike   ,
+        EnumLike    ,
+        DateTimeLike,
+        TimeSpanLike,
+    }
+
+    string                Namespace = "T4Include"               ;
+    NumericalDefinition[] Model     = new NumericalDefinition[0];    
+
+    sealed class NumericalDefinition : BaseEntity<Root>
+    {
+        public NumericalType    Type;
+        public string           Name;
+    }
+
+    static NumericalDefinition Create (NumericalType type, string name)
+    {
+        return new NumericalDefinition
+        {
+            Type = type             ,
+            Name = name ?? S_NoName ,
+        };
+    }
+
+    static NumericalDefinition F (string name)
+    {
+        return Create (NumericalType.FloatLike, name);
+    }
+
+    static NumericalDefinition I (string name)
+    {
+        return Create (NumericalType.IntLike, name);
+    }
+
+    static NumericalDefinition E (string name)
+    {
+        return Create (NumericalType.EnumLike, name);
+    }
+
+    static NumericalDefinition DT (string name)
+    {
+        return Create (NumericalType.DateTimeLike, name);
+    }
+
+    static NumericalDefinition TS (string name)
+    {
+        return Create (NumericalType.TimeSpanLike, name);
+    }
+
+    void OutputBitTests (string name)
+    {
+#>
+        public static bool IsAnyOn (this <#=name#> value, <#=name#> test)
+        {
+            return (value & test) != 0;
+        }
+        
+        public static bool IsAnyOff (this <#=name#> value, <#=name#> test)
+        {
+            return (value & test) != test;
+        }
+        
+        public static bool IsAllOn (this <#=name#> value, <#=name#> test)
+        {
+            return (value & test) == test;
+        }
+        
+        public static bool IsAllOff (this <#=name#> value, <#=name#> test)
+        {
+            return (value & test) == 0;
+        }
+<#+
+    }
+
+#>

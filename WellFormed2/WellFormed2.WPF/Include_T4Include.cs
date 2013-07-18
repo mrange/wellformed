@@ -5,7 +5,7 @@
 // #                                                                          #
 // # This means that any edits to the .cs file will be lost when its          #
 // # regenerated. Changes should instead be applied to the corresponding      #
-// # text template file (.tt)                                                      #
+// # text template file (.tt)                                                 #
 // ############################################################################
 
 
@@ -1105,7 +1105,7 @@ namespace WellFormed2.WPF.Include
     static partial class MetaData
     {
         public const string RootPath        = @"https://raw.github.com/";
-        public const string IncludeDate     = @"2013-07-13T11:16:48";
+        public const string IncludeDate     = @"2013-07-18T17:27:51";
 
         public const string Include_0       = @"https://raw.github.com/mrange/T4Include/master/Extensions/BasicExtensions.cs";
         public const string Include_1       = @"https://raw.github.com/mrange/T4Include/master/Extensions/WpfExtensions.cs";
