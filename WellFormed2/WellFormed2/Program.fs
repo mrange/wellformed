@@ -10,8 +10,11 @@
 // You must not remove this notice, or any other, from this software.
 // ----------------------------------------------------------------------------------------------
 
-open WellFormed2.Core
+open System
+open System.Windows
 
+open WellFormed2.Core
+open WellFormed2.WPF
 
 type CustomerInfo =
     {
@@ -29,6 +32,21 @@ let CustomerFormlet =
         }
 
 [<EntryPoint>]
+[<STAThread>]
 let main argv = 
+    let window = new Window ()
+    window.MinWidth <- 600.0
+    window.MinHeight <- 400.0
+    window.Title <- "WellFormed2 App"
 
-    0 // return an integer exit code
+    let formlet = CustomerFormlet
+
+    let control = new FormletControl ()
+
+    control.ShowFormlet (formlet, fun ci -> ())
+
+    window.Content <- control
+
+    let result = window.ShowDialog()    
+
+    0

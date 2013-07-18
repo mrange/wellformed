@@ -16,7 +16,22 @@ using WellFormed2.Core;
 
 namespace WellFormed2.WPF
 {
-    partial class FormletControl : Control
+    public partial class ResetFormEventArgs
+    {
+        
+    }
+
+    public partial class SubmitFormEventArgs
+    {
+        
+    }
+
+    public partial class RebuildFormEventArgs
+    {
+        
+    }
+
+    public partial class FormletControl : Control
     {
 
         FormletRebuildContext m_context;
