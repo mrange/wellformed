@@ -60,7 +60,7 @@ namespace WellFormed2.WPF.Internal
 
         void AddCreator<T, TToCreate> ()
             where T : class
-            where TToCreate : T, new 
+            where TToCreate : T, new ()
         {
             AddCreator<T> (() => new TToCreate ());
         }

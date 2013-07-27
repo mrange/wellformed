@@ -29,7 +29,7 @@ namespace WellFormed2.WPF.Internal
 
         public          Types.IForm<T>                  Form        ;
 
-        static readonly Types.LayoutOrientation DefaultOrientation = Types.LayoutOrientation.LeftToRight;
+        static readonly Types.LayoutOrientation DefaultOrientation = Types.LayoutOrientation.TopToBottom;
 
         public FormletHolder(Types.IFormletRebuildContext context, Types.IFormlet<T> formlet, Action<T> submitter)
         {
