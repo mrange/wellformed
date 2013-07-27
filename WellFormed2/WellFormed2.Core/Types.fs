@@ -47,10 +47,6 @@ module Types =
         |   Visual  of obj
         |   Layout  of LayoutOrientation*(FlatVisualTree array)
 
-    type IText = 
-        abstract member Text    : string    with get, set
-        abstract member Visual  : obj       with get
-
     type IFormletRebuildContext = 
         abstract member CreateInstance<'T>  : unit -> 'T
 

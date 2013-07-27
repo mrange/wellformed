@@ -43,10 +43,10 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DispatchQueue.cs" />
-    <Compile Include="Extensions.cs" />
-    <Compile Include="FormletHolder.cs" />
-    <Compile Include="FormletRebuildContext.cs" />
+    <Compile Include="Internal\DispatchQueue.cs" />
+    <Compile Include="Internal\Extensions.cs" />
+    <Compile Include="Internal\FormletHolder.cs" />
+    <Compile Include="Internal\FormletRebuildContext.cs" />
     <Compile Include="Generated_Commands.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -62,7 +62,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Generated_Events.tt</DependentUpon>
     </Compile>
-    <Compile Include="Include_T4Include.cs">
+    <Compile Include="Internal\Include_T4Include.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Include_T4Include.tt</DependentUpon>
@@ -83,7 +83,7 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Generated_Events.cs</LastGenOutput>
     </None>
-    <None Include="Include_T4Include.tt">
+    <None Include="Internal\Include_T4Include.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Include_T4Include.cs</LastGenOutput>
     </None>

@@ -13,6 +13,7 @@
 using System;
 using System.Windows.Controls;
 using WellFormed2.Core;
+using WellFormed2.WPF.Internal;
 
 namespace WellFormed2.WPF
 {

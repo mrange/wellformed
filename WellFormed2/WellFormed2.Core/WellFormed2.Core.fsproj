@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Types.fs" />
+    <Compile Include="Visuals.fs" />
     <Compile Include="Common.fs" />
     <Compile Include="Formlet.fs" />
     <Compile Include="Input.fs" />
