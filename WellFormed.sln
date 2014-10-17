@@ -1,10 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WellFormed", "WellFormed\WellFormed.fsproj", "{7E1F107C-E406-4726-B8A6-65AD484873BF}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WellFormed.Core", "WellFormed.Core\WellFormed.Core.fsproj", "{AA464CF2-BBC0-4CB5-B07E-0CD330E675A4}"
-EndProject
+# Visual Studio Express 2013 for Windows Desktop
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D3074B2F-E337-47C7-ABA7-92D716333C44}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
@@ -14,6 +12,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1. WellFormed libraries", "1. WellFormed libraries", "{463DAAFF-2C1C-48DF-AEE8-8460B93FEEAA}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WellFormed", "WellFormed\WellFormed.fsproj", "{7E1F107C-E406-4726-B8A6-65AD484873BF}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WellFormed.Core", "WellFormed.Core\WellFormed.Core.fsproj", "{AA464CF2-BBC0-4CB5-B07E-0CD330E675A4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
